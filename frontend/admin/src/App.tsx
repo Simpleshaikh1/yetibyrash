@@ -7,6 +7,9 @@ import { PageHeader, Panel } from "./components/ui";
 import { CataloguePage } from "./pages/CataloguePage";
 import { DeliveryPage } from "./pages/DeliveryPage";
 import { LoginPage } from "./pages/LoginPage";
+import { MessagesPage } from "./pages/MessagesPage";
+import { OrderDetailPage } from "./pages/OrderDetailPage";
+import { OrdersPage } from "./pages/OrdersPage";
 import { ComingSoonPage, OverviewPage } from "./pages/OverviewPage";
 import { ProductEditorPage } from "./pages/ProductEditorPage";
 import { ProductsPage } from "./pages/ProductsPage";
@@ -36,7 +39,9 @@ function Gate() {
         <Route path="products/:id" element={<Allow perm="products"><ProductEditorPage /></Allow>} />
         <Route path="catalogue" element={<Allow perm="catalogue"><CataloguePage /></Allow>} />
         <Route path="staff" element={<Allow perm="staff"><StaffPage /></Allow>} />
-        <Route path="orders" element={<ComingSoonPage title="Orders" milestone="M4" />} />
+        <Route path="orders" element={<Allow perm="orders"><OrdersPage /></Allow>} />
+        <Route path="orders/:id" element={<Allow perm="orders"><OrderDetailPage /></Allow>} />
+        <Route path="messages" element={<Allow perm="catalogue"><MessagesPage /></Allow>} />
         <Route path="content" element={<ComingSoonPage title="Homepage and content" milestone="M5" />} />
         <Route path="promotions" element={<ComingSoonPage title="Promotions" milestone="M5" />} />
         <Route path="reviews" element={<ComingSoonPage title="Reviews" milestone="M6" />} />

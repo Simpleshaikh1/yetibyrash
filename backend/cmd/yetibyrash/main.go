@@ -18,7 +18,9 @@ import (
 	"yetibyrash/backend/internal/db"
 	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/httpapi"
+	"yetibyrash/backend/internal/jobs"
 	"yetibyrash/backend/internal/media"
+	"yetibyrash/backend/internal/notify"
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/staff"
@@ -81,6 +83,13 @@ func run() error {
 	orderSvc := orders.NewService(pool, deliverySvc, pay, cfg.ShopURL)
 	go orderSvc.RunReleaser(ctx) // releases stock of orders unpaid after 30 minutes
 
+	// Customer emails go through the job queue, so a slow or down mail server never blocks an order.
+	mailer := notify.SMTPMailer{Addr: cfg.SMTPAddr, From: cfg.MailFrom, Username: cfg.SMTPUsername, Password: cfg.SMTPPassword}
+	notifySvc := notify.NewOrders(pool, mailer, cfg.ShopURL)
+	runner := jobs.NewRunner(pool)
+	runner.Handle(jobs.KindOrderEmail, notifySvc.HandleJob)
+	go runner.Run(ctx)
+
 	srv := &http.Server{
 		Addr: cfg.HTTPAddr,
 		Handler: httpapi.NewRouter(httpapi.Deps{
@@ -94,6 +103,7 @@ func run() error {
 			Orders:         orderSvc,
 			PaystackSecret: cfg.PaystackSecretKey,
 			DevPay:         devPay,
+			Notify:         notifySvc,
 			Version:        version,
 			SecureCookies:  cfg.IsProduction(),
 			AllowedOrigins: cfg.AdminOrigins,

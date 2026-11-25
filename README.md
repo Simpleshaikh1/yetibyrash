@@ -43,6 +43,10 @@ SHOP_URL=http://localhost:5173
 
 Paystack can't reach your computer's webhook during local development; the order page still confirms payment by asking Paystack when the shopper returns. Unpaid orders release their stock after 30 minutes.
 
+**Orders and customer emails:** paid orders appear on the admin **Orders** board. Move each one along: Packed → Shipped (pick a courier; couriers are set up on the **Delivery** screen) → Out for delivery → Delivered. Owners and managers can cancel an order while it's Paid or Packed, which puts the stock back. Every step emails the customer. The wording is edited on **Customer messages**. Locally, those emails land in Mailpit at http://localhost:8025 instead of reaching anyone. Customers follow their order at http://localhost:5173/track using the order number and their phone number.
+
+For real email, set `SMTP_ADDR`, `SMTP_USERNAME`, `SMTP_PASSWORD` and `MAIL_FROM` in `backend/.env`. Emails are sent from a queue, so a mail outage only delays them (they retry for several hours).
+
 **First owner on a real server** (no seed there):
 
 ```powershell

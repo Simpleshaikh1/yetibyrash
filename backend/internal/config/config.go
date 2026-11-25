@@ -19,6 +19,12 @@ type Config struct {
 	ShopURL string
 	// Paystack keys. With no secret key in development, a built-in test payment page is used instead.
 	PaystackSecretKey string
+
+	// Email. Development default is Mailpit (inbox at http://localhost:8025).
+	SMTPAddr     string
+	SMTPUsername string
+	SMTPPassword string
+	MailFrom     string
 }
 
 // Load reads backend/.env (if present) and then the environment.
@@ -34,6 +40,11 @@ func Load() Config {
 		ShopURL:      get("SHOP_URL", "http://localhost:5173"),
 
 		PaystackSecretKey: get("PAYSTACK_SECRET_KEY", ""),
+
+		SMTPAddr:     get("SMTP_ADDR", "localhost:1025"),
+		SMTPUsername: get("SMTP_USERNAME", ""),
+		SMTPPassword: get("SMTP_PASSWORD", ""),
+		MailFrom:     get("MAIL_FROM", "Yetibyrash <orders@yetibyrash.test>"),
 	}
 }
 

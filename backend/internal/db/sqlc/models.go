@@ -279,6 +279,13 @@ type Colour struct {
 	Hex  string `json:"hex"`
 }
 
+type Courier struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	TrackingUrl string `json:"tracking_url"`
+	Active      bool   `json:"active"`
+}
+
 type DeliverySetting struct {
 	ID            int32       `json:"id"`
 	ExpressCutoff pgtype.Time `json:"express_cutoff"`
@@ -302,12 +309,30 @@ type Holiday struct {
 	Name string      `json:"name"`
 }
 
+type Job struct {
+	ID        int64              `json:"id"`
+	Kind      string             `json:"kind"`
+	Payload   []byte             `json:"payload"`
+	RunAt     pgtype.Timestamptz `json:"run_at"`
+	Attempts  int32              `json:"attempts"`
+	LastError string             `json:"last_error"`
+	DoneAt    pgtype.Timestamptz `json:"done_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type Lga struct {
 	ID        int64  `json:"id"`
 	StateID   int64  `json:"state_id"`
 	Name      string `json:"name"`
 	Delivered bool   `json:"delivered"`
 	Express   bool   `json:"express"`
+}
+
+type MessageTemplate struct {
+	Event   OrderStatus `json:"event"`
+	Subject string      `json:"subject"`
+	Body    string      `json:"body"`
+	Active  bool        `json:"active"`
 }
 
 type Order struct {
@@ -332,6 +357,9 @@ type Order struct {
 	ExpectedTo       pgtype.Date        `json:"expected_to"`
 	CreatedAt        pgtype.Timestamptz `json:"created_at"`
 	PaidAt           pgtype.Timestamptz `json:"paid_at"`
+	CourierID        pgtype.Int8        `json:"courier_id"`
+	TrackingNumber   string             `json:"tracking_number"`
+	StatusAt         pgtype.Timestamptz `json:"status_at"`
 }
 
 type OrderEvent struct {
@@ -341,6 +369,7 @@ type OrderEvent struct {
 	Note      string             `json:"note"`
 	StaffID   pgtype.Int8        `json:"staff_id"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	Public    bool               `json:"public"`
 }
 
 type OrderItem struct {

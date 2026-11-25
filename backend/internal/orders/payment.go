@@ -13,6 +13,7 @@ import (
 
 	"yetibyrash/backend/internal/apperr"
 	"yetibyrash/backend/internal/db/sqlc"
+	"yetibyrash/backend/internal/jobs"
 	"yetibyrash/backend/internal/paystack"
 )
 
@@ -91,9 +92,13 @@ func (s *Service) ConfirmPayment(ctx context.Context, p paystack.Payment) error 
 		}
 		if o.Status == sqlc.OrderStatusPendingPayment {
 			if err := q.InsertOrderEvent(ctx, sqlc.InsertOrderEventParams{OrderID: o.ID, Status: sqlc.OrderStatusPaid,
-				Note: "Paid with Paystack" + channelText(p.Channel) + "."}); err != nil {
+				Note: "Paid with Paystack" + channelText(p.Channel) + ".", Public: true}); err != nil {
 				return err
 			}
+		}
+		// The "we've got your order" email goes out from the job queue, only if this commits.
+		if err := jobs.Enqueue(ctx, q, jobs.KindOrderEmail, jobs.OrderEmail{OrderID: o.ID, Event: string(sqlc.OrderStatusPaid)}); err != nil {
+			return err
 		}
 		if o.CartID.Valid {
 			if err := q.DeleteCart(ctx, o.CartID); err != nil {
@@ -257,7 +262,11 @@ func (s *Service) Order(ctx context.Context, number, reference string) (View, er
 		return View{}, err
 	}
 	for _, e := range events {
-		v.Events = append(v.Events, EventView{Status: string(e.Status), Note: e.Note, At: e.CreatedAt.Time})
+		note := e.Note
+		if !e.Public {
+			note = "" // staff-only notes never reach the shopper
+		}
+		v.Events = append(v.Events, EventView{Status: string(e.Status), Note: note, At: e.CreatedAt.Time})
 	}
 	return v, nil
 }

@@ -132,6 +132,22 @@ export type OrderView = {
   events: { status: string; note: string; at: string }[];
 };
 
+export type Tracking = {
+  number: string;
+  status: OrderView["status"];
+  headline: string;
+  area: string;
+  items: number;
+  speed: string;
+  expectedFrom: string;
+  expectedTo: string;
+  courier: string;
+  trackingNumber: string;
+  trackingLink: string;
+  steps: { status: string; label: string; at: string | null; done: boolean; current: boolean }[];
+  notes: { text: string; at: string }[];
+};
+
 /** Error with the API's message, ready to show to the shopper. */
 export class ApiError extends Error {
   constructor(
@@ -186,6 +202,7 @@ export const api = {
   checkout: (input: CheckoutInput) => send<{ orderNumber: string; paymentUrl: string }>("POST", "/api/v1/checkout", input),
   order: (number: string, reference: string, signal?: AbortSignal) =>
     getJSON<OrderView>(`/api/v1/orders/${encodeURIComponent(number)}?reference=${encodeURIComponent(reference)}`, signal),
+  track: (number: string, phone: string) => send<Tracking>("POST", "/api/v1/track", { number, phone }),
 };
 
 /** "2026-11-26" → "Thu 26 Nov" */

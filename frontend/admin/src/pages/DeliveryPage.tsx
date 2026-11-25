@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { formatNaira, koboToInput, parseNaira } from "@yetibyrash/ui";
-import { api, ApiError, type DeliveryAdmin, type DeliveryState, type Zone } from "../api";
+import { api, ApiError, type Courier, type DeliveryAdmin, type DeliveryState, type Zone } from "../api";
 import { ErrorBanner, Field, Loading, PageHeader, Panel, SavedBanner } from "../components/ui";
 import { useAction, useApi } from "../useApi";
 
@@ -44,6 +44,7 @@ export function DeliveryPage() {
             <div className="stack">
               <Rules data={data.data} reload={data.reload} />
               <Holidays data={data.data} reload={data.reload} />
+              <Couriers />
             </div>
           </div>
         </div>
@@ -252,6 +253,73 @@ function Rules({ data, reload }: { data: DeliveryAdmin; reload: () => void }) {
         Save rules
       </button>
     </Panel>
+  );
+}
+
+// Couriers staff pick from when marking an order Shipped.
+function Couriers() {
+  const list = useApi("couriers", (s) => api.couriers(s));
+  return (
+    <Panel title="Couriers" note="Staff choose one when marking an order Shipped. A tracking link can include {tracking_number}.">
+      <ErrorBanner error={list.error} />
+      {list.data?.map((c) => (
+        <CourierRow key={c.id} courier={c} reload={list.reload} />
+      ))}
+      <CourierRow courier={{ id: 0, name: "", trackingUrl: "", active: true }} reload={list.reload} />
+    </Panel>
+  );
+}
+
+function CourierRow({ courier, reload }: { courier: Courier; reload: () => void }) {
+  const [name, setName] = useState(courier.name);
+  const [url, setUrl] = useState(courier.trackingUrl);
+  const [active, setActive] = useState(courier.active);
+  const { busy, error, run } = useAction();
+  const changed = !courier.id ? name.trim() !== "" : name !== courier.name || url !== courier.trackingUrl || active !== courier.active;
+  const id = `cr-${courier.id || "new"}`;
+  return (
+    <div className="stack-xs courier-row">
+      <div className="row">
+        <label htmlFor={`${id}-name`} className="visually-hidden">
+          Courier name
+        </label>
+        <input id={`${id}-name`} placeholder={courier.id ? "" : "Add a courier"} value={name} onChange={(e) => setName(e.target.value)} />
+        {courier.id !== 0 && (
+          <label className="check" htmlFor={`${id}-active`}>
+            <input id={`${id}-active`} type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
+            In use
+          </label>
+        )}
+      </div>
+      {(courier.id !== 0 || name) && (
+        <>
+          <label htmlFor={`${id}-url`} className="visually-hidden">
+            Tracking link
+          </label>
+          <input id={`${id}-url`} placeholder="Tracking link (optional), e.g. https://courier.example/track/{tracking_number}" value={url} onChange={(e) => setUrl(e.target.value)} />
+        </>
+      )}
+      {error && <span className="field-error">{error.message}</span>}
+      {changed && (
+        <button
+          className="btn small primary"
+          disabled={busy}
+          onClick={() =>
+            run(() => api.saveCourier({ id: courier.id, name, trackingUrl: url, active }).then(() => true)).then((ok) => {
+              if (ok) {
+                if (!courier.id) {
+                  setName("");
+                  setUrl("");
+                }
+                reload();
+              }
+            })
+          }
+        >
+          {courier.id ? "Save" : "Add courier"}
+        </button>
+      )}
+    </div>
   );
 }
 

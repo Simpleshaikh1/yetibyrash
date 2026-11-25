@@ -8,6 +8,7 @@ import { HomePage } from "./pages/HomePage";
 import { OrderPage } from "./pages/OrderPage";
 import { ProductPage } from "./pages/ProductPage";
 import { ShopPage } from "./pages/ShopPage";
+import { TrackPage } from "./pages/TrackPage";
 import { TierProvider } from "./tier";
 
 export function App() {
@@ -25,7 +26,7 @@ export function App() {
               <Route path="checkout" element={<CheckoutPage />} />
               <Route path="order/:number" element={<OrderPage />} />
               <Route path="saved" element={<ComingSoon title="Saved items" milestone="M6" />} />
-              <Route path="track" element={<ComingSoon title="Track order" milestone="M4" />} />
+              <Route path="track" element={<TrackPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

@@ -238,6 +238,44 @@ func (s *Service) Summary(ctx context.Context) (Summary, error) {
 	return out, nil
 }
 
+// ---------- Couriers ----------
+
+type Courier struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	TrackingURL string `json:"trackingUrl"` // may contain {tracking_number}
+	Active      bool   `json:"active"`
+}
+
+func (s *Service) Couriers(ctx context.Context) ([]Courier, error) {
+	rows, err := s.q.ListCouriers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Courier, 0, len(rows))
+	for _, c := range rows {
+		out = append(out, Courier{ID: c.ID, Name: c.Name, TrackingURL: c.TrackingUrl, Active: c.Active})
+	}
+	return out, nil
+}
+
+// SaveCourier adds (id 0) or edits a courier. Couriers are switched off rather than deleted,
+// because past orders point at them.
+func (s *Service) SaveCourier(ctx context.Context, c Courier) (int64, error) {
+	c.Name = strings.TrimSpace(c.Name)
+	c.TrackingURL = strings.TrimSpace(c.TrackingURL)
+	if c.Name == "" {
+		return 0, apperr.NewInvalid("name", "Give the courier a name.")
+	}
+	if c.TrackingURL != "" && !strings.HasPrefix(c.TrackingURL, "https://") && !strings.HasPrefix(c.TrackingURL, "http://") {
+		return 0, apperr.NewInvalid("trackingUrl", "The tracking link must start with https://")
+	}
+	if c.ID == 0 {
+		return s.q.InsertCourier(ctx, sqlc.InsertCourierParams{Name: c.Name, TrackingUrl: c.TrackingURL, Active: c.Active})
+	}
+	return c.ID, s.q.UpdateCourier(ctx, sqlc.UpdateCourierParams{ID: c.ID, Name: c.Name, TrackingUrl: c.TrackingURL, Active: c.Active})
+}
+
 // ---------- Admin ----------
 
 type Settings struct {

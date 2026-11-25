@@ -169,7 +169,7 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Inser
 }
 
 const insertOrderEvent = `-- name: InsertOrderEvent :exec
-INSERT INTO order_events (order_id, status, note, staff_id) VALUES ($1, $2, $3, $4)
+INSERT INTO order_events (order_id, status, note, staff_id, public) VALUES ($1, $2, $3, $4, $5)
 `
 
 type InsertOrderEventParams struct {
@@ -177,14 +177,17 @@ type InsertOrderEventParams struct {
 	Status  OrderStatus `json:"status"`
 	Note    string      `json:"note"`
 	StaffID pgtype.Int8 `json:"staff_id"`
+	Public  bool        `json:"public"`
 }
 
+// public: the shopper sees the note on their tracker.
 func (q *Queries) InsertOrderEvent(ctx context.Context, arg InsertOrderEventParams) error {
 	_, err := q.db.Exec(ctx, insertOrderEvent,
 		arg.OrderID,
 		arg.Status,
 		arg.Note,
 		arg.StaffID,
+		arg.Public,
 	)
 	return err
 }
@@ -253,12 +256,13 @@ func (q *Queries) InsertPayment(ctx context.Context, arg InsertPaymentParams) (i
 }
 
 const listOrderEvents = `-- name: ListOrderEvents :many
-SELECT status, note, created_at FROM order_events WHERE order_id = $1 ORDER BY created_at, id
+SELECT status, note, public, created_at FROM order_events WHERE order_id = $1 ORDER BY created_at, id
 `
 
 type ListOrderEventsRow struct {
 	Status    OrderStatus        `json:"status"`
 	Note      string             `json:"note"`
+	Public    bool               `json:"public"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
@@ -271,7 +275,12 @@ func (q *Queries) ListOrderEvents(ctx context.Context, orderID int64) ([]ListOrd
 	items := []ListOrderEventsRow{}
 	for rows.Next() {
 		var i ListOrderEventsRow
-		if err := rows.Scan(&i.Status, &i.Note, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.Status,
+			&i.Note,
+			&i.Public,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -405,7 +414,7 @@ func (q *Queries) LockVariantsForCheckout(ctx context.Context, ids []int64) ([]L
 }
 
 const markOrderPaid = `-- name: MarkOrderPaid :exec
-UPDATE orders SET status = 'paid', paid_at = now() WHERE id = $1
+UPDATE orders SET status = 'paid', paid_at = now(), status_at = now() WHERE id = $1
 `
 
 func (q *Queries) MarkOrderPaid(ctx context.Context, id int64) error {
@@ -414,7 +423,7 @@ func (q *Queries) MarkOrderPaid(ctx context.Context, id int64) error {
 }
 
 const setOrderStatus = `-- name: SetOrderStatus :exec
-UPDATE orders SET status = $2 WHERE id = $1
+UPDATE orders SET status = $2, status_at = now() WHERE id = $1
 `
 
 type SetOrderStatusParams struct {

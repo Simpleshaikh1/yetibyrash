@@ -897,6 +897,98 @@ p {
   text-align: right;
 }
 
+/* ---------- Track order ---------- */
+
+.track-form {
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Beads on a thread: done beads are filled, the current one glows, later ones are open. */
+.bead-track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bead-track li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  column-gap: var(--space-3);
+  padding-bottom: var(--space-5);
+  color: var(--ink-muted);
+}
+
+.bead-track li:last-child {
+  padding-bottom: 0;
+}
+
+.bead-track li::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 22px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--line-shop);
+}
+
+.bead-track li:last-child::before {
+  display: none;
+}
+
+.bead-track li.done::before {
+  background: var(--accent-rose);
+}
+
+.bead {
+  grid-row: span 2;
+  width: 18px;
+  height: 18px;
+  margin: 2px 5px;
+  border-radius: 50%;
+  border: 2px solid var(--line-shop);
+  background: var(--surface-white);
+  position: relative;
+  z-index: 1;
+}
+
+.bead-track li.done .bead {
+  background: var(--accent-rose);
+  border-color: var(--accent-rose);
+}
+
+.bead-track li.current .bead {
+  width: 22px;
+  height: 22px;
+  margin: 0 3px;
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 5px var(--accent-rose-light);
+}
+
+.bead-label {
+  font-weight: 500;
+}
+
+.bead-track li.done,
+.bead-track li.current {
+  color: var(--ink);
+}
+
+.track-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
 /* ---------- Messages ---------- */
 
 .status-msg {

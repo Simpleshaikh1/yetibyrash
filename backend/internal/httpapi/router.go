@@ -8,6 +8,7 @@ import (
 
 	"yetibyrash/backend/internal/cart"
 	"yetibyrash/backend/internal/delivery"
+	"yetibyrash/backend/internal/notify"
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/staff"
@@ -34,6 +35,7 @@ type Deps struct {
 	// PaystackSecret verifies webhooks. DevPay is set only in development without Paystack keys.
 	PaystackSecret string
 	DevPay         *paystack.DevProvider
+	Notify         *notify.Orders // customer message templates
 
 	SecureCookies  bool     // send cookies over HTTPS only (production)
 	AllowedOrigins []string // admin app addresses allowed to make changes
@@ -85,6 +87,7 @@ func registerShopOrders(mux *http.ServeMux, d Deps) {
 	mux.HandleFunc("POST /api/v1/checkout", h.checkout)
 	mux.HandleFunc("GET /api/v1/orders/{number}", h.order)
 	mux.HandleFunc("POST /api/webhooks/paystack", h.paystackWebhook)
+	mux.HandleFunc("POST /api/v1/track", newTrackHandler(d.Orders).track)
 	if d.DevPay != nil {
 		mux.HandleFunc("GET /api/v1/dev/pay/{reference}", h.devPayForm)
 		mux.HandleFunc("POST /api/v1/dev/pay/{reference}", h.devPaySubmit)
@@ -141,6 +144,22 @@ func registerAdmin(mux *http.ServeMux, d Deps) {
 		mux.Handle("PUT "+p+"/delivery/settings", catalogue(dh.updateSettings))
 		mux.Handle("POST "+p+"/delivery/holidays", catalogue(dh.addHoliday))
 		mux.Handle("DELETE "+p+"/delivery/holidays/{day}", catalogue(dh.deleteHoliday))
+	}
+
+	if d.Orders != nil && d.Delivery != nil && d.Notify != nil {
+		oh := adminOrderHandlers{orders: d.Orders, delivery: d.Delivery, notify: d.Notify}
+		ordersPerm := a.requireStaff(staff.PermOrders)
+		mux.Handle("GET "+p+"/overview", anyStaff(oh.overview))
+		mux.Handle("GET "+p+"/orders", ordersPerm(oh.list))
+		mux.Handle("GET "+p+"/orders/{id}", ordersPerm(oh.get))
+		mux.Handle("POST "+p+"/orders/{id}/advance", ordersPerm(oh.advance))
+		mux.Handle("POST "+p+"/orders/{id}/cancel", ordersPerm(oh.cancel))
+		mux.Handle("GET "+p+"/couriers", a.requireStaff(staff.PermOrders, staff.PermCatalogue)(oh.couriers))
+		mux.Handle("POST "+p+"/couriers", catalogue(oh.saveCourier))
+		mux.Handle("PUT "+p+"/couriers/{id}", catalogue(oh.saveCourier))
+		mux.Handle("GET "+p+"/messages", catalogue(oh.messages))
+		mux.Handle("PUT "+p+"/messages/{event}", catalogue(oh.saveMessage))
+		mux.Handle("POST "+p+"/messages/preview", catalogue(oh.previewMessage))
 	}
 
 	mux.Handle("GET "+p+"/staff", owner(a.listStaff))

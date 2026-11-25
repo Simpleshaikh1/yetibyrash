@@ -23,7 +23,8 @@ INSERT INTO order_items (order_id, variant_id, product_name, product_slug, varia
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 
 -- name: InsertOrderEvent :exec
-INSERT INTO order_events (order_id, status, note, staff_id) VALUES ($1, $2, $3, $4);
+-- public: the shopper sees the note on their tracker.
+INSERT INTO order_events (order_id, status, note, staff_id, public) VALUES ($1, $2, $3, $4, $5);
 
 -- name: GetOrderByReferenceForUpdate :one
 SELECT id, number, status, cart_id, total_kobo
@@ -41,13 +42,13 @@ SELECT variant_id, product_name, product_slug, variant_label, sku, image_key, un
 FROM order_items WHERE order_id = $1 ORDER BY id;
 
 -- name: ListOrderEvents :many
-SELECT status, note, created_at FROM order_events WHERE order_id = $1 ORDER BY created_at, id;
+SELECT status, note, public, created_at FROM order_events WHERE order_id = $1 ORDER BY created_at, id;
 
 -- name: MarkOrderPaid :exec
-UPDATE orders SET status = 'paid', paid_at = now() WHERE id = $1;
+UPDATE orders SET status = 'paid', paid_at = now(), status_at = now() WHERE id = $1;
 
 -- name: SetOrderStatus :exec
-UPDATE orders SET status = $2 WHERE id = $1;
+UPDATE orders SET status = $2, status_at = now() WHERE id = $1;
 
 -- name: ListStalePendingOrders :many
 -- Orders still waiting for payment after the reservation time.

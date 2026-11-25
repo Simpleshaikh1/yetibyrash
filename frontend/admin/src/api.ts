@@ -92,6 +92,83 @@ export type Zone = {
 };
 export type DeliveryLga = { id: number; name: string; express: boolean; delivered: boolean };
 export type DeliveryState = { id: number; name: string; zoneId: number; zoneName: string; lgas: DeliveryLga[] };
+export type OrderStatus = "pending_payment" | "paid" | "packed" | "shipped" | "out_for_delivery" | "delivered" | "abandoned" | "cancelled" | "refunded";
+
+export const statusLabels: Record<OrderStatus, string> = {
+  pending_payment: "Waiting for payment",
+  paid: "Paid, to pack",
+  packed: "Packed",
+  shipped: "Shipped",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+  abandoned: "Not paid",
+  cancelled: "Cancelled",
+  refunded: "Refunded",
+};
+
+export type BoardOrder = {
+  id: number;
+  number: string;
+  status: OrderStatus;
+  statusAt: string;
+  paidAt: string;
+  name: string;
+  phone: string;
+  area: string;
+  speed: string;
+  totalKobo: number;
+  items: number;
+  late: boolean;
+};
+
+export type AdminOrder = {
+  id: number;
+  number: string;
+  status: OrderStatus;
+  reference: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  zoneName: string;
+  speed: string;
+  subtotalKobo: number;
+  deliveryKobo: number;
+  totalKobo: number;
+  expectedFrom: string;
+  expectedTo: string;
+  paidAt: string | null;
+  statusAt: string;
+  createdAt: string;
+  courierId: number | null;
+  courierName: string;
+  trackingNumber: string;
+  next: OrderStatus | "";
+  canCancel: boolean;
+  items: { name: string; slug: string; option: string; image: string; unitKobo: number; qty: number }[];
+  adminEvents: { status: OrderStatus; note: string; public: boolean; by: string; at: string }[];
+  payments: { reference: string; amountKobo: number; channel: string; outcome: string; at: string }[];
+};
+
+export type Courier = { id: number; name: string; trackingUrl: string; active: boolean };
+
+export type Overview = {
+  salesTodayKobo: number;
+  ordersToday: number;
+  toPack: number;
+  packed: number;
+  onTheWay: number;
+  outForDelivery: number;
+  lateToPack: { id: number; number: string; name: string; paidAt: string }[];
+  lowStock: { productId: number; name: string; option: string; stock: number }[];
+  soldOut: number;
+  problemPayments: { reference: string; orderId: number | null; amountKobo: number; outcome: string; at: string }[];
+  failedEmails: number;
+  last7Days: { day: string; totalKobo: number }[];
+};
+
+export type MessageTemplate = { event: OrderStatus; subject: string; body: string; active: boolean };
+
 export type DeliveryAdmin = {
   zones: Zone[];
   states: DeliveryState[];
@@ -182,6 +259,20 @@ export const api = {
   updateDeliverySettings: (s: { expressCutoff: string; dispatchDays: number[] }) => request<void>("PUT", "/delivery/settings", s),
   addHoliday: (h: { day: string; name: string }) => request<void>("POST", "/delivery/holidays", h),
   deleteHoliday: (day: string) => request<void>("DELETE", `/delivery/holidays/${day}`),
+
+  overview: (signal?: AbortSignal) => request<Overview>("GET", "/overview", undefined, signal),
+  orders: (params: URLSearchParams, signal?: AbortSignal) =>
+    request<{ orders: BoardOrder[] }>("GET", `/orders?${params}`, undefined, signal).then((r) => r.orders),
+  order: (id: number, signal?: AbortSignal) => request<AdminOrder>("GET", `/orders/${id}`, undefined, signal),
+  advanceOrder: (id: number, body: { to: string; courierId?: number; trackingNumber?: string; note?: string }) =>
+    request<void>("POST", `/orders/${id}/advance`, body),
+  cancelOrder: (id: number, reason: string) => request<void>("POST", `/orders/${id}/cancel`, { reason }),
+  couriers: (signal?: AbortSignal) => request<{ couriers: Courier[] }>("GET", "/couriers", undefined, signal).then((r) => r.couriers),
+  saveCourier: (c: Courier) => request<{ id: number }>(c.id ? "PUT" : "POST", c.id ? `/couriers/${c.id}` : "/couriers", c),
+  messages: (signal?: AbortSignal) =>
+    request<{ templates: MessageTemplate[]; placeholders: { key: string; example: string }[] }>("GET", "/messages", undefined, signal),
+  saveMessage: (t: MessageTemplate) => request<void>("PUT", `/messages/${t.event}`, t),
+  previewMessage: (subject: string, body: string) => request<{ subject: string; body: string }>("POST", "/messages/preview", { subject, body }),
 
   staff: (signal?: AbortSignal) => request<{ staff: StaffAccount[] }>("GET", "/staff", undefined, signal).then((r) => r.staff),
   createStaff: (body: { email: string; name: string; role: Role; password: string }) => request<{ id: number }>("POST", "/staff", body),

@@ -4,13 +4,14 @@ import { useAuth } from "../auth";
 
 const nav: { to: string; label: string; perm?: Permission; soon?: string }[] = [
   { to: "/", label: "Overview" },
-  { to: "/orders", label: "Orders", perm: "orders", soon: "M4" },
+  { to: "/orders", label: "Orders", perm: "orders" },
   { to: "/products", label: "Products", perm: "products" },
   { to: "/catalogue", label: "Catalogue setup", perm: "catalogue" },
   { to: "/content", label: "Homepage and content", perm: "catalogue", soon: "M5" },
   { to: "/promotions", label: "Promotions", perm: "catalogue", soon: "M5" },
   { to: "/reviews", label: "Reviews", perm: "products", soon: "M6" },
   { to: "/delivery", label: "Delivery", perm: "catalogue" },
+  { to: "/messages", label: "Customer messages", perm: "catalogue" },
   { to: "/staff", label: "Staff", perm: "staff" },
 ];
 

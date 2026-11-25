@@ -136,9 +136,14 @@ export function OrderPage() {
       </section>
 
       {paid && (
-        <Link to="/shop" className="btn outline">
-          Continue shopping
-        </Link>
+        <>
+          <Link to={`/track?number=${encodeURIComponent(order.number)}`} className="btn primary">
+            Track this order
+          </Link>
+          <Link to="/shop" className="btn outline">
+            Continue shopping
+          </Link>
+        </>
       )}
     </div>
   );
