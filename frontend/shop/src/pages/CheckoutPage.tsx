@@ -58,10 +58,13 @@ export function CheckoutPage() {
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.stateId, form.lgaId, form.lgaText, addressReady, bag?.subtotalKobo]);
+  }, [form.stateId, form.lgaId, form.lgaText, addressReady, bag?.subtotalKobo, bag?.code?.code]);
 
   const option = quote?.options.find((o) => o.speed === form.speed) ?? quote?.options[0];
-  const total = quote && option ? quote.subtotalKobo + option.feeKobo : null;
+  const freeDelivery = !!quote?.freeDelivery && !quote.codeProblem;
+  const fee = option ? (freeDelivery ? 0 : option.feeKobo) : 0;
+  const discount = quote && !quote.codeProblem ? quote.discountKobo : 0;
+  const total = quote && option ? quote.subtotalKobo - discount + fee : null;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -166,7 +169,7 @@ export function CheckoutPage() {
               <b>{o.speed === "express" ? "Express" : "Standard"}</b>
               <span className="small muted">Arrives {o.label}</span>
             </span>
-            <b className="price">{o.free ? "Free" : formatNaira(o.feeKobo)}</b>
+            <b className="price">{o.free || freeDelivery ? "Free" : formatNaira(o.feeKobo)}</b>
           </label>
         ))}
       </section>
@@ -176,10 +179,27 @@ export function CheckoutPage() {
           <span>Items ({bag.count})</span>
           <span className="price">{formatNaira(bag.subtotalKobo)}</span>
         </div>
+        {discount > 0 && (
+          <div className="row-between discount">
+            <span>Discount ({quote?.code})</span>
+            <span className="price">−{formatNaira(discount)}</span>
+          </div>
+        )}
         <div className="row-between">
-          <span>Delivery</span>
-          <span className="price">{option ? (option.free ? "Free" : formatNaira(option.feeKobo)) : "—"}</span>
+          <span>Delivery{freeDelivery && ` (${quote?.code})`}</span>
+          <span className="price">{option ? (option.free || freeDelivery ? "Free" : formatNaira(option.feeKobo)) : "—"}</span>
         </div>
+        {quote?.gift && (
+          <div className="row-between">
+            <span>Free gift: {quote.gift}</span>
+            <span className="price">₦0</span>
+          </div>
+        )}
+        {quote?.codeProblem && (
+          <p className="urgent small" role="alert">
+            Code {quote.code}: {quote.codeProblem} <Link to="/bag">Change it in your bag.</Link>
+          </p>
+        )}
         <div className="row-between total">
           <span>Total</span>
           <span className="price">{total !== null ? formatNaira(total) : "—"}</span>

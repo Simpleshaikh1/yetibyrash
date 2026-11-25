@@ -76,6 +76,9 @@ func (s *Service) ConfirmPayment(ctx context.Context, p paystack.Payment) error 
 					return err
 				}
 			}
+			if err := retakeOffers(ctx, q, o.ID); err != nil {
+				return err
+			}
 			if err := q.InsertOrderEvent(ctx, sqlc.InsertOrderEventParams{OrderID: o.ID, Status: sqlc.OrderStatusPaid,
 				Note: "Payment arrived after the 30-minute hold ended. Check stock before packing."}); err != nil {
 				return err
@@ -129,6 +132,9 @@ func (s *Service) abandon(ctx context.Context, reference, note string) error {
 			if err := q.ChangeStock(ctx, sqlc.ChangeStockParams{ID: it.VariantID, Delta: it.Qty}); err != nil {
 				return err
 			}
+		}
+		if err := giveBackOffers(ctx, q, o.ID); err != nil {
+			return err
 		}
 		if err := q.SetOrderStatus(ctx, sqlc.SetOrderStatusParams{ID: o.ID, Status: sqlc.OrderStatusAbandoned}); err != nil {
 			return err
@@ -188,6 +194,7 @@ type ItemView struct {
 	Image    string `json:"image"`
 	UnitKobo int64  `json:"unitKobo"`
 	Qty      int    `json:"qty"`
+	Gift     bool   `json:"gift"` // the free gift, at no charge
 }
 
 type EventView struct {
@@ -207,6 +214,8 @@ type View struct {
 	Speed        string      `json:"speed"`
 	SubtotalKobo int64       `json:"subtotalKobo"`
 	DeliveryKobo int64       `json:"deliveryKobo"`
+	DiscountKobo int64       `json:"discountKobo"`
+	DiscountCode string      `json:"discountCode"`
 	TotalKobo    int64       `json:"totalKobo"`
 	ExpectedFrom string      `json:"expectedFrom"`
 	ExpectedTo   string      `json:"expectedTo"`
@@ -243,6 +252,7 @@ func (s *Service) Order(ctx context.Context, number, reference string) (View, er
 		Address:      strings.Join(nonEmpty(o.Street, o.Landmark, o.LgaName, o.StateName), ", "),
 		Speed:        string(o.Speed),
 		SubtotalKobo: o.SubtotalKobo, DeliveryKobo: o.DeliveryKobo, TotalKobo: o.TotalKobo,
+		DiscountKobo: o.DiscountKobo, DiscountCode: o.DiscountCode,
 		ExpectedFrom: o.ExpectedFrom.Time.Format(time.DateOnly), ExpectedTo: o.ExpectedTo.Time.Format(time.DateOnly),
 		Items: []ItemView{}, Events: []EventView{},
 	}
@@ -255,7 +265,7 @@ func (s *Service) Order(ctx context.Context, number, reference string) (View, er
 		return View{}, err
 	}
 	for _, it := range items {
-		v.Items = append(v.Items, ItemView{Name: it.ProductName, Slug: it.ProductSlug, Option: it.VariantLabel, Image: it.ImageKey, UnitKobo: it.UnitKobo, Qty: int(it.Qty)})
+		v.Items = append(v.Items, ItemView{Name: it.ProductName, Slug: it.ProductSlug, Option: it.VariantLabel, Image: it.ImageKey, UnitKobo: it.UnitKobo, Qty: int(it.Qty), Gift: it.IsGift})
 	}
 	events, err := s.q.ListOrderEvents(ctx, o.ID)
 	if err != nil {

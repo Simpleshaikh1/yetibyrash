@@ -53,6 +53,49 @@ func (ns NullDeliverySpeed) Value() (driver.Value, error) {
 	return string(ns.DeliverySpeed), nil
 }
 
+type DiscountKind string
+
+const (
+	DiscountKindPercent      DiscountKind = "percent"
+	DiscountKindFixed        DiscountKind = "fixed"
+	DiscountKindFreeDelivery DiscountKind = "free_delivery"
+)
+
+func (e *DiscountKind) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DiscountKind(s)
+	case string:
+		*e = DiscountKind(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DiscountKind: %T", src)
+	}
+	return nil
+}
+
+type NullDiscountKind struct {
+	DiscountKind DiscountKind `json:"discount_kind"`
+	Valid        bool         `json:"valid"` // Valid is true if DiscountKind is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDiscountKind) Scan(value interface{}) error {
+	if value == nil {
+		ns.DiscountKind, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DiscountKind.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDiscountKind) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DiscountKind), nil
+}
+
 type OrderStatus string
 
 const (
@@ -187,6 +230,49 @@ func (ns NullProductTier) Value() (driver.Value, error) {
 	return string(ns.ProductTier), nil
 }
 
+type PromotionScope string
+
+const (
+	PromotionScopeAll      PromotionScope = "all"
+	PromotionScopeTier     PromotionScope = "tier"
+	PromotionScopeCategory PromotionScope = "category"
+)
+
+func (e *PromotionScope) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PromotionScope(s)
+	case string:
+		*e = PromotionScope(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PromotionScope: %T", src)
+	}
+	return nil
+}
+
+type NullPromotionScope struct {
+	PromotionScope PromotionScope `json:"promotion_scope"`
+	Valid          bool           `json:"valid"` // Valid is true if PromotionScope is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPromotionScope) Scan(value interface{}) error {
+	if value == nil {
+		ns.PromotionScope, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PromotionScope.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPromotionScope) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PromotionScope), nil
+}
+
 type StaffRole string
 
 const (
@@ -231,6 +317,16 @@ func (ns NullStaffRole) Value() (driver.Value, error) {
 	return string(ns.StaffRole), nil
 }
 
+type Announcement struct {
+	ID       int64              `json:"id"`
+	Text     string             `json:"text"`
+	Link     string             `json:"link"`
+	Position int32              `json:"position"`
+	Active   bool               `json:"active"`
+	StartsAt pgtype.Timestamptz `json:"starts_at"`
+	EndsAt   pgtype.Timestamptz `json:"ends_at"`
+}
+
 type AuditLog struct {
 	ID        int64              `json:"id"`
 	StaffID   pgtype.Int8        `json:"staff_id"`
@@ -241,10 +337,26 @@ type AuditLog struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type Banner struct {
+	ID         int64              `json:"id"`
+	Eyebrow    string             `json:"eyebrow"`
+	Headline   string             `json:"headline"`
+	ButtonText string             `json:"button_text"`
+	ButtonLink string             `json:"button_link"`
+	ImageKey   string             `json:"image_key"`
+	Tier       NullProductTier    `json:"tier"`
+	StartsAt   pgtype.Timestamptz `json:"starts_at"`
+	EndsAt     pgtype.Timestamptz `json:"ends_at"`
+	Position   int32              `json:"position"`
+	Active     bool               `json:"active"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
 type Cart struct {
-	ID        pgtype.UUID        `json:"id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID           pgtype.UUID        `json:"id"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DiscountCode string             `json:"discount_code"`
 }
 
 type CartItem struct {
@@ -304,9 +416,46 @@ type DeliveryZone struct {
 	FreeOverKobo    pgtype.Int8 `json:"free_over_kobo"`
 }
 
+type DiscountCode struct {
+	ID             int64              `json:"id"`
+	Code           string             `json:"code"`
+	Kind           DiscountKind       `json:"kind"`
+	Value          int64              `json:"value"`
+	MinOrderKobo   int64              `json:"min_order_kobo"`
+	MaxUses        pgtype.Int4        `json:"max_uses"`
+	Used           int32              `json:"used"`
+	FirstOrderOnly bool               `json:"first_order_only"`
+	ZoneID         pgtype.Int8        `json:"zone_id"`
+	StartsAt       pgtype.Timestamptz `json:"starts_at"`
+	EndsAt         pgtype.Timestamptz `json:"ends_at"`
+	Active         bool               `json:"active"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
+type GiftOffer struct {
+	ID            int64              `json:"id"`
+	ThresholdKobo int64              `json:"threshold_kobo"`
+	VariantID     int64              `json:"variant_id"`
+	Quantity      int32              `json:"quantity"`
+	Given         int32              `json:"given"`
+	StartsAt      pgtype.Timestamptz `json:"starts_at"`
+	EndsAt        pgtype.Timestamptz `json:"ends_at"`
+	Active        bool               `json:"active"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+}
+
 type Holiday struct {
 	Day  pgtype.Date `json:"day"`
 	Name string      `json:"name"`
+}
+
+type HomepageSection struct {
+	Key       string   `json:"key"`
+	Title     string   `json:"title"`
+	Position  int32    `json:"position"`
+	Visible   bool     `json:"visible"`
+	ItemCount int32    `json:"item_count"`
+	Lines     []string `json:"lines"`
 }
 
 type Job struct {
@@ -360,6 +509,10 @@ type Order struct {
 	CourierID        pgtype.Int8        `json:"courier_id"`
 	TrackingNumber   string             `json:"tracking_number"`
 	StatusAt         pgtype.Timestamptz `json:"status_at"`
+	DiscountKobo     int64              `json:"discount_kobo"`
+	DiscountCode     string             `json:"discount_code"`
+	PromotionID      pgtype.Int8        `json:"promotion_id"`
+	GiftOfferID      pgtype.Int8        `json:"gift_offer_id"`
 }
 
 type OrderEvent struct {
@@ -383,6 +536,17 @@ type OrderItem struct {
 	ImageKey     string `json:"image_key"`
 	UnitKobo     int64  `json:"unit_kobo"`
 	Qty          int32  `json:"qty"`
+	IsGift       bool   `json:"is_gift"`
+}
+
+type Page struct {
+	ID        int64              `json:"id"`
+	Slug      string             `json:"slug"`
+	Title     string             `json:"title"`
+	Body      string             `json:"body"`
+	Published bool               `json:"published"`
+	Position  int32              `json:"position"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Payment struct {
@@ -443,6 +607,23 @@ type ProductPairing struct {
 	ProductID int64 `json:"product_id"`
 	PairedID  int64 `json:"paired_id"`
 	Position  int32 `json:"position"`
+}
+
+type Promotion struct {
+	ID            int64              `json:"id"`
+	Name          string             `json:"name"`
+	Kind          DiscountKind       `json:"kind"`
+	Value         int64              `json:"value"`
+	AppliesTo     PromotionScope     `json:"applies_to"`
+	Tier          NullProductTier    `json:"tier"`
+	CategoryID    pgtype.Int8        `json:"category_id"`
+	StartsAt      pgtype.Timestamptz `json:"starts_at"`
+	EndsAt        pgtype.Timestamptz `json:"ends_at"`
+	BadgeText     string             `json:"badge_text"`
+	Announcement  string             `json:"announcement"`
+	ExcludeOnSale bool               `json:"exclude_on_sale"`
+	Active        bool               `json:"active"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type Size struct {

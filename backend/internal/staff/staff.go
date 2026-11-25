@@ -37,17 +37,19 @@ func ValidRole(r Role) bool {
 type Permission string
 
 const (
-	PermProducts  Permission = "products"  // product list, editor, photos
-	PermCatalogue Permission = "catalogue" // categories, size sets, colours
-	PermOrders    Permission = "orders"    // orders board (M4)
-	PermStaff     Permission = "staff"     // staff accounts
+	PermProducts   Permission = "products"   // product list, editor, photos
+	PermCatalogue  Permission = "catalogue"  // categories, size sets, colours
+	PermOrders     Permission = "orders"     // orders board (M4)
+	PermStaff      Permission = "staff"      // staff accounts
+	PermContent    Permission = "content"    // homepage, banners, announcements, pages
+	PermPromotions Permission = "promotions" // sales, discount codes, free gifts
 )
 
 var rolePermissions = map[Role][]Permission{
-	RoleOwner:         {PermProducts, PermCatalogue, PermOrders, PermStaff},
-	RoleManager:       {PermProducts, PermCatalogue, PermOrders},
+	RoleOwner:         {PermProducts, PermCatalogue, PermOrders, PermStaff, PermContent, PermPromotions},
+	RoleManager:       {PermProducts, PermCatalogue, PermOrders, PermContent, PermPromotions},
 	RolePacker:        {PermOrders},
-	RoleContentEditor: {PermProducts},
+	RoleContentEditor: {PermProducts, PermContent},
 }
 
 func (r Role) Can(p Permission) bool {

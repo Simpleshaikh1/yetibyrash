@@ -45,6 +45,23 @@ Paystack can't reach your computer's webhook during local development; the order
 
 **Orders and customer emails:** paid orders appear on the admin **Orders** board. Move each one along: Packed → Shipped (pick a courier; couriers are set up on the **Delivery** screen) → Out for delivery → Delivered. Owners and managers can cancel an order while it's Paid or Packed, which puts the stock back. Every step emails the customer. The wording is edited on **Customer messages**. Locally, those emails land in Mailpit at http://localhost:8025 instead of reaching anyone. Customers follow their order at http://localhost:5173/track using the order number and their phone number.
 
+**Homepage and content:** the admin's **Homepage and content** screen controls the homepage. You can:
+
+- reorder, rename or hide its sections
+- add hero banners per tier, with dates and one photo (cropped 4:5 for phones and 16:7 for laptops)
+- edit the announcement bar at the top of every page
+- write pages such as About, FAQ and policies, which appear in the footer once published
+
+Pages use light formatting: `## heading`, `- list`, `**bold**`, `[link](/shop)`.
+
+**Promotions:** the **Promotions** screen has three tools:
+
+- **Sales** take a percentage or an amount off everything, one tier, or one category for set days. They show a badge and the crossed-out price, and prices go back on their own when the sale ends.
+- **Discount codes** are typed in the bag. A code can give a percentage, an amount or free delivery, with an optional minimum spend, use limit, first-order-only rule or delivery area.
+- **The free gift** goes in once the bag reaches a spend.
+
+A code's use and a gift are held at checkout and given back if the order goes unpaid or is cancelled.
+
 For real email, set `SMTP_ADDR`, `SMTP_USERNAME`, `SMTP_PASSWORD` and `MAIL_FROM` in `backend/.env`. Emails are sent from a queue, so a mail outage only delays them (they retry for several hours).
 
 **First owner on a real server** (no seed there):

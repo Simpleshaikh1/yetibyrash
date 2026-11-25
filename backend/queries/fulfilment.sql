@@ -22,6 +22,7 @@ SELECT o.id, o.number, o.status, o.status_at, o.payment_reference, o.created_at,
        o.customer_name, o.customer_phone, o.customer_email,
        o.state_name, o.lga_name, o.street, o.landmark, o.zone_name, o.speed,
        o.subtotal_kobo, o.delivery_kobo, o.total_kobo, o.expected_from, o.expected_to,
+       o.discount_kobo, o.discount_code,
        o.courier_id, COALESCE(c.name, '')::text AS courier_name, COALESCE(c.tracking_url, '')::text AS courier_tracking_url,
        o.tracking_number
 FROM orders o LEFT JOIN couriers c ON c.id = o.courier_id

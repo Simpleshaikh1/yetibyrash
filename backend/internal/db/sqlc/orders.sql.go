@@ -30,7 +30,8 @@ func (q *Queries) ChangeStock(ctx context.Context, arg ChangeStockParams) error 
 const getOrderByNumber = `-- name: GetOrderByNumber :one
 SELECT id, number, status, payment_reference, customer_name, customer_phone, customer_email,
        state_name, lga_name, street, landmark, zone_name, speed,
-       subtotal_kobo, delivery_kobo, total_kobo, expected_from, expected_to, created_at, paid_at
+       subtotal_kobo, delivery_kobo, total_kobo, expected_from, expected_to, created_at, paid_at,
+       discount_kobo, discount_code
 FROM orders WHERE number = $1
 `
 
@@ -55,6 +56,8 @@ type GetOrderByNumberRow struct {
 	ExpectedTo       pgtype.Date        `json:"expected_to"`
 	CreatedAt        pgtype.Timestamptz `json:"created_at"`
 	PaidAt           pgtype.Timestamptz `json:"paid_at"`
+	DiscountKobo     int64              `json:"discount_kobo"`
+	DiscountCode     string             `json:"discount_code"`
 }
 
 func (q *Queries) GetOrderByNumber(ctx context.Context, number string) (GetOrderByNumberRow, error) {
@@ -81,6 +84,8 @@ func (q *Queries) GetOrderByNumber(ctx context.Context, number string) (GetOrder
 		&i.ExpectedTo,
 		&i.CreatedAt,
 		&i.PaidAt,
+		&i.DiscountKobo,
+		&i.DiscountCode,
 	)
 	return i, err
 }
@@ -115,8 +120,9 @@ func (q *Queries) GetOrderByReferenceForUpdate(ctx context.Context, paymentRefer
 const insertOrder = `-- name: InsertOrder :one
 INSERT INTO orders (cart_id, payment_reference, customer_name, customer_phone, customer_email,
                     state_name, lga_name, street, landmark, zone_name, speed,
-                    subtotal_kobo, delivery_kobo, total_kobo, expected_from, expected_to)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                    subtotal_kobo, delivery_kobo, total_kobo, expected_from, expected_to,
+                    discount_kobo, discount_code, promotion_id, gift_offer_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
 RETURNING id, number
 `
 
@@ -137,6 +143,10 @@ type InsertOrderParams struct {
 	TotalKobo        int64         `json:"total_kobo"`
 	ExpectedFrom     pgtype.Date   `json:"expected_from"`
 	ExpectedTo       pgtype.Date   `json:"expected_to"`
+	DiscountKobo     int64         `json:"discount_kobo"`
+	DiscountCode     string        `json:"discount_code"`
+	PromotionID      pgtype.Int8   `json:"promotion_id"`
+	GiftOfferID      pgtype.Int8   `json:"gift_offer_id"`
 }
 
 type InsertOrderRow struct {
@@ -162,6 +172,10 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Inser
 		arg.TotalKobo,
 		arg.ExpectedFrom,
 		arg.ExpectedTo,
+		arg.DiscountKobo,
+		arg.DiscountCode,
+		arg.PromotionID,
+		arg.GiftOfferID,
 	)
 	var i InsertOrderRow
 	err := row.Scan(&i.ID, &i.Number)
@@ -193,8 +207,8 @@ func (q *Queries) InsertOrderEvent(ctx context.Context, arg InsertOrderEventPara
 }
 
 const insertOrderItem = `-- name: InsertOrderItem :exec
-INSERT INTO order_items (order_id, variant_id, product_name, product_slug, variant_label, sku, image_key, unit_kobo, qty)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO order_items (order_id, variant_id, product_name, product_slug, variant_label, sku, image_key, unit_kobo, qty, is_gift)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 `
 
 type InsertOrderItemParams struct {
@@ -207,6 +221,7 @@ type InsertOrderItemParams struct {
 	ImageKey     string `json:"image_key"`
 	UnitKobo     int64  `json:"unit_kobo"`
 	Qty          int32  `json:"qty"`
+	IsGift       bool   `json:"is_gift"`
 }
 
 func (q *Queries) InsertOrderItem(ctx context.Context, arg InsertOrderItemParams) error {
@@ -220,6 +235,7 @@ func (q *Queries) InsertOrderItem(ctx context.Context, arg InsertOrderItemParams
 		arg.ImageKey,
 		arg.UnitKobo,
 		arg.Qty,
+		arg.IsGift,
 	)
 	return err
 }
@@ -292,7 +308,7 @@ func (q *Queries) ListOrderEvents(ctx context.Context, orderID int64) ([]ListOrd
 }
 
 const listOrderItems = `-- name: ListOrderItems :many
-SELECT variant_id, product_name, product_slug, variant_label, sku, image_key, unit_kobo, qty
+SELECT variant_id, product_name, product_slug, variant_label, sku, image_key, unit_kobo, qty, is_gift
 FROM order_items WHERE order_id = $1 ORDER BY id
 `
 
@@ -305,6 +321,7 @@ type ListOrderItemsRow struct {
 	ImageKey     string `json:"image_key"`
 	UnitKobo     int64  `json:"unit_kobo"`
 	Qty          int32  `json:"qty"`
+	IsGift       bool   `json:"is_gift"`
 }
 
 func (q *Queries) ListOrderItems(ctx context.Context, orderID int64) ([]ListOrderItemsRow, error) {
@@ -325,6 +342,7 @@ func (q *Queries) ListOrderItems(ctx context.Context, orderID int64) ([]ListOrde
 			&i.ImageKey,
 			&i.UnitKobo,
 			&i.Qty,
+			&i.IsGift,
 		); err != nil {
 			return nil, err
 		}

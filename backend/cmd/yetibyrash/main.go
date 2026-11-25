@@ -15,6 +15,7 @@ import (
 	"yetibyrash/backend/internal/cart"
 	"yetibyrash/backend/internal/catalog"
 	"yetibyrash/backend/internal/config"
+	"yetibyrash/backend/internal/content"
 	"yetibyrash/backend/internal/db"
 	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/httpapi"
@@ -23,6 +24,7 @@ import (
 	"yetibyrash/backend/internal/notify"
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
+	"yetibyrash/backend/internal/promotions"
 	"yetibyrash/backend/internal/staff"
 )
 
@@ -104,6 +106,8 @@ func run() error {
 			PaystackSecret: cfg.PaystackSecretKey,
 			DevPay:         devPay,
 			Notify:         notifySvc,
+			Content:        content.NewService(pool, photos),
+			Promotions:     promotions.NewService(pool),
 			Version:        version,
 			SecureCookies:  cfg.IsProduction(),
 			AllowedOrigins: cfg.AdminOrigins,

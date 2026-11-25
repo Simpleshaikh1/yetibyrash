@@ -2,7 +2,7 @@
 // Money is always in kobo. The session lives in an HttpOnly cookie the browser sends automatically.
 
 export type Role = "owner" | "manager" | "packer" | "content_editor";
-export type Permission = "products" | "catalogue" | "orders" | "staff";
+export type Permission = "products" | "catalogue" | "orders" | "staff" | "content" | "promotions";
 export type Member = { id: number; email: string; name: string; role: Role };
 export type Me = { staff: Member; permissions: Permission[] };
 
@@ -278,6 +278,121 @@ export const api = {
   createStaff: (body: { email: string; name: string; role: Role; password: string }) => request<{ id: number }>("POST", "/staff", body),
   updateStaff: (id: number, body: { name: string; role: Role; active: boolean }) => request<void>("PUT", `/staff/${id}`, body),
   setStaffPassword: (id: number, password: string) => request<void>("PUT", `/staff/${id}/password`, { password }),
+};
+
+// ---------- Homepage and content (M5) ----------
+
+export type Banner = {
+  id: number;
+  eyebrow: string;
+  headline: string;
+  buttonText: string;
+  buttonLink: string;
+  image: string; // files: /media/<image>-phone.jpg and -wide.jpg
+  tier: "" | Tier;
+  startsOn: string;
+  endsOn: string;
+  active: boolean;
+  live: boolean;
+};
+export type Announcement = { id: number; text: string; link: string; startsOn: string; endsOn: string; active: boolean; live: boolean };
+export type HomeSection = { key: string; title: string; visible: boolean; itemCount: number; lines: string[] };
+export type SitePage = { id: number; slug: string; title: string; body: string; published: boolean; updatedAt: string };
+export type ContentAdmin = {
+  banners: Banner[];
+  announcements: Announcement[];
+  sections: HomeSection[];
+  pages: SitePage[];
+  saleMessages: string[];
+};
+
+// ---------- Promotions (M5) ----------
+
+export type Sale = {
+  id: number;
+  name: string;
+  kind: "percent" | "fixed";
+  value: number; // percent, or kobo off each item
+  appliesTo: "all" | "tier" | "category";
+  tier: "" | Tier;
+  categoryId: number;
+  categoryName: string;
+  startsOn: string;
+  endsOn: string;
+  badge: string;
+  announcement: string;
+  excludeOnSale: boolean;
+  active: boolean;
+  state: "live" | "scheduled" | "ended" | "off";
+  endsInDays: number;
+  orders: number;
+  salesKobo: number;
+};
+export type DiscountCode = {
+  id: number;
+  code: string;
+  kind: "percent" | "fixed" | "free_delivery";
+  value: number;
+  minOrderKobo: number;
+  maxUses: number | null;
+  used: number;
+  firstOrderOnly: boolean;
+  zoneId: number;
+  zoneName: string;
+  startsOn: string;
+  endsOn: string;
+  active: boolean;
+  summary: string;
+};
+export type GiftOffer = {
+  id: number;
+  thresholdKobo: number;
+  sku: string;
+  productName: string;
+  option: string;
+  stock: number;
+  quantity: number;
+  given: number;
+  startsOn: string;
+  endsOn: string;
+  active: boolean;
+  live: boolean;
+};
+export type PromotionsAdmin = {
+  sales: Sale[];
+  codes: DiscountCode[];
+  gifts: GiftOffer[];
+  categories: { id: number; name: string }[];
+  zones: { id: number; name: string }[];
+};
+
+const save = <T extends { id: number }>(base: string, item: T) =>
+  request<{ id: number }>(item.id ? "PUT" : "POST", item.id ? `${base}/${item.id}` : base, item);
+
+export const contentApi = {
+  get: (signal?: AbortSignal) => request<ContentAdmin>("GET", "/content", undefined, signal),
+  saveBanner: (b: Banner) => save("/content/banners", b),
+  deleteBanner: (id: number) => request<void>("DELETE", `/content/banners/${id}`),
+  bannerImage: (id: number, file: File) => {
+    const form = new FormData();
+    form.append("photo", file);
+    return request<{ image: string; warnings: string[] }>("POST", `/content/banners/${id}/image`, form);
+  },
+  orderBanners: (ids: number[]) => request<void>("PUT", "/content/banner-order", { ids }),
+  saveAnnouncement: (a: Announcement) => save("/content/announcements", a),
+  deleteAnnouncement: (id: number) => request<void>("DELETE", `/content/announcements/${id}`),
+  orderAnnouncements: (ids: number[]) => request<void>("PUT", "/content/announcement-order", { ids }),
+  saveSections: (sections: HomeSection[]) => request<void>("PUT", "/content/sections", { sections }),
+  savePage: (p: SitePage) => save("/content/pages", p),
+  deletePage: (id: number) => request<void>("DELETE", `/content/pages/${id}`),
+};
+
+export const promotionsApi = {
+  get: (signal?: AbortSignal) => request<PromotionsAdmin>("GET", "/promotions", undefined, signal),
+  saveSale: (s: Sale) => save("/promotions/sales", s),
+  deleteSale: (id: number) => request<void>("DELETE", `/promotions/sales/${id}`),
+  saveCode: (c: DiscountCode) => save("/promotions/codes", c),
+  saveGift: (g: GiftOffer) => save("/promotions/gifts", g),
 };
 
 export const roleLabels: Record<Role, string> = {

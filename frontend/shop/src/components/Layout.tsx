@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
+import { api, type Site } from "../api";
 import { useBag } from "../bag";
+import { useApi } from "../useApi";
 import { Icon, type IconName } from "./Icon";
 
 const nav: { to: string; label: string; icon: IconName; end?: boolean }[] = [
@@ -10,12 +13,15 @@ const nav: { to: string; label: string; icon: IconName; end?: boolean }[] = [
   { to: "/track", label: "Track", icon: "track" },
 ];
 
-// Every shop screen: header with the wordmark and bag, page content, bottom navigation.
+// Every shop screen: announcement bar, header with the wordmark and bag, page content,
+// footer links, and the bottom navigation.
 export function Layout() {
   const { count } = useBag();
+  const site = useApi("site", (s) => api.site(s));
   const bagLabel = count ? `Bag, ${count} ${count === 1 ? "item" : "items"}` : "Bag";
   return (
     <div className="app">
+      {site.data && site.data.announcements.length > 0 && <AnnouncementBar items={site.data.announcements} />}
       <header className="topbar">
         <Link to="/shop" className="icon-btn" aria-label="Browse categories">
           <Icon name="menu" />
@@ -34,6 +40,7 @@ export function Layout() {
       </header>
       <main className="page">
         <Outlet />
+        {site.data && <Footer pages={site.data.pages} />}
       </main>
       <nav className="bottomnav" aria-label="Main">
         {nav.map((n) => (
@@ -44,5 +51,46 @@ export function Layout() {
         ))}
       </nav>
     </div>
+  );
+}
+
+// One message at a time, changing every 5 seconds (paused while the pointer is over it).
+function AnnouncementBar({ items }: { items: Site["announcements"] }) {
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (items.length < 2 || paused) return;
+    const t = setInterval(() => setI((n) => (n + 1) % items.length), 5000);
+    return () => clearInterval(t);
+  }, [items.length, paused]);
+  const a = items[i % items.length];
+  return (
+    <div className="announce" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      {a.link ? (
+        <Link key={i} to={a.link}>
+          {a.text}
+        </Link>
+      ) : (
+        <span key={i}>{a.text}</span>
+      )}
+    </div>
+  );
+}
+
+function Footer({ pages }: { pages: Site["pages"] }) {
+  return (
+    <footer className="footer">
+      <span className="wordmark small-mark">Yetibyrash</span>
+      <span className="small muted">Elegance meets affordability</span>
+      {pages.length > 0 && (
+        <nav aria-label="About the shop" className="footer-links">
+          {pages.map((p) => (
+            <Link key={p.slug} to={`/page/${p.slug}`}>
+              {p.title}
+            </Link>
+          ))}
+        </nav>
+      )}
+    </footer>
   );
 }

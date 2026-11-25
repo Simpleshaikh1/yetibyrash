@@ -38,3 +38,10 @@ export async function fetchHealth(signal?: AbortSignal): Promise<Health> {
   }
   return (await res.json()) as Health;
 }
+
+export { Markdown, parseMarkdown } from "./markdown";
+
+/** Hero banner photo: "phone" is 4:5, "wide" is 16:7. */
+export function bannerUrl(key: string, crop: "phone" | "wide"): string {
+  return `/media/${key}-${crop}.jpg`;
+}

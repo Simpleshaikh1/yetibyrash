@@ -22,6 +22,7 @@ export type ProductCard = {
   priceKobo: number;
   maxPriceKobo: number;
   compareAtKobo: number | null;
+  saleBadge: string; // a running sale's badge, "" for none
   colourCount: number;
   inStock: boolean;
   preorder: boolean;
@@ -57,6 +58,7 @@ export type ProductDetail = {
   tier: Tier;
   materialLine: string;
   badges: string[];
+  saleBadge: string;
   giftBoxAllowed: boolean;
   preorderAllowed: boolean;
   category: { name: string; slug: string };
@@ -71,7 +73,22 @@ export type ProductDetail = {
   lowStockThreshold: number;
 };
 
-export type Home = { tagline: string; categories: Category[]; newIn: ProductCard[] };
+export type HomeSection = { key: "hero" | "categories" | "new_in" | "best_sellers" | "gift_budget" | "trust"; title: string; lines: string[] };
+export type HeroBanner = { eyebrow: string; headline: string; buttonText: string; buttonLink: string; image: string };
+/** The homepage: `sections` lists the visible blocks in the admin's order. */
+export type Home = {
+  tagline: string;
+  sections: HomeSection[];
+  hero: HeroBanner | null;
+  categories: Category[];
+  newIn: ProductCard[];
+  bestSellers: ProductCard[];
+  budgets: PriceBand[];
+};
+
+/** Announcement bar and footer links, shown on every page. */
+export type Site = { announcements: { text: string; link: string }[]; pages: { slug: string; title: string }[] };
+export type SitePage = { slug: string; title: string; body: string; updatedAt: string };
 
 export type BagLine = {
   variantId: number;
@@ -86,15 +103,37 @@ export type BagLine = {
   qty: number;
   stock: number;
   lineKobo: number;
+  saleBadge: string;
   problem: string; // "" when fine
 };
-export type Bag = { lines: BagLine[]; count: number; subtotalKobo: number; canCheckout: boolean };
+/** The discount code on the bag. `problem` says why it gives nothing yet. */
+export type BagCode = { code: string; discountKobo: number; freeDelivery: boolean; summary: string; problem: string };
+/** The free-gift offer; remainingKobo 0 means the gift is in. */
+export type BagGift = { slug: string; name: string; option: string; image: string; thresholdKobo: number; remainingKobo: number };
+export type Bag = {
+  lines: BagLine[];
+  count: number;
+  subtotalKobo: number;
+  canCheckout: boolean;
+  code: BagCode | null;
+  discountKobo: number;
+  gift: BagGift | null;
+};
 
 export type Lga = { id: number; name: string; express: boolean };
 export type State = { id: number; name: string; zoneName: string; lgas: Lga[] };
 
 export type DeliveryOption = { speed: "standard" | "express"; feeKobo: number; free: boolean; from: string; to: string; label: string };
-export type Quote = { subtotalKobo: number; options: DeliveryOption[]; zoneName: string };
+export type Quote = {
+  subtotalKobo: number;
+  options: DeliveryOption[];
+  zoneName: string;
+  code: string;
+  discountKobo: number; // off the items
+  freeDelivery: boolean; // the code makes delivery free
+  codeProblem: string;
+  gift: string; // free gift going in, "" for none
+};
 
 export type DeliverySummary = {
   cutoffAt: string | null;
@@ -124,11 +163,13 @@ export type OrderView = {
   speed: string;
   subtotalKobo: number;
   deliveryKobo: number;
+  discountKobo: number;
+  discountCode: string;
   totalKobo: number;
   expectedFrom: string;
   expectedTo: string;
   paidAt: string | null;
-  items: { name: string; slug: string; option: string; image: string; unitKobo: number; qty: number }[];
+  items: { name: string; slug: string; option: string; image: string; unitKobo: number; qty: number; gift: boolean }[];
   events: { status: string; note: string; at: string }[];
 };
 
@@ -195,6 +236,11 @@ export const api = {
   bag: (signal?: AbortSignal) => getJSON<Bag>("/api/v1/cart", signal),
   addToBag: (variantId: number, qty = 1) => send<Bag>("POST", "/api/v1/cart/items", { variantId, qty }),
   setQty: (variantId: number, qty: number) => send<Bag>("PUT", `/api/v1/cart/items/${variantId}`, { qty }),
+  applyCode: (code: string) => send<Bag>("POST", "/api/v1/cart/code", { code }),
+  removeCode: () => send<Bag>("DELETE", "/api/v1/cart/code"),
+
+  site: (signal?: AbortSignal) => getJSON<Site>("/api/v1/site", signal),
+  page: (slug: string, signal?: AbortSignal) => getJSON<SitePage>(`/api/v1/pages/${encodeURIComponent(slug)}`, signal),
 
   locations: (signal?: AbortSignal) => getJSON<{ states: State[] }>("/api/v1/locations", signal).then((r) => r.states),
   delivery: (signal?: AbortSignal) => getJSON<DeliverySummary>("/api/v1/delivery", signal),

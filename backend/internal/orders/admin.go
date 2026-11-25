@@ -230,6 +230,9 @@ func (s *Service) Cancel(ctx context.Context, by staff.Member, id int64, reason 
 				return err
 			}
 		}
+		if err := giveBackOffers(ctx, q, id); err != nil {
+			return err
+		}
 		if err := q.SetOrderStatus(ctx, sqlc.SetOrderStatusParams{ID: id, Status: sqlc.OrderStatusCancelled}); err != nil {
 			return err
 		}

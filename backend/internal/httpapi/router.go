@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"yetibyrash/backend/internal/cart"
+	"yetibyrash/backend/internal/content"
 	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/notify"
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
+	"yetibyrash/backend/internal/promotions"
 	"yetibyrash/backend/internal/staff"
 )
 
@@ -36,6 +38,8 @@ type Deps struct {
 	PaystackSecret string
 	DevPay         *paystack.DevProvider
 	Notify         *notify.Orders // customer message templates
+	Content        *content.Service
+	Promotions     *promotions.Service
 
 	SecureCookies  bool     // send cookies over HTTPS only (production)
 	AllowedOrigins []string // admin app addresses allowed to make changes
@@ -55,6 +59,11 @@ func NewRouter(d Deps) http.Handler {
 
 	if d.Orders != nil {
 		registerShopOrders(mux, d)
+	}
+	if d.Content != nil {
+		sh := siteHandlers{c: d.Content}
+		mux.HandleFunc("GET /api/v1/site", sh.site)
+		mux.HandleFunc("GET /api/v1/pages/{slug}", sh.page)
 	}
 
 	if d.Media != nil {
@@ -81,6 +90,8 @@ func registerShopOrders(mux *http.ServeMux, d Deps) {
 	mux.HandleFunc("GET /api/v1/cart", h.getCart)
 	mux.HandleFunc("POST /api/v1/cart/items", h.addToCart)
 	mux.HandleFunc("PUT /api/v1/cart/items/{variantId}", h.setCartQty)
+	mux.HandleFunc("POST /api/v1/cart/code", h.applyCode)
+	mux.HandleFunc("DELETE /api/v1/cart/code", h.removeCode)
 	mux.HandleFunc("GET /api/v1/locations", h.locations)
 	mux.HandleFunc("GET /api/v1/delivery", h.deliverySummary)
 	mux.HandleFunc("POST /api/v1/checkout/quote", h.quote)
@@ -160,6 +171,37 @@ func registerAdmin(mux *http.ServeMux, d Deps) {
 		mux.Handle("GET "+p+"/messages", catalogue(oh.messages))
 		mux.Handle("PUT "+p+"/messages/{event}", catalogue(oh.saveMessage))
 		mux.Handle("POST "+p+"/messages/preview", catalogue(oh.previewMessage))
+	}
+
+	if d.Content != nil {
+		ch := adminContentHandlers{c: d.Content}
+		contentPerm := a.requireStaff(staff.PermContent)
+		mux.Handle("GET "+p+"/content", contentPerm(ch.get))
+		mux.Handle("POST "+p+"/content/banners", contentPerm(ch.saveBanner))
+		mux.Handle("PUT "+p+"/content/banners/{id}", contentPerm(ch.saveBanner))
+		mux.Handle("DELETE "+p+"/content/banners/{id}", contentPerm(ch.deleteBanner))
+		mux.Handle("POST "+p+"/content/banners/{id}/image", contentPerm(ch.bannerImage))
+		mux.Handle("PUT "+p+"/content/banner-order", contentPerm(ch.orderBanners))
+		mux.Handle("POST "+p+"/content/announcements", contentPerm(ch.saveAnnouncement))
+		mux.Handle("PUT "+p+"/content/announcements/{id}", contentPerm(ch.saveAnnouncement))
+		mux.Handle("DELETE "+p+"/content/announcements/{id}", contentPerm(ch.deleteAnnouncement))
+		mux.Handle("PUT "+p+"/content/announcement-order", contentPerm(ch.orderAnnouncements))
+		mux.Handle("PUT "+p+"/content/sections", contentPerm(ch.saveSections))
+		mux.Handle("POST "+p+"/content/pages", contentPerm(ch.savePage))
+		mux.Handle("PUT "+p+"/content/pages/{id}", contentPerm(ch.savePage))
+		mux.Handle("DELETE "+p+"/content/pages/{id}", contentPerm(ch.deletePage))
+	}
+	if d.Promotions != nil {
+		ph := adminPromoHandlers{p: d.Promotions}
+		promoPerm := a.requireStaff(staff.PermPromotions)
+		mux.Handle("GET "+p+"/promotions", promoPerm(ph.get))
+		mux.Handle("POST "+p+"/promotions/sales", promoPerm(ph.saveSale))
+		mux.Handle("PUT "+p+"/promotions/sales/{id}", promoPerm(ph.saveSale))
+		mux.Handle("DELETE "+p+"/promotions/sales/{id}", promoPerm(ph.deleteSale))
+		mux.Handle("POST "+p+"/promotions/codes", promoPerm(ph.saveCode))
+		mux.Handle("PUT "+p+"/promotions/codes/{id}", promoPerm(ph.saveCode))
+		mux.Handle("POST "+p+"/promotions/gifts", promoPerm(ph.saveGift))
+		mux.Handle("PUT "+p+"/promotions/gifts/{id}", promoPerm(ph.saveGift))
 	}
 
 	mux.Handle("GET "+p+"/staff", owner(a.listStaff))

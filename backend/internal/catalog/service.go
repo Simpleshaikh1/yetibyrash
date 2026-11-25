@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"yetibyrash/backend/internal/db/sqlc"
+	"yetibyrash/backend/internal/promotions"
 )
 
 // Service reads the catalogue from Postgres.
@@ -109,6 +110,9 @@ func (s *Service) ListProducts(ctx context.Context, f ProductFilter) (ProductLis
 		})
 	}
 
+	if err := s.applySales(ctx, list.Items); err != nil {
+		return ProductList{}, err
+	}
 	list.Filters, err = s.filterOptions(ctx, f.CategorySlug, bands)
 	if err != nil {
 		return ProductList{}, err
@@ -152,16 +156,25 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 	if err != nil {
 		return ProductDetail{}, fmt.Errorf("list variants: %w", err)
 	}
+	sales, err := promotions.LoadSales(ctx, s.q, []int64{p.ID})
+	if err != nil {
+		return ProductDetail{}, err
+	}
 	seenColour := map[string]bool{}
 	var sizeSetID int64
+	saleBadge := ""
 	for _, v := range variants {
+		price := sales.Apply(p.ID, v.PriceKobo, v.CompareAtKobo.Int64)
+		if price.Badge != "" {
+			saleBadge = price.Badge
+		}
 		d.Variants = append(d.Variants, Variant{
 			ID:            v.ID,
 			SKU:           v.Sku,
 			Colour:        v.ColourName.String,
 			Size:          v.SizeLabel.String,
-			PriceKobo:     v.PriceKobo,
-			CompareAtKobo: nullInt(v.CompareAtKobo),
+			PriceKobo:     price.Kobo,
+			CompareAtKobo: positive(price.CompareAtKobo),
 			Stock:         int(v.Stock),
 		})
 		if v.ColourName.Valid && !seenColour[v.ColourName.String] {
@@ -172,6 +185,8 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 			sizeSetID = v.SizeSetID.Int64
 		}
 	}
+
+	d.SaleBadge = saleBadge
 
 	if sizeSetID != 0 {
 		set, err := s.q.GetSizeSet(ctx, sizeSetID)
@@ -215,6 +230,9 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 			Image: x.ImageKey,
 		})
 	}
+	if err := s.applySales(ctx, d.Pairings); err != nil {
+		return ProductDetail{}, err
+	}
 
 	d.LowStockThreshold, err = s.lowStockThreshold(ctx)
 	if err != nil {
@@ -225,27 +243,10 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 
 // Home returns what the homepage shows for a tier ("" = both tiers).
 func (s *Service) Home(ctx context.Context, tier Tier) (Home, error) {
-	cats, err := s.Categories(ctx)
-	if err != nil {
-		return Home{}, err
+	home := Home{
+		Tagline: "Elegance meets affordability", Sections: []HomeSection{}, Categories: []Category{},
+		NewIn: []ProductCard{}, BestSellers: []ProductCard{}, Budgets: []PriceBand{},
 	}
-	home := Home{Categories: []Category{}}
-	for _, c := range cats {
-		if c.ShowOnHome {
-			home.Categories = append(home.Categories, c)
-		}
-	}
-
-	newIn, err := s.ListProducts(ctx, ProductFilter{Tier: tier, Sort: SortNewest, Page: 1})
-	if err != nil {
-		return Home{}, err
-	}
-	home.NewIn = newIn.Items
-	if len(home.NewIn) > 6 {
-		home.NewIn = home.NewIn[:6]
-	}
-
-	home.Tagline = "Elegance meets affordability"
 	if raw, err := s.q.GetStoreSetting(ctx, "tagline"); err == nil {
 		var t string
 		if json.Unmarshal(raw.Value, &t) == nil && t != "" {
@@ -254,7 +255,120 @@ func (s *Service) Home(ctx context.Context, tier Tier) (Home, error) {
 	} else if !errors.Is(err, pgx.ErrNoRows) {
 		return Home{}, fmt.Errorf("get tagline: %w", err)
 	}
+
+	sections, err := s.q.ListSections(ctx)
+	if err != nil {
+		return Home{}, fmt.Errorf("list sections: %w", err)
+	}
+	var tierArg sqlc.NullProductTier
+	if tier != "" {
+		tierArg = sqlc.NullProductTier{ProductTier: sqlc.ProductTier(tier), Valid: true}
+	}
+	for _, sec := range sections {
+		if !sec.Visible {
+			continue
+		}
+		home.Sections = append(home.Sections, HomeSection{Key: sec.Key, Title: sec.Title, Lines: nonNil(sec.Lines)})
+		n := int(sec.ItemCount)
+		switch sec.Key {
+		case "hero":
+			b, err := s.q.LiveBanner(ctx, tierArg)
+			if err == nil {
+				home.Hero = &Banner{Eyebrow: b.Eyebrow, Headline: b.Headline, ButtonText: b.ButtonText, ButtonLink: b.ButtonLink, Image: b.ImageKey}
+			} else if !errors.Is(err, pgx.ErrNoRows) {
+				return Home{}, fmt.Errorf("live banner: %w", err)
+			}
+		case "categories":
+			cats, err := s.Categories(ctx)
+			if err != nil {
+				return Home{}, err
+			}
+			for _, c := range cats {
+				if c.ShowOnHome {
+					home.Categories = append(home.Categories, c)
+				}
+			}
+		case "new_in":
+			newIn, err := s.ListProducts(ctx, ProductFilter{Tier: tier, Sort: SortNewest, Page: 1})
+			if err != nil {
+				return Home{}, err
+			}
+			home.NewIn = newIn.Items[:min(n, len(newIn.Items))]
+		case "best_sellers":
+			ids, err := s.q.BestSellerIDs(ctx, sqlc.BestSellerIDsParams{Tier: tierArg, MaxItems: int32(n)})
+			if err != nil {
+				return Home{}, fmt.Errorf("best sellers: %w", err)
+			}
+			if home.BestSellers, err = s.cardsByID(ctx, ids); err != nil {
+				return Home{}, err
+			}
+		case "gift_budget":
+			if home.Budgets, err = s.priceBands(ctx); err != nil {
+				return Home{}, err
+			}
+		}
+	}
 	return home, nil
+}
+
+// cardsByID returns product cards in the order of ids, skipping hidden products.
+func (s *Service) cardsByID(ctx context.Context, ids []int64) ([]ProductCard, error) {
+	out := []ProductCard{}
+	if len(ids) == 0 {
+		return out, nil
+	}
+	rows, err := s.q.ProductCardsByIDs(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("product cards: %w", err)
+	}
+	byID := map[int64]sqlc.ProductCardsByIDsRow{}
+	for _, r := range rows {
+		byID[r.ID] = r
+	}
+	for _, id := range ids {
+		r, ok := byID[id]
+		if !ok {
+			continue
+		}
+		out = append(out, ProductCard{
+			ID: r.ID, Slug: r.Slug, Name: r.Name, Tier: Tier(r.Tier), MaterialLine: r.MaterialLine,
+			CategoryName: r.CategoryName, Badges: nonNil(r.Badges), PriceKobo: r.MinPriceKobo,
+			MaxPriceKobo: r.MaxPriceKobo, CompareAtKobo: positive(r.CompareAtKobo), ColourCount: int(r.ColourCount),
+			InStock: r.TotalStock > 0, Preorder: r.PreorderAllowed, Image: r.ImageKey,
+		})
+	}
+	return out, s.applySales(ctx, out)
+}
+
+// applySales swaps in sale prices and the sale badge.
+func (s *Service) applySales(ctx context.Context, cards []ProductCard) error {
+	if len(cards) == 0 {
+		return nil
+	}
+	ids := make([]int64, len(cards))
+	for i, c := range cards {
+		ids[i] = c.ID
+	}
+	sales, err := promotions.LoadSales(ctx, s.q, ids)
+	if err != nil {
+		return err
+	}
+	for i := range cards {
+		c := &cards[i]
+		var compareAt int64
+		if c.CompareAtKobo != nil {
+			compareAt = *c.CompareAtKobo
+		}
+		low := sales.Apply(c.ID, c.PriceKobo, compareAt)
+		if low.SaleID == 0 {
+			continue
+		}
+		c.PriceKobo = low.Kobo
+		c.CompareAtKobo = positive(low.CompareAtKobo)
+		c.MaxPriceKobo = sales.Apply(c.ID, c.MaxPriceKobo, 0).Kobo
+		c.SaleBadge = low.Badge
+	}
+	return nil
 }
 
 func (s *Service) priceBands(ctx context.Context) ([]PriceBand, error) {

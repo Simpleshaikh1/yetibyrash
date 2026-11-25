@@ -13,6 +13,7 @@ import (
 
 	"yetibyrash/backend/internal/apperr"
 	"yetibyrash/backend/internal/db/sqlc"
+	"yetibyrash/backend/internal/promotions"
 )
 
 // MaxQty is the most of one option a bag can hold.
@@ -26,8 +27,10 @@ type Line struct {
 	Option        string `json:"option"` // "Espresso / M", "" for a one-option product
 	SKU           string `json:"sku"`
 	Image         string `json:"image"`
-	UnitKobo      int64  `json:"unitKobo"`
-	CompareAtKobo *int64 `json:"compareAtKobo"`
+	UnitKobo      int64  `json:"unitKobo"`      // after any sale
+	CompareAtKobo *int64 `json:"compareAtKobo"` // crossed-out price, null = none
+	SaleBadge     string `json:"saleBadge"`
+	SaleID        int64  `json:"-"`
 	Qty           int    `json:"qty"`
 	Stock         int    `json:"stock"`
 	LineKobo      int64  `json:"lineKobo"`
@@ -40,6 +43,12 @@ type Bag struct {
 	Count        int    `json:"count"` // total items, for the bag icon
 	SubtotalKobo int64  `json:"subtotalKobo"`
 	CanCheckout  bool   `json:"canCheckout"`
+	// Code is the discount code on the bag (null = none). DiscountKobo is what it takes off
+	// the items; free delivery is applied at checkout once the address is known.
+	Code         *promotions.CodeResult `json:"code"`
+	DiscountKobo int64                  `json:"discountKobo"`
+	// Gift is the free-gift offer and how close the bag is to it (null = no offer running).
+	Gift *promotions.Gift `json:"gift"`
 }
 
 type Service struct{ q *sqlc.Queries }
@@ -66,15 +75,24 @@ func (s *Service) Get(ctx context.Context, id pgtype.UUID) (Bag, error) {
 		return bag, fmt.Errorf("cart lines: %w", err)
 	}
 	bag.CanCheckout = len(rows) > 0
+	ids := make([]int64, 0, len(rows))
 	for _, r := range rows {
+		ids = append(ids, r.ProductID)
+	}
+	sales, err := promotions.LoadSales(ctx, s.q, ids)
+	if err != nil {
+		return bag, err
+	}
+	for _, r := range rows {
+		price := sales.Apply(r.ProductID, r.PriceKobo, r.CompareAtKobo.Int64)
 		l := Line{
 			VariantID: r.VariantID, ProductID: r.ProductID, Slug: r.Slug, Name: r.Name, SKU: r.Sku,
-			Image: r.ImageKey, UnitKobo: r.PriceKobo, Qty: int(r.Qty), Stock: int(r.Stock),
-			LineKobo: r.PriceKobo * int64(r.Qty),
+			Image: r.ImageKey, UnitKobo: price.Kobo, Qty: int(r.Qty), Stock: int(r.Stock),
+			LineKobo: price.Kobo * int64(r.Qty), SaleBadge: price.Badge, SaleID: price.SaleID,
 		}
 		l.Option = strings.Join(nonEmpty(r.Colour, r.Size), " / ")
-		if r.CompareAtKobo.Valid {
-			l.CompareAtKobo = &r.CompareAtKobo.Int64
+		if price.CompareAtKobo > 0 {
+			l.CompareAtKobo = &price.CompareAtKobo
 		}
 		switch {
 		case !r.Available:
@@ -92,7 +110,65 @@ func (s *Service) Get(ctx context.Context, id pgtype.UUID) (Bag, error) {
 		}
 		bag.Lines = append(bag.Lines, l)
 	}
+	if err := s.applyOffers(ctx, id, &bag); err != nil {
+		return bag, err
+	}
 	return bag, nil
+}
+
+// applyOffers adds the bag's discount code and the free-gift progress.
+func (s *Service) applyOffers(ctx context.Context, id pgtype.UUID, bag *Bag) error {
+	if bag.SubtotalKobo == 0 {
+		return nil
+	}
+	code, err := s.q.GetCartCode(ctx, id)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("cart code: %w", err)
+	}
+	if code != "" {
+		res, _, err := promotions.EvaluateCode(ctx, s.q, code, promotions.CodeCheck{SubtotalKobo: bag.SubtotalKobo}, false)
+		switch {
+		case errors.Is(err, promotions.ErrNoSuchCode):
+			res = promotions.CodeResult{Code: code, Problem: "This code has ended. Remove it to continue."}
+		case err != nil:
+			return err
+		}
+		bag.Code = &res
+		bag.DiscountKobo = res.DiscountKobo
+	}
+	bag.Gift, err = promotions.LiveGift(ctx, s.q, bag.SubtotalKobo)
+	return err
+}
+
+// ApplyCode puts a discount code on the bag. An unknown code is refused; a code the bag
+// doesn't qualify for yet is kept, and the bag says what's missing.
+func (s *Service) ApplyCode(ctx context.Context, id pgtype.UUID, code string) error {
+	code = promotions.NormalizeCode(code)
+	if code == "" {
+		return apperr.NewInvalid("code", "Enter a discount code.")
+	}
+	if !id.Valid {
+		return apperr.NewInvalid("code", "Add something to your bag first.")
+	}
+	if exists, err := s.q.CartExists(ctx, id); err != nil {
+		return err
+	} else if !exists {
+		return apperr.NewInvalid("code", "Add something to your bag first.")
+	}
+	if _, _, err := promotions.EvaluateCode(ctx, s.q, code, promotions.CodeCheck{}, false); errors.Is(err, promotions.ErrNoSuchCode) {
+		return apperr.NewInvalid("code", "We don't recognise that code. Check the spelling.")
+	} else if err != nil {
+		return err
+	}
+	return s.q.SetCartCode(ctx, sqlc.SetCartCodeParams{ID: id, DiscountCode: code})
+}
+
+// RemoveCode takes the discount code off the bag.
+func (s *Service) RemoveCode(ctx context.Context, id pgtype.UUID) error {
+	if !id.Valid {
+		return nil
+	}
+	return s.q.SetCartCode(ctx, sqlc.SetCartCodeParams{ID: id, DiscountCode: ""})
 }
 
 // Add puts qty of an option in the bag, creating the bag if needed. It returns the bag's id.

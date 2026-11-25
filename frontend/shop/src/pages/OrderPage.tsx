@@ -123,12 +123,16 @@ export function OrderPage() {
             <div className="bag-info">
               <span className="bag-name">{it.name}</span>
               {it.option && <span className="small muted">{it.option}</span>}
-              <span className="small">
-                {it.qty} × {formatNaira(it.unitKobo)}
-              </span>
+              <span className="small">{it.gift ? "Free gift" : `${it.qty} × ${formatNaira(it.unitKobo)}`}</span>
             </div>
           </div>
         ))}
+        {order.discountKobo > 0 && (
+          <div className="row-between small muted">
+            <span>Discount{order.discountCode && ` (${order.discountCode})`}</span>
+            <span>−{formatNaira(order.discountKobo)}</span>
+          </div>
+        )}
         <div className="row-between small muted">
           <span>Delivery</span>
           <span>{order.deliveryKobo === 0 ? "Free" : formatNaira(order.deliveryKobo)}</span>

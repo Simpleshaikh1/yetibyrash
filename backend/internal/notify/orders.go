@@ -70,7 +70,18 @@ func (o *Orders) Render(ctx context.Context, orderID int64, subject, body, note 
 		if it.VariantLabel != "" {
 			name += " (" + it.VariantLabel + ")"
 		}
+		if it.IsGift {
+			lines = append(lines, fmt.Sprintf("%d × %s — free gift", it.Qty, name))
+			continue
+		}
 		lines = append(lines, fmt.Sprintf("%d × %s — %s", it.Qty, name, Naira(it.UnitKobo*int64(it.Qty))))
+	}
+	if ord.DiscountKobo > 0 {
+		label := "Discount"
+		if ord.DiscountCode != "" {
+			label += " (" + ord.DiscountCode + ")"
+		}
+		lines = append(lines, label+" — −"+Naira(ord.DiscountKobo))
 	}
 	if ord.DeliveryKobo > 0 {
 		lines = append(lines, "Delivery — "+Naira(ord.DeliveryKobo))

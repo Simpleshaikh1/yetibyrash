@@ -58,6 +58,7 @@ type ProductCard struct {
 	PriceKobo     int64  `json:"priceKobo"`
 	MaxPriceKobo  int64  `json:"maxPriceKobo"`
 	CompareAtKobo *int64 `json:"compareAtKobo"` // old price when on sale, else null
+	SaleBadge     string `json:"saleBadge"`     // a running sale's badge, e.g. "20% OFF"
 	ColourCount   int    `json:"colourCount"`
 	InStock       bool   `json:"inStock"`
 	Preorder      bool   `json:"preorder"`
@@ -148,6 +149,7 @@ type ProductDetail struct {
 	Tier            Tier          `json:"tier"`
 	MaterialLine    string        `json:"materialLine"`
 	Badges          []string      `json:"badges"`
+	SaleBadge       string        `json:"saleBadge"`
 	GiftBoxAllowed  bool          `json:"giftBoxAllowed"`
 	PreorderAllowed bool          `json:"preorderAllowed"`
 	Category        CategoryRef   `json:"category"`
@@ -163,8 +165,30 @@ type ProductDetail struct {
 	LowStockThreshold int `json:"lowStockThreshold"`
 }
 
+// Home is the homepage for one tier. Sections lists the visible blocks in the order the
+// admin set; the shop draws each block from the matching field below.
 type Home struct {
-	Tagline    string        `json:"tagline"`
-	Categories []Category    `json:"categories"`
-	NewIn      []ProductCard `json:"newIn"`
+	Tagline     string        `json:"tagline"`
+	Sections    []HomeSection `json:"sections"`
+	Hero        *Banner       `json:"hero"` // null = show the plain wordmark hero
+	Categories  []Category    `json:"categories"`
+	NewIn       []ProductCard `json:"newIn"`
+	BestSellers []ProductCard `json:"bestSellers"`
+	Budgets     []PriceBand   `json:"budgets"` // gift shop by budget
+}
+
+// HomeSection is one homepage block: hero, categories, new_in, best_sellers, gift_budget or trust.
+type HomeSection struct {
+	Key   string   `json:"key"`
+	Title string   `json:"title"`
+	Lines []string `json:"lines"` // trust strip only
+}
+
+// Banner is a hero banner. Image files: /media/<image>-phone.jpg (4:5) and -wide.jpg (16:7).
+type Banner struct {
+	Eyebrow    string `json:"eyebrow"`
+	Headline   string `json:"headline"`
+	ButtonText string `json:"buttonText"`
+	ButtonLink string `json:"buttonLink"`
+	Image      string `json:"image"`
 }

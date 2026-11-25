@@ -13,6 +13,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/mail"
@@ -30,6 +31,7 @@ import (
 	"yetibyrash/backend/internal/db/sqlc"
 	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/paystack"
+	"yetibyrash/backend/internal/promotions"
 )
 
 // HoldMinutes is how long stock stays reserved for an unpaid order.
@@ -69,6 +71,14 @@ type Quote struct {
 	SubtotalKobo int64             `json:"subtotalKobo"`
 	Options      []delivery.Option `json:"options"`
 	ZoneName     string            `json:"zoneName"`
+	// The bag's discount code for this address: DiscountKobo comes off the items, and
+	// FreeDelivery makes the chosen delivery free. CodeProblem says why it doesn't apply.
+	Code         string `json:"code"`
+	DiscountKobo int64  `json:"discountKobo"`
+	FreeDelivery bool   `json:"freeDelivery"`
+	CodeProblem  string `json:"codeProblem"`
+	// Gift is the free gift going in with this order, "" for none.
+	Gift string `json:"gift"`
 }
 
 // Quote prices the bag for a destination without creating anything.
@@ -88,7 +98,22 @@ func (s *Service) Quote(ctx context.Context, cartID pgtype.UUID, stateID, lgaID 
 	if err != nil {
 		return Quote{}, err
 	}
-	return Quote{SubtotalKobo: bag.SubtotalKobo, Options: opts, ZoneName: dest.Zone.Name}, nil
+	quote := Quote{SubtotalKobo: bag.SubtotalKobo, Options: opts, ZoneName: dest.Zone.Name}
+	if bag.Gift.Qualifies() {
+		quote.Gift = bag.Gift.Name
+	}
+	if bag.Code != nil {
+		res, _, err := promotions.EvaluateCode(ctx, s.q, bag.Code.Code, promotions.CodeCheck{SubtotalKobo: bag.SubtotalKobo, ZoneID: dest.Zone.ID}, false)
+		switch {
+		case errors.Is(err, promotions.ErrNoSuchCode):
+			quote.Code, quote.CodeProblem = bag.Code.Code, "This code has ended. Remove it from your bag to continue."
+		case err != nil:
+			return Quote{}, err
+		default:
+			quote.Code, quote.DiscountKobo, quote.FreeDelivery, quote.CodeProblem = res.Code, res.DiscountKobo, res.FreeDelivery, res.Problem
+		}
+	}
+	return quote, nil
 }
 
 // Started is a checkout waiting for payment.
@@ -134,7 +159,17 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 		}
 
 		// Prices and stock come from the locked rows, never from the browser.
+		productIDs := make([]int64, 0, len(bag.Lines))
+		for _, l := range bag.Lines {
+			productIDs = append(productIDs, l.ProductID)
+		}
+		sales, err := promotions.LoadSales(ctx, q, productIDs)
+		if err != nil {
+			return err
+		}
 		var subtotal int64
+		var saleID int64
+		unit := map[int64]int64{}
 		var problems []string
 		for _, l := range bag.Lines {
 			v, ok := live[l.VariantID]
@@ -146,10 +181,58 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 			case int(v.Stock) < l.Qty:
 				problems = append(problems, fmt.Sprintf("only %d of %s left", v.Stock, label(l)))
 			}
-			subtotal += v.PriceKobo * int64(l.Qty)
+			price := sales.Apply(l.ProductID, v.PriceKobo, 0)
+			unit[l.VariantID] = price.Kobo
+			if saleID == 0 {
+				saleID = price.SaleID
+			}
+			subtotal += price.Kobo * int64(l.Qty)
 		}
 		if len(problems) > 0 {
 			return &apperr.Conflict{Code: "stock_changed", Message: "Your bag changed: " + strings.Join(problems, "; ") + ". Update your bag and try again."}
+		}
+
+		// Discount code: checked again here with the address and customer, and its use
+		// reserved under a lock so a limited code can't be overused.
+		var discount int64
+		freeDelivery := false
+		code := ""
+		if bag.Code != nil {
+			res, codeID, err := promotions.EvaluateCode(ctx, q, bag.Code.Code, promotions.CodeCheck{
+				SubtotalKobo: subtotal, ZoneID: dest.Zone.ID, Phone: in.Phone, Email: in.Email,
+			}, true)
+			if errors.Is(err, promotions.ErrNoSuchCode) {
+				return &apperr.Conflict{Code: "code_ended", Message: "Your discount code has ended. Remove it from your bag to continue."}
+			}
+			if err != nil {
+				return err
+			}
+			if res.Problem != "" {
+				return &apperr.Conflict{Code: "code_not_valid", Message: res.Problem + " Remove the code from your bag to continue without it."}
+			}
+			if err := q.UseCode(ctx, codeID); err != nil {
+				return err
+			}
+			code, discount, freeDelivery = res.Code, res.DiscountKobo, res.FreeDelivery
+		}
+
+		// Free gift: measured on the items after sale prices, before the code.
+		gift, err := promotions.LiveGift(ctx, q, subtotal)
+		if err != nil {
+			return err
+		}
+		if gift.Qualifies() {
+			g, err := q.LockGift(ctx, gift.OfferID)
+			if err != nil {
+				return err
+			}
+			if g.Given >= g.Quantity {
+				gift = nil // the last one went a moment ago
+			} else if err := q.GiveGift(ctx, gift.OfferID); err != nil {
+				return err
+			}
+		} else {
+			gift = nil
 		}
 
 		opts, err := s.delivery.Options(ctx, dest, subtotal)
@@ -165,18 +248,27 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 		if opt == nil {
 			return apperr.NewInvalid("speed", "That delivery option isn't available for your address. Choose another.")
 		}
-		total = subtotal + opt.FeeKobo
+		if freeDelivery {
+			discount += opt.FeeKobo
+		}
+		total = subtotal - discount + opt.FeeKobo
 		from, _ := time.Parse(time.DateOnly, opt.From)
 		to, _ := time.Parse(time.DateOnly, opt.To)
 
-		order, err = q.InsertOrder(ctx, sqlc.InsertOrderParams{
+		params := sqlc.InsertOrderParams{
 			CartID: cartID, PaymentReference: ref,
 			CustomerName: in.Name, CustomerPhone: in.Phone, CustomerEmail: in.Email,
 			StateName: dest.StateName, LgaName: dest.LgaName, Street: in.Street, Landmark: in.Landmark,
 			ZoneName: dest.Zone.Name, Speed: sqlc.DeliverySpeed(in.Speed),
 			SubtotalKobo: subtotal, DeliveryKobo: opt.FeeKobo, TotalKobo: total,
 			ExpectedFrom: pgtype.Date{Time: from, Valid: true}, ExpectedTo: pgtype.Date{Time: to, Valid: true},
-		})
+			DiscountKobo: discount, DiscountCode: code,
+			PromotionID: pgtype.Int8{Int64: saleID, Valid: saleID != 0},
+		}
+		if gift != nil {
+			params.GiftOfferID = pgtype.Int8{Int64: gift.OfferID, Valid: true}
+		}
+		order, err = q.InsertOrder(ctx, params)
 		if err != nil {
 			return err
 		}
@@ -184,12 +276,23 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 			v := live[l.VariantID]
 			if err := q.InsertOrderItem(ctx, sqlc.InsertOrderItemParams{
 				OrderID: order.ID, VariantID: l.VariantID, ProductName: l.Name, ProductSlug: l.Slug,
-				VariantLabel: l.Option, Sku: v.Sku, ImageKey: l.Image, UnitKobo: v.PriceKobo, Qty: int32(l.Qty),
+				VariantLabel: l.Option, Sku: v.Sku, ImageKey: l.Image, UnitKobo: unit[l.VariantID], Qty: int32(l.Qty),
 			}); err != nil {
 				return err
 			}
 			// Reserve the stock now, so two people can't pay for the last one.
 			if err := q.ChangeStock(ctx, sqlc.ChangeStockParams{ID: l.VariantID, Delta: int32(-l.Qty)}); err != nil {
+				return err
+			}
+		}
+		if gift != nil {
+			if err := q.InsertOrderItem(ctx, sqlc.InsertOrderItemParams{
+				OrderID: order.ID, VariantID: gift.VariantID, ProductName: gift.Name, ProductSlug: gift.Slug,
+				VariantLabel: gift.Option, Sku: gift.SKU, ImageKey: gift.Image, UnitKobo: 0, Qty: 1, IsGift: true,
+			}); err != nil {
+				return err
+			}
+			if err := q.ChangeStock(ctx, sqlc.ChangeStockParams{ID: gift.VariantID, Delta: -1}); err != nil {
 				return err
 			}
 		}

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "./auth";
 import { Layout } from "./components/Layout";
 import { PageHeader, Panel } from "./components/ui";
 import { CataloguePage } from "./pages/CataloguePage";
+import { ContentPage } from "./pages/ContentPage";
 import { DeliveryPage } from "./pages/DeliveryPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MessagesPage } from "./pages/MessagesPage";
@@ -13,6 +14,7 @@ import { OrdersPage } from "./pages/OrdersPage";
 import { ComingSoonPage, OverviewPage } from "./pages/OverviewPage";
 import { ProductEditorPage } from "./pages/ProductEditorPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { PromotionsPage } from "./pages/PromotionsPage";
 import { StaffPage } from "./pages/StaffPage";
 
 export function App() {
@@ -42,8 +44,8 @@ function Gate() {
         <Route path="orders" element={<Allow perm="orders"><OrdersPage /></Allow>} />
         <Route path="orders/:id" element={<Allow perm="orders"><OrderDetailPage /></Allow>} />
         <Route path="messages" element={<Allow perm="catalogue"><MessagesPage /></Allow>} />
-        <Route path="content" element={<ComingSoonPage title="Homepage and content" milestone="M5" />} />
-        <Route path="promotions" element={<ComingSoonPage title="Promotions" milestone="M5" />} />
+        <Route path="content" element={<Allow perm="content"><ContentPage /></Allow>} />
+        <Route path="promotions" element={<Allow perm="promotions"><PromotionsPage /></Allow>} />
         <Route path="reviews" element={<ComingSoonPage title="Reviews" milestone="M6" />} />
         <Route path="delivery" element={<Allow perm="catalogue"><DeliveryPage /></Allow>} />
         <Route path="*" element={<ComingSoonPage title="Page not found" milestone="—" />} />
