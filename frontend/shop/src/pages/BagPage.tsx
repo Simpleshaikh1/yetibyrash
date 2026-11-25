@@ -29,7 +29,7 @@ export function BagPage() {
 
   if (bag.lines.length === 0) {
     return (
-      <div className="stack">
+      <div className="stack narrow-page">
         <h1 className="page-title">Your bag</h1>
         <p className="status-msg">Your bag is empty.</p>
         <Link to="/shop" className="btn primary">
@@ -43,7 +43,7 @@ export function BagPage() {
   const toFree = freeOver !== null ? freeOver - bag.subtotalKobo : null;
 
   return (
-    <div className="stack">
+    <div className="stack narrow-page">
       <div className="row-between">
         <h1 className="page-title">Your bag</h1>
         <span className="muted">

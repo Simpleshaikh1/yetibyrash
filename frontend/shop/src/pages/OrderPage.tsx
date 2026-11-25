@@ -48,7 +48,7 @@ export function OrderPage() {
 
   if (error) {
     return (
-      <div className="stack">
+      <div className="stack narrow-page">
         <ErrorMessage error={error} />
         <Link to="/" className="btn outline">
           Go to the homepage
@@ -61,7 +61,7 @@ export function OrderPage() {
   const paid = paidStatuses.has(order.status);
 
   return (
-    <div className="stack">
+    <div className="stack narrow-page">
       <div className="confirm-head">
         {paid ? (
           <>

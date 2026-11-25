@@ -83,102 +83,119 @@ function Product({ p }: { p: ProductDetail }) {
         <Icon name="back" />
       </Link>
 
-      <Photo name={p.name} imageKey={p.images[photoIndex]?.key} large>
-        <Badge product={{ ...p, compareAtKobo: compareAt }} />
-      </Photo>
-      {p.images.length > 1 && (
-        <div className="thumbs" role="list" aria-label="More photos">
-          {p.images.map((im, i) => (
-            <button key={im.id} className={i === photoIndex ? "thumb on" : "thumb"} aria-label={`Photo ${i + 1} of ${p.images.length}`} aria-pressed={i === photoIndex} onClick={() => setPhotoIndex(i)}>
-              <img src={photoUrl(im.key, 400)} alt="" loading="lazy" />
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="stack-xs">
-        <span className="small muted">
-          {p.parent ? `${p.parent.name} · ` : ""}
-          {p.category.name}
-        </span>
-        <h1 className="product-name">{p.name}</h1>
-        {p.materialLine && <span className="muted">{p.materialLine}</span>}
-        <div className="row-start baseline">
-          <span className="price-large">{formatNaira(price)}</span>
-          {compareAt && <s className="muted">{formatNaira(compareAt)}</s>}
-          {lowStock && <span className="urgent">Only {variant!.stock} left, ships from Lagos</span>}
-        </div>
-      </div>
-
-      {hasColours && (
-        <div className="stack-xs">
-          <span className="label">
-            Colour: <b>{colour}</b>
-          </span>
-          <div className="swatches">
-            {p.colours.map((c) => (
-              <button
-                key={c.name}
-                className={c.name === colour ? "swatch on" : "swatch"}
-                style={{ background: c.hex }}
-                aria-label={c.name}
-                aria-pressed={c.name === colour}
-                onClick={() => setColour(c.name)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {p.sizeSet && (
-        <div className="stack-xs">
-          <span className="label">Size ({p.sizeSet.name.replace(/ sizes?/i, "").replace(/[()]/g, "")})</span>
-          <div className="sizes" style={{ gridTemplateColumns: `repeat(${Math.min(p.sizeSet.sizes.length, 5)}, minmax(0, 1fr))` }}>
-            {p.sizeSet.sizes.map((s) => {
-              const stock = stockFor(s.label);
-              const unavailable = stock === undefined || stock === 0;
-              return (
-                <button
-                  key={s.label}
-                  className={[s.label === size ? "on" : "", stock === 0 ? "out" : ""].join(" ")}
-                  disabled={unavailable}
-                  aria-pressed={s.label === size}
-                  onClick={() => setSize(s.label)}
-                >
-                  {s.label}
+      <div className="product-layout">
+        <div className="product-media stack-sm">
+          <Photo name={p.name} imageKey={p.images[photoIndex]?.key} large>
+            <Badge product={{ ...p, compareAtKobo: compareAt }} />
+          </Photo>
+          {p.images.length > 1 && (
+            <div className="thumbs" role="list" aria-label="More photos">
+              {p.images.map((im, i) => (
+                <button key={im.id} className={i === photoIndex ? "thumb on" : "thumb"} aria-label={`Photo ${i + 1} of ${p.images.length}`} aria-pressed={i === photoIndex} onClick={() => setPhotoIndex(i)}>
+                  <img src={photoUrl(im.key, 400)} alt="" loading="lazy" />
                 </button>
-              );
-            })}
-          </div>
-          {size && <span className="small muted">{p.sizeSet.sizes.find((s) => s.label === size)?.measurement}</span>}
-        </div>
-      )}
-
-      <div className="info-box">
-        <DeliveryLine />
-        <span>
-          <b>Payment:</b> Paystack, card, transfer or USSD
-        </span>
-        <span>
-          <b>Returns:</b> {p.returnRule}
-        </span>
-        <span>
-          <b>Packaging:</b> Yetibyrash pouch, discreet outer bag
-        </span>
-      </div>
-
-      {p.description && <p>{p.description}</p>}
-
-      {p.details.length > 0 && (
-        <dl className="details">
-          {p.details.map((d) => (
-            <div key={d.label}>
-              <dt>{d.label}</dt>
-              <dd>{d.value}</dd>
+              ))}
             </div>
-          ))}
-        </dl>
-      )}
+          )}
+        </div>
+
+        <div className="product-info stack">
+          <div className="stack-xs">
+            <span className="small muted">
+              {p.parent ? `${p.parent.name} · ` : ""}
+              {p.category.name}
+            </span>
+            <h1 className="product-name">{p.name}</h1>
+            {p.materialLine && <span className="muted">{p.materialLine}</span>}
+            <div className="row-start baseline">
+              <span className="price-large">{formatNaira(price)}</span>
+              {compareAt && <s className="muted">{formatNaira(compareAt)}</s>}
+              {lowStock && <span className="urgent">Only {variant!.stock} left, ships from Lagos</span>}
+            </div>
+          </div>
+
+          {hasColours && (
+            <div className="stack-xs">
+              <span className="label">
+                Colour: <b>{colour}</b>
+              </span>
+              <div className="swatches">
+                {p.colours.map((c) => (
+                  <button
+                    key={c.name}
+                    className={c.name === colour ? "swatch on" : "swatch"}
+                    style={{ background: c.hex }}
+                    aria-label={c.name}
+                    aria-pressed={c.name === colour}
+                    onClick={() => setColour(c.name)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {p.sizeSet && (
+            <div className="stack-xs">
+              <span className="label">Size ({p.sizeSet.name.replace(/ sizes?/i, "").replace(/[()]/g, "")})</span>
+              <div className="sizes" style={{ gridTemplateColumns: `repeat(${Math.min(p.sizeSet.sizes.length, 5)}, minmax(0, 1fr))` }}>
+                {p.sizeSet.sizes.map((s) => {
+                  const stock = stockFor(s.label);
+                  const unavailable = stock === undefined || stock === 0;
+                  return (
+                    <button
+                      key={s.label}
+                      className={[s.label === size ? "on" : "", stock === 0 ? "out" : ""].join(" ")}
+                      disabled={unavailable}
+                      aria-pressed={s.label === size}
+                      onClick={() => setSize(s.label)}
+                    >
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+              {size && <span className="small muted">{p.sizeSet.sizes.find((s) => s.label === size)?.measurement}</span>}
+            </div>
+          )}
+
+          <div className="info-box">
+            <DeliveryLine />
+            <span>
+              <b>Payment:</b> Paystack, card, transfer or USSD
+            </span>
+            <span>
+              <b>Returns:</b> {p.returnRule}
+            </span>
+            <span>
+              <b>Packaging:</b> Yetibyrash pouch, discreet outer bag
+            </span>
+          </div>
+
+          {p.description && <p>{p.description}</p>}
+
+          {p.details.length > 0 && (
+            <dl className="details">
+              {p.details.map((d) => (
+                <div key={d.label}>
+                  <dt>{d.label}</dt>
+                  <dd>{d.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          <div className="buybar">
+            {addError && (
+              <span className="urgent small center" role="alert">
+                {addError}
+              </span>
+            )}
+            <button className="btn primary" disabled={needsSize || soldOut || !variant || adding} onClick={addToBag}>
+              {adding ? "Adding…" : buttonLabel}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {p.pairings.length > 0 && (
         <section className="stack-sm">
@@ -186,17 +203,6 @@ function Product({ p }: { p: ProductDetail }) {
           <ProductGrid items={p.pairings} />
         </section>
       )}
-
-      <div className="buybar">
-        {addError && (
-          <span className="urgent small center" role="alert">
-            {addError}
-          </span>
-        )}
-        <button className="btn primary" disabled={needsSize || soldOut || !variant || adding} onClick={addToBag}>
-          {adding ? "Adding…" : buttonLabel}
-        </button>
-      </div>
     </div>
   );
 }

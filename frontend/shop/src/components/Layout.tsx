@@ -23,12 +23,22 @@ export function Layout() {
     <div className="app">
       {site.data && site.data.announcements.length > 0 && <AnnouncementBar items={site.data.announcements} />}
       <header className="topbar">
-        <Link to="/shop" className="icon-btn" aria-label="Browse categories">
+        <Link to="/shop" className="icon-btn menu-btn" aria-label="Browse categories">
           <Icon name="menu" />
         </Link>
         <Link to="/" className="wordmark">
           Yetibyrash
         </Link>
+        {/* Laptops and wider: the main links sit in the header instead of the bottom bar. */}
+        <nav className="topnav" aria-label="Main">
+          {nav
+            .filter((n) => n.to !== "/bag")
+            .map((n) => (
+              <NavLink key={n.to} to={n.to} end={n.end}>
+                {n.label}
+              </NavLink>
+            ))}
+        </nav>
         <Link to="/bag" className="icon-btn bag-icon" aria-label={bagLabel}>
           <Icon name="bag" />
           {count > 0 && (
@@ -42,7 +52,7 @@ export function Layout() {
         <Outlet />
         {site.data && <Footer pages={site.data.pages} />}
       </main>
-      <nav className="bottomnav" aria-label="Main">
+      <nav className="bottomnav" aria-label="Main (phone)">
         {nav.map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} aria-label={n.to === "/bag" ? bagLabel : undefined}>
             <Icon name={n.icon} />
