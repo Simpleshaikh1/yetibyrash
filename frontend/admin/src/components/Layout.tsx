@@ -10,7 +10,7 @@ const nav: { to: string; label: string; perm?: Permission; soon?: string }[] = [
   { to: "/content", label: "Homepage and content", perm: "catalogue", soon: "M5" },
   { to: "/promotions", label: "Promotions", perm: "catalogue", soon: "M5" },
   { to: "/reviews", label: "Reviews", perm: "products", soon: "M6" },
-  { to: "/delivery", label: "Delivery", perm: "catalogue", soon: "M3" },
+  { to: "/delivery", label: "Delivery", perm: "catalogue" },
   { to: "/staff", label: "Staff", perm: "staff" },
 ];
 

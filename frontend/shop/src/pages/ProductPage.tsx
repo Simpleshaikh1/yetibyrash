@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatNaira, photoUrl } from "@yetibyrash/ui";
-import { api, type ProductDetail, type Variant } from "../api";
+import { api, ApiError, shortDate, type ProductDetail, type Variant } from "../api";
+import { useBag } from "../bag";
 import { Badge } from "../components/Badge";
 import { Icon } from "../components/Icon";
 import { Photo } from "../components/Photo";
@@ -37,6 +38,10 @@ function Product({ p }: { p: ProductDetail }) {
   const [colour, setColour] = useState(firstColour);
   const [size, setSize] = useState("");
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const { setBag } = useBag();
+  const navigate = useNavigate();
 
   const variant: Variant | undefined = useMemo(
     () => p.variants.find((v) => v.colour === (hasColours ? colour : "") && (hasSizes ? v.size === size : true)),
@@ -53,9 +58,24 @@ function Product({ p }: { p: ProductDetail }) {
   const soldOut = variant !== undefined && variant.stock === 0;
   const lowStock = variant !== undefined && variant.stock > 0 && variant.stock <= p.lowStockThreshold;
 
+  // Pre-orders aren't taken yet, so a sold-out option can't go in the bag.
   let buttonLabel = `Add to bag · ${formatNaira(price)}`;
   if (needsSize) buttonLabel = "Choose a size";
-  else if (soldOut) buttonLabel = p.preorderAllowed ? `Pre-order · ${formatNaira(price)}` : "Sold out";
+  else if (soldOut || !variant) buttonLabel = "Sold out";
+
+  const addToBag = async () => {
+    if (!variant) return;
+    setAdding(true);
+    setAddError(null);
+    try {
+      setBag(await api.addToBag(variant.id, 1));
+      navigate("/bag");
+    } catch (e) {
+      setAddError(e instanceof ApiError ? e.message : "Couldn't add to your bag. Please try again.");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <div className="stack product">
@@ -116,7 +136,7 @@ function Product({ p }: { p: ProductDetail }) {
           <div className="sizes" style={{ gridTemplateColumns: `repeat(${Math.min(p.sizeSet.sizes.length, 5)}, minmax(0, 1fr))` }}>
             {p.sizeSet.sizes.map((s) => {
               const stock = stockFor(s.label);
-              const unavailable = stock === undefined || (stock === 0 && !p.preorderAllowed);
+              const unavailable = stock === undefined || stock === 0;
               return (
                 <button
                   key={s.label}
@@ -135,6 +155,7 @@ function Product({ p }: { p: ProductDetail }) {
       )}
 
       <div className="info-box">
+        <DeliveryLine />
         <span>
           <b>Payment:</b> Paystack, card, transfer or USSD
         </span>
@@ -167,11 +188,41 @@ function Product({ p }: { p: ProductDetail }) {
       )}
 
       <div className="buybar">
-        <button className="btn primary" disabled title="The bag arrives in the next update (M3)">
-          {buttonLabel}
+        {addError && (
+          <span className="urgent small center" role="alert">
+            {addError}
+          </span>
+        )}
+        <button className="btn primary" disabled={needsSize || soldOut || !variant || adding} onClick={addToBag}>
+          {adding ? "Adding…" : buttonLabel}
         </button>
-        <span className="small muted center">The bag and checkout arrive in milestone M3.</span>
       </div>
     </div>
+  );
+}
+
+// "Order within 3h 20m, get it in Lagos by Thu 26 Nov", from the real delivery rules.
+function DeliveryLine() {
+  const { data } = useApi("delivery", (s) => api.delivery(s));
+  if (!data?.lagos) return null;
+  const lagos = `get it in Lagos ${data.lagos.from === data.lagos.to ? "on" : "by"} ${shortDate(data.lagos.to)}`;
+  let lead = "Order now";
+  if (data.cutoffAt) {
+    const mins = Math.max(0, Math.round((new Date(data.cutoffAt).getTime() - Date.now()) / 60000));
+    lead = mins >= 60 ? `Order within ${Math.floor(mins / 60)}h ${mins % 60}m` : `Order within ${mins}m`;
+  }
+  const others = data.zones.filter((z) => z.name !== "Lagos").map((z) => z.days);
+  const range = others.length ? `${Math.min(...others.map((d) => Number(d.split("–")[0])))}–${Math.max(...others.map((d) => Number(d.split("–").pop())))}` : "";
+  return (
+    <>
+      <span style={{ color: "var(--ink)" }}>
+        <b>{lead}</b>, {lagos}
+      </span>
+      {range && (
+        <span>
+          <b>Other states:</b> {range} working days
+        </span>
+      )}
+    </>
   );
 }

@@ -15,6 +15,10 @@ type Config struct {
 	MediaDir    string // folder for uploaded product photos (local storage)
 	// AdminOrigins are the addresses the admin app is served from; admin changes from anywhere else are refused.
 	AdminOrigins []string
+	// ShopURL is the shop's public address; Paystack sends shoppers back to <ShopURL>/order/<number>.
+	ShopURL string
+	// Paystack keys. With no secret key in development, a built-in test payment page is used instead.
+	PaystackSecretKey string
 }
 
 // Load reads backend/.env (if present) and then the environment.
@@ -27,6 +31,9 @@ func Load() Config {
 		DatabaseURL:  get("DATABASE_URL", "postgres://yetibyrash:yetibyrash@localhost:5432/yetibyrash?sslmode=disable"),
 		MediaDir:     get("MEDIA_DIR", "var/media"),
 		AdminOrigins: list(get("ADMIN_ORIGINS", "http://localhost:5174,http://127.0.0.1:5174")),
+		ShopURL:      get("SHOP_URL", "http://localhost:5173"),
+
+		PaystackSecretKey: get("PAYSTACK_SECRET_KEY", ""),
 	}
 }
 

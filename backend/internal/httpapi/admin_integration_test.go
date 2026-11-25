@@ -17,6 +17,7 @@ import (
 	"testing"
 
 	"yetibyrash/backend/internal/catalog"
+	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/httpapi"
 	"yetibyrash/backend/internal/media"
 	"yetibyrash/backend/internal/staff"
@@ -92,6 +93,7 @@ func TestAdminEndToEnd(t *testing.T) {
 		Staff:          staffSvc,
 		Admin:          catalog.NewAdminService(pool, storage),
 		Media:          storage.Handler(),
+		Delivery:       delivery.NewService(pool),
 		AllowedOrigins: []string{adminOrigin},
 	}))
 	defer srv.Close()
@@ -280,6 +282,35 @@ func TestAdminEndToEnd(t *testing.T) {
 	}
 	if code, body := owner.do("PUT", "/api/admin/v1/staff/"+itoa(int(ownerID)), map[string]any{"name": "Owner", "role": "owner", "active": false}, adminOrigin); code != 409 || errCode(body) != "last_owner" {
 		t.Fatalf("deactivate last owner = %d %v", code, body)
+	}
+
+	// Delivery screen: load, change Lagos's free-delivery amount, refuse half-set express.
+	code, dl := owner.do("GET", "/api/admin/v1/delivery", nil, "")
+	if code != 200 || len(dl["zones"].([]any)) != 5 || len(dl["states"].([]any)) != 37 {
+		t.Fatalf("delivery = %d, zones=%v", code, len(dl["zones"].([]any)))
+	}
+	lagosZone := dl["zones"].([]any)[0].(map[string]any)
+	lagosZone["freeOverKobo"] = 5000000
+	if code, body := owner.do("PUT", "/api/admin/v1/delivery/zones/"+itoa(int(lagosZone["id"].(float64))), lagosZone, adminOrigin); code != 204 {
+		t.Fatalf("update zone = %d %v", code, body)
+	}
+	lagosZone["expressDays"] = nil
+	if code, body := owner.do("PUT", "/api/admin/v1/delivery/zones/"+itoa(int(lagosZone["id"].(float64))), lagosZone, adminOrigin); code != 400 || body["error"].(map[string]any)["field"] != "express" {
+		t.Fatalf("half-set express = %d %v", code, body)
+	}
+	if code, body := owner.do("PUT", "/api/admin/v1/delivery/settings", map[string]any{"expressCutoff": "14:30", "dispatchDays": []int{1, 2, 3, 4, 5}}, adminOrigin); code != 204 {
+		t.Fatalf("update settings = %d %v", code, body)
+	}
+	if code, body := owner.do("POST", "/api/admin/v1/delivery/holidays", map[string]any{"day": "2026-12-25", "name": "Christmas Day"}, adminOrigin); code != 204 {
+		t.Fatalf("add holiday = %d %v", code, body)
+	}
+	_, dl = owner.do("GET", "/api/admin/v1/delivery", nil, "")
+	settings := dl["settings"].(map[string]any)
+	if dl["zones"].([]any)[0].(map[string]any)["freeOverKobo"].(float64) != 5000000 || settings["expressCutoff"] != "14:30" || len(dl["holidays"].([]any)) != 1 {
+		t.Fatalf("delivery after edits = %v / %v / %v", dl["zones"].([]any)[0], settings, dl["holidays"])
+	}
+	if code, _ := editor.do("GET", "/api/admin/v1/delivery", nil, ""); code != 403 {
+		t.Fatalf("content editor opening delivery = %d, want 403", code)
 	}
 
 	// Sign out ends the session.

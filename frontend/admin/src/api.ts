@@ -80,6 +80,25 @@ export type Setup = { categories: SetupCategory[]; sizeSets: SizeSet[]; colours:
 
 export type StaffAccount = Member & { active: boolean; lastLoginAt: string | null; createdAt: string };
 
+export type Zone = {
+  id: number;
+  name: string;
+  standardFeeKobo: number;
+  standardDaysMin: number;
+  standardDaysMax: number;
+  expressFeeKobo: number | null;
+  expressDays: number | null;
+  freeOverKobo: number | null;
+};
+export type DeliveryLga = { id: number; name: string; express: boolean; delivered: boolean };
+export type DeliveryState = { id: number; name: string; zoneId: number; zoneName: string; lgas: DeliveryLga[] };
+export type DeliveryAdmin = {
+  zones: Zone[];
+  states: DeliveryState[];
+  settings: { expressCutoff: string; dispatchDays: number[] };
+  holidays: { day: string; name: string }[];
+};
+
 /** An error from the API, with the message to show and (for form errors) the field it's about. */
 export class ApiError extends Error {
   constructor(
@@ -153,6 +172,16 @@ export const api = {
     body: { parentId?: number | null; name: string; defaultSizeSetId: number | null; returnRule: string; showOnHome: boolean; position: number },
   ) => request<{ id: number }>(id ? "PUT" : "POST", id ? `/categories/${id}` : "/categories", body),
   saveCategoryFields: (id: number, fields: { id: number; label: string }[]) => request<void>("PUT", `/categories/${id}/fields`, { fields }),
+
+  delivery: (signal?: AbortSignal) => request<DeliveryAdmin>("GET", "/delivery", undefined, signal),
+  updateZone: (z: Zone) => request<void>("PUT", `/delivery/zones/${z.id}`, z),
+  setStateZone: (stateId: number, zoneId: number) => request<void>("PUT", `/delivery/states/${stateId}`, { zoneId }),
+  addLga: (stateId: number, l: Omit<DeliveryLga, "id">) => request<{ id: number }>("POST", `/delivery/states/${stateId}/lgas`, l),
+  updateLga: (l: DeliveryLga) => request<void>("PUT", `/delivery/lgas/${l.id}`, l),
+  deleteLga: (id: number) => request<void>("DELETE", `/delivery/lgas/${id}`),
+  updateDeliverySettings: (s: { expressCutoff: string; dispatchDays: number[] }) => request<void>("PUT", "/delivery/settings", s),
+  addHoliday: (h: { day: string; name: string }) => request<void>("POST", "/delivery/holidays", h),
+  deleteHoliday: (day: string) => request<void>("DELETE", `/delivery/holidays/${day}`),
 
   staff: (signal?: AbortSignal) => request<{ staff: StaffAccount[] }>("GET", "/staff", undefined, signal).then((r) => r.staff),
   createStaff: (body: { email: string; name: string; role: Role; password: string }) => request<{ id: number }>("POST", "/staff", body),

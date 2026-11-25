@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
+import { useBag } from "../bag";
 import { Icon, type IconName } from "./Icon";
 
 const nav: { to: string; label: string; icon: IconName; end?: boolean }[] = [
@@ -11,6 +12,8 @@ const nav: { to: string; label: string; icon: IconName; end?: boolean }[] = [
 
 // Every shop screen: header with the wordmark and bag, page content, bottom navigation.
 export function Layout() {
+  const { count } = useBag();
+  const bagLabel = count ? `Bag, ${count} ${count === 1 ? "item" : "items"}` : "Bag";
   return (
     <div className="app">
       <header className="topbar">
@@ -20,8 +23,13 @@ export function Layout() {
         <Link to="/" className="wordmark">
           Yetibyrash
         </Link>
-        <Link to="/bag" className="icon-btn" aria-label="Bag">
+        <Link to="/bag" className="icon-btn bag-icon" aria-label={bagLabel}>
           <Icon name="bag" />
+          {count > 0 && (
+            <span className="count" aria-hidden="true">
+              {count}
+            </span>
+          )}
         </Link>
       </header>
       <main className="page">
@@ -29,7 +37,7 @@ export function Layout() {
       </main>
       <nav className="bottomnav" aria-label="Main">
         {nav.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end}>
+          <NavLink key={n.to} to={n.to} end={n.end} aria-label={n.to === "/bag" ? bagLabel : undefined}>
             <Icon name={n.icon} />
             {n.label}
           </NavLink>

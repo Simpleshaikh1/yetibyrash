@@ -32,7 +32,16 @@ The API waits up to 30 seconds for the database, so starting everything at once 
 
 **Admin sign-in:** the seed also creates a development owner account if there are no staff yet. Its email and password are `DEV_OWNER_EMAIL` and `DEV_OWNER_PASSWORD` in `backend/.env.example`. Sign in at http://localhost:5174/admin/. Add other staff on the **Staff** screen.
 
-**Photos** you upload are saved in `backend/var/media` (ignored by git) and served at `/media/...`.
+**Photos:** upload them in the admin (Products → a product → 2. Photos → + Add photos). They're saved in `backend/var/media` (ignored by git) and served at `/media/...`.
+
+**Payments:** without Paystack keys, checkout uses a built-in **test payment page** (development only; no money moves). To use Paystack's test mode instead, put your keys in `backend/.env` (never in `.env.example`, which is committed):
+
+```
+PAYSTACK_SECRET_KEY=sk_test_...
+SHOP_URL=http://localhost:5173
+```
+
+Paystack can't reach your computer's webhook during local development; the order page still confirms payment by asking Paystack when the shopper returns. Unpaid orders release their stock after 30 minutes.
 
 **First owner on a real server** (no seed there):
 
@@ -41,6 +50,17 @@ cd backend; go run ./cmd/createstaff -email you@example.com -name "Your Name" -r
 ```
 
 It asks for the password on the next line, so it never lands in your shell history.
+
+## Show the running shop to someone else
+
+Everything runs on your computer, so `localhost` links only work for you. A Cloudflare quick tunnel gives a temporary public `https://….trycloudflare.com` link to your running shop (free, no account).
+
+1. Install once: `winget install --id Cloudflare.cloudflared`
+2. Start everything as usual, then in a new terminal: `cloudflared tunnel --url http://localhost:5173`
+3. Copy the `https://….trycloudflare.com` address it prints and put it in `backend/.env` as `SHOP_URL=https://….trycloudflare.com`, then rerun the `api`. (Without this, the test payment sends them back to *your* localhost.)
+4. Send them the link. Press Ctrl+C in that terminal to stop sharing. The address changes every time.
+
+Anyone with the link can use the shop while it's running, so stop the tunnel when they're done. Avoid sharing the admin this way.
 
 ## Without GoLand
 

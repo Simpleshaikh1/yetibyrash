@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"yetibyrash/backend/internal/cart"
+	"yetibyrash/backend/internal/delivery"
+	"yetibyrash/backend/internal/orders"
+	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/staff"
 )
 
@@ -24,7 +28,14 @@ type Deps struct {
 	Media   http.Handler // serves /media/<key> (product photos)
 	Version string
 
-	SecureCookies  bool     // send the admin cookie over HTTPS only (production)
+	Cart     *cart.Service
+	Delivery *delivery.Service
+	Orders   *orders.Service
+	// PaystackSecret verifies webhooks. DevPay is set only in development without Paystack keys.
+	PaystackSecret string
+	DevPay         *paystack.DevProvider
+
+	SecureCookies  bool     // send cookies over HTTPS only (production)
 	AllowedOrigins []string // admin app addresses allowed to make changes
 }
 
@@ -40,6 +51,10 @@ func NewRouter(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/v1/products", productsHandler(d.Catalog))
 	mux.HandleFunc("GET /api/v1/products/{slug}", productHandler(d.Catalog))
 
+	if d.Orders != nil {
+		registerShopOrders(mux, d)
+	}
+
 	if d.Media != nil {
 		mux.Handle("GET /media/", d.Media)
 	}
@@ -54,6 +69,26 @@ func NewRouter(d Deps) http.Handler {
 	})
 
 	return recoverPanics(logRequests(mux))
+}
+
+func registerShopOrders(mux *http.ServeMux, d Deps) {
+	h := &shopHandlers{
+		cart: d.Cart, delivery: d.Delivery, orders: d.Orders,
+		paystackSecret: d.PaystackSecret, devPay: d.DevPay, secureCookies: d.SecureCookies,
+	}
+	mux.HandleFunc("GET /api/v1/cart", h.getCart)
+	mux.HandleFunc("POST /api/v1/cart/items", h.addToCart)
+	mux.HandleFunc("PUT /api/v1/cart/items/{variantId}", h.setCartQty)
+	mux.HandleFunc("GET /api/v1/locations", h.locations)
+	mux.HandleFunc("GET /api/v1/delivery", h.deliverySummary)
+	mux.HandleFunc("POST /api/v1/checkout/quote", h.quote)
+	mux.HandleFunc("POST /api/v1/checkout", h.checkout)
+	mux.HandleFunc("GET /api/v1/orders/{number}", h.order)
+	mux.HandleFunc("POST /api/webhooks/paystack", h.paystackWebhook)
+	if d.DevPay != nil {
+		mux.HandleFunc("GET /api/v1/dev/pay/{reference}", h.devPayForm)
+		mux.HandleFunc("POST /api/v1/dev/pay/{reference}", h.devPaySubmit)
+	}
 }
 
 func registerAdmin(mux *http.ServeMux, d Deps) {
@@ -94,6 +129,19 @@ func registerAdmin(mux *http.ServeMux, d Deps) {
 	mux.Handle("POST "+p+"/categories", catalogue(h.saveCategory))
 	mux.Handle("PUT "+p+"/categories/{id}", catalogue(h.saveCategory))
 	mux.Handle("PUT "+p+"/categories/{id}/fields", catalogue(h.saveCategoryFields))
+
+	if d.Delivery != nil {
+		dh := adminDeliveryHandlers{d: d.Delivery}
+		mux.Handle("GET "+p+"/delivery", catalogue(dh.get))
+		mux.Handle("PUT "+p+"/delivery/zones/{id}", catalogue(dh.updateZone))
+		mux.Handle("PUT "+p+"/delivery/states/{id}", catalogue(dh.setStateZone))
+		mux.Handle("POST "+p+"/delivery/states/{id}/lgas", catalogue(dh.addLga))
+		mux.Handle("PUT "+p+"/delivery/lgas/{id}", catalogue(dh.updateLga))
+		mux.Handle("DELETE "+p+"/delivery/lgas/{id}", catalogue(dh.deleteLga))
+		mux.Handle("PUT "+p+"/delivery/settings", catalogue(dh.updateSettings))
+		mux.Handle("POST "+p+"/delivery/holidays", catalogue(dh.addHoliday))
+		mux.Handle("DELETE "+p+"/delivery/holidays/{day}", catalogue(dh.deleteHoliday))
+	}
 
 	mux.Handle("GET "+p+"/staff", owner(a.listStaff))
 	mux.Handle("POST "+p+"/staff", owner(a.createStaff))

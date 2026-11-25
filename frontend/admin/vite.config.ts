@@ -12,6 +12,8 @@ export default defineConfig({
     port: 5174,
     strictPort: true,
     hmr: { host: "127.0.0.1" }, // live reload connects over IPv4 even when the page is opened as localhost
+    // Lets a Cloudflare quick tunnel (https://….trycloudflare.com) show the admin to someone else. See README.
+    allowedHosts: [".trycloudflare.com"],
     proxy: {
       "/api": "http://localhost:8090",
       "/media": "http://localhost:8090",

@@ -11,6 +11,97 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DeliverySpeed string
+
+const (
+	DeliverySpeedStandard DeliverySpeed = "standard"
+	DeliverySpeedExpress  DeliverySpeed = "express"
+)
+
+func (e *DeliverySpeed) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DeliverySpeed(s)
+	case string:
+		*e = DeliverySpeed(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DeliverySpeed: %T", src)
+	}
+	return nil
+}
+
+type NullDeliverySpeed struct {
+	DeliverySpeed DeliverySpeed `json:"delivery_speed"`
+	Valid         bool          `json:"valid"` // Valid is true if DeliverySpeed is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDeliverySpeed) Scan(value interface{}) error {
+	if value == nil {
+		ns.DeliverySpeed, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DeliverySpeed.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDeliverySpeed) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DeliverySpeed), nil
+}
+
+type OrderStatus string
+
+const (
+	OrderStatusPendingPayment OrderStatus = "pending_payment"
+	OrderStatusPaid           OrderStatus = "paid"
+	OrderStatusPacked         OrderStatus = "packed"
+	OrderStatusShipped        OrderStatus = "shipped"
+	OrderStatusOutForDelivery OrderStatus = "out_for_delivery"
+	OrderStatusDelivered      OrderStatus = "delivered"
+	OrderStatusAbandoned      OrderStatus = "abandoned"
+	OrderStatusCancelled      OrderStatus = "cancelled"
+	OrderStatusRefunded       OrderStatus = "refunded"
+)
+
+func (e *OrderStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = OrderStatus(s)
+	case string:
+		*e = OrderStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for OrderStatus: %T", src)
+	}
+	return nil
+}
+
+type NullOrderStatus struct {
+	OrderStatus OrderStatus `json:"order_status"`
+	Valid       bool        `json:"valid"` // Valid is true if OrderStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullOrderStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.OrderStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.OrderStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullOrderStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.OrderStatus), nil
+}
+
 type ProductStatus string
 
 const (
@@ -150,6 +241,19 @@ type AuditLog struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type Cart struct {
+	ID        pgtype.UUID        `json:"id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
+type CartItem struct {
+	CartID    pgtype.UUID        `json:"cart_id"`
+	VariantID int64              `json:"variant_id"`
+	Qty       int32              `json:"qty"`
+	AddedAt   pgtype.Timestamptz `json:"added_at"`
+}
+
 type Category struct {
 	ID               int64              `json:"id"`
 	ParentID         pgtype.Int8        `json:"parent_id"`
@@ -173,6 +277,94 @@ type Colour struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Hex  string `json:"hex"`
+}
+
+type DeliverySetting struct {
+	ID            int32       `json:"id"`
+	ExpressCutoff pgtype.Time `json:"express_cutoff"`
+	DispatchDays  []int32     `json:"dispatch_days"`
+}
+
+type DeliveryZone struct {
+	ID              int64       `json:"id"`
+	Name            string      `json:"name"`
+	Position        int32       `json:"position"`
+	StandardFeeKobo int64       `json:"standard_fee_kobo"`
+	StandardDaysMin int32       `json:"standard_days_min"`
+	StandardDaysMax int32       `json:"standard_days_max"`
+	ExpressFeeKobo  pgtype.Int8 `json:"express_fee_kobo"`
+	ExpressDays     pgtype.Int4 `json:"express_days"`
+	FreeOverKobo    pgtype.Int8 `json:"free_over_kobo"`
+}
+
+type Holiday struct {
+	Day  pgtype.Date `json:"day"`
+	Name string      `json:"name"`
+}
+
+type Lga struct {
+	ID        int64  `json:"id"`
+	StateID   int64  `json:"state_id"`
+	Name      string `json:"name"`
+	Delivered bool   `json:"delivered"`
+	Express   bool   `json:"express"`
+}
+
+type Order struct {
+	ID               int64              `json:"id"`
+	Number           string             `json:"number"`
+	Status           OrderStatus        `json:"status"`
+	CartID           pgtype.UUID        `json:"cart_id"`
+	PaymentReference string             `json:"payment_reference"`
+	CustomerName     string             `json:"customer_name"`
+	CustomerPhone    string             `json:"customer_phone"`
+	CustomerEmail    string             `json:"customer_email"`
+	StateName        string             `json:"state_name"`
+	LgaName          string             `json:"lga_name"`
+	Street           string             `json:"street"`
+	Landmark         string             `json:"landmark"`
+	ZoneName         string             `json:"zone_name"`
+	Speed            DeliverySpeed      `json:"speed"`
+	SubtotalKobo     int64              `json:"subtotal_kobo"`
+	DeliveryKobo     int64              `json:"delivery_kobo"`
+	TotalKobo        int64              `json:"total_kobo"`
+	ExpectedFrom     pgtype.Date        `json:"expected_from"`
+	ExpectedTo       pgtype.Date        `json:"expected_to"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	PaidAt           pgtype.Timestamptz `json:"paid_at"`
+}
+
+type OrderEvent struct {
+	ID        int64              `json:"id"`
+	OrderID   int64              `json:"order_id"`
+	Status    OrderStatus        `json:"status"`
+	Note      string             `json:"note"`
+	StaffID   pgtype.Int8        `json:"staff_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type OrderItem struct {
+	ID           int64  `json:"id"`
+	OrderID      int64  `json:"order_id"`
+	VariantID    int64  `json:"variant_id"`
+	ProductName  string `json:"product_name"`
+	ProductSlug  string `json:"product_slug"`
+	VariantLabel string `json:"variant_label"`
+	Sku          string `json:"sku"`
+	ImageKey     string `json:"image_key"`
+	UnitKobo     int64  `json:"unit_kobo"`
+	Qty          int32  `json:"qty"`
+}
+
+type Payment struct {
+	ID         int64              `json:"id"`
+	Reference  string             `json:"reference"`
+	OrderID    pgtype.Int8        `json:"order_id"`
+	AmountKobo int64              `json:"amount_kobo"`
+	Channel    string             `json:"channel"`
+	Outcome    string             `json:"outcome"`
+	Payload    []byte             `json:"payload"`
+	ReceivedAt pgtype.Timestamptz `json:"received_at"`
 }
 
 type PriceBand struct {
@@ -255,6 +447,12 @@ type StaffSession struct {
 	StaffID   int64              `json:"staff_id"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+}
+
+type State struct {
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	ZoneID int64  `json:"zone_id"`
 }
 
 type StoreSetting struct {

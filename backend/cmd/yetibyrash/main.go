@@ -12,11 +12,15 @@ import (
 	"syscall"
 	"time"
 
+	"yetibyrash/backend/internal/cart"
 	"yetibyrash/backend/internal/catalog"
 	"yetibyrash/backend/internal/config"
 	"yetibyrash/backend/internal/db"
+	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/httpapi"
 	"yetibyrash/backend/internal/media"
+	"yetibyrash/backend/internal/orders"
+	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/staff"
 )
 
@@ -58,6 +62,25 @@ func run() error {
 		return err
 	}
 
+	// Payments: real Paystack when a secret key is set; in development without keys,
+	// a built-in test payment page so checkout can be tried end to end.
+	var pay paystack.Provider
+	var devPay *paystack.DevProvider
+	switch {
+	case cfg.PaystackSecretKey != "":
+		pay = paystack.NewClient(cfg.PaystackSecretKey)
+	case cfg.IsProduction():
+		return errors.New("PAYSTACK_SECRET_KEY must be set in production")
+	default:
+		devPay = paystack.NewDevProvider()
+		pay = devPay
+		slog.Warn("no PAYSTACK_SECRET_KEY: using the built-in test payment page (development only)")
+	}
+
+	deliverySvc := delivery.NewService(pool)
+	orderSvc := orders.NewService(pool, deliverySvc, pay, cfg.ShopURL)
+	go orderSvc.RunReleaser(ctx) // releases stock of orders unpaid after 30 minutes
+
 	srv := &http.Server{
 		Addr: cfg.HTTPAddr,
 		Handler: httpapi.NewRouter(httpapi.Deps{
@@ -66,6 +89,11 @@ func run() error {
 			Staff:          staff.NewService(pool),
 			Admin:          catalog.NewAdminService(pool, photos),
 			Media:          photos.Handler(),
+			Cart:           cart.NewService(pool),
+			Delivery:       deliverySvc,
+			Orders:         orderSvc,
+			PaystackSecret: cfg.PaystackSecretKey,
+			DevPay:         devPay,
 			Version:        version,
 			SecureCookies:  cfg.IsProduction(),
 			AllowedOrigins: cfg.AdminOrigins,

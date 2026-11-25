@@ -822,6 +822,14 @@ input[type="checkbox"] {
   color: var(--ink-secondary);
 }
 
+.row-between-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 14.5px;
+}
+
 /* ---------- Sign-in ---------- */
 
 .login {

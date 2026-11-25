@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "./auth";
 import { Layout } from "./components/Layout";
 import { PageHeader, Panel } from "./components/ui";
 import { CataloguePage } from "./pages/CataloguePage";
+import { DeliveryPage } from "./pages/DeliveryPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ComingSoonPage, OverviewPage } from "./pages/OverviewPage";
 import { ProductEditorPage } from "./pages/ProductEditorPage";
@@ -39,7 +40,7 @@ function Gate() {
         <Route path="content" element={<ComingSoonPage title="Homepage and content" milestone="M5" />} />
         <Route path="promotions" element={<ComingSoonPage title="Promotions" milestone="M5" />} />
         <Route path="reviews" element={<ComingSoonPage title="Reviews" milestone="M6" />} />
-        <Route path="delivery" element={<ComingSoonPage title="Delivery" milestone="M3" />} />
+        <Route path="delivery" element={<Allow perm="catalogue"><DeliveryPage /></Allow>} />
         <Route path="*" element={<ComingSoonPage title="Page not found" milestone="—" />} />
       </Route>
     </Routes>
