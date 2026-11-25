@@ -28,6 +28,8 @@ Open the `Yetibyrash` folder as the project, then pick **Yetibyrash (all)** in t
 
 The API waits up to 30 seconds for the database, so starting everything at once is fine.
 
+**Example products:** run **seed demo products** once (or `cd backend; go run ./cmd/seed -reset`) to fill the shop with 14 example products. `-reset` replaces any products already there. It refuses to run when `APP_ENV=production`.
+
 ## Without GoLand
 
 ```powershell
@@ -47,6 +49,8 @@ cd frontend; npm run dev:shop
 ```powershell
 cd backend; go test ./...
 ```
+
+The catalogue tests create a throwaway database in the local Postgres, so start Docker first (they are skipped if Postgres isn't running).
 
 ## Settings
 

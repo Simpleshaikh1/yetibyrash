@@ -26,7 +26,7 @@ func TestHealth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			router := NewRouter(Deps{DB: fakeDB{err: tt.dbErr}, Version: "test"})
+			router := NewRouter(Deps{DB: fakeDB{err: tt.dbErr}, Catalog: &fakeCatalog{}, Version: "test"})
 			rec := httptest.NewRecorder()
 			router.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/health", nil))
 
@@ -45,7 +45,7 @@ func TestHealth(t *testing.T) {
 }
 
 func TestUnknownAPIPathReturnsJSON404(t *testing.T) {
-	router := NewRouter(Deps{DB: fakeDB{}, Version: "test"})
+	router := NewRouter(Deps{DB: fakeDB{}, Catalog: &fakeCatalog{}, Version: "test"})
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/nope", nil))
 

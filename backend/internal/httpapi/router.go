@@ -15,6 +15,7 @@ type Pinger interface {
 // Deps is everything the handlers need. It grows as milestones add features.
 type Deps struct {
 	DB      Pinger
+	Catalog CatalogService
 	Version string
 }
 
@@ -23,6 +24,12 @@ func NewRouter(d Deps) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /api/health", healthHandler(d))
+
+	// Shop catalogue
+	mux.HandleFunc("GET /api/v1/home", homeHandler(d.Catalog))
+	mux.HandleFunc("GET /api/v1/categories", categoriesHandler(d.Catalog))
+	mux.HandleFunc("GET /api/v1/products", productsHandler(d.Catalog))
+	mux.HandleFunc("GET /api/v1/products/{slug}", productHandler(d.Catalog))
 
 	// Unknown /api paths get a JSON 404 instead of Go's plain-text one.
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {

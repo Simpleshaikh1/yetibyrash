@@ -7,6 +7,8 @@ export default defineConfig({
   base: "/admin/",
   plugins: [react()],
   server: {
+    // IPv4 loopback: Node alone picks IPv6 (::1), which some browsers on Windows can't reach via 127.0.0.1.
+    host: "127.0.0.1",
     port: 5174,
     strictPort: true,
     proxy: {

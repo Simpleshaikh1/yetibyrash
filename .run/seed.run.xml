@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="seed demo products" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="Yetibyrash" />
+    <working_directory value="$PROJECT_DIR$/backend" />
+    <parameters value="-reset" />
+    <kind value="PACKAGE" />
+    <package value="yetibyrash/backend/cmd/seed" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/backend/cmd/seed/main.go" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"yetibyrash/backend/internal/catalog"
 	"yetibyrash/backend/internal/config"
 	"yetibyrash/backend/internal/db"
 	"yetibyrash/backend/internal/httpapi"
@@ -52,7 +53,11 @@ func run() error {
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
-		Handler:           httpapi.NewRouter(httpapi.Deps{DB: pool, Version: version}),
+		Handler: httpapi.NewRouter(httpapi.Deps{
+			DB:      pool,
+			Catalog: catalog.NewService(pool),
+			Version: version,
+		}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,
