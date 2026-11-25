@@ -25,6 +25,7 @@ export type ProductCard = {
   colourCount: number;
   inStock: boolean;
   preorder: boolean;
+  image: string; // main photo key, "" if none
 };
 
 export type Colour = { name: string; hex: string };

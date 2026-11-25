@@ -3,6 +3,7 @@ node_modules/
 dist/
 backend/bin/
 backend/tmp/
+backend/var/
 
 # Secrets
 .env

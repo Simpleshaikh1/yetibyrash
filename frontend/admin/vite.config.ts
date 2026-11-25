@@ -11,8 +11,10 @@ export default defineConfig({
     host: "127.0.0.1",
     port: 5174,
     strictPort: true,
+    hmr: { host: "127.0.0.1" }, // live reload connects over IPv4 even when the page is opened as localhost
     proxy: {
       "/api": "http://localhost:8090",
+      "/media": "http://localhost:8090",
     },
   },
 });

@@ -96,6 +96,60 @@ func (ns NullProductTier) Value() (driver.Value, error) {
 	return string(ns.ProductTier), nil
 }
 
+type StaffRole string
+
+const (
+	StaffRoleOwner         StaffRole = "owner"
+	StaffRoleManager       StaffRole = "manager"
+	StaffRolePacker        StaffRole = "packer"
+	StaffRoleContentEditor StaffRole = "content_editor"
+)
+
+func (e *StaffRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = StaffRole(s)
+	case string:
+		*e = StaffRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for StaffRole: %T", src)
+	}
+	return nil
+}
+
+type NullStaffRole struct {
+	StaffRole StaffRole `json:"staff_role"`
+	Valid     bool      `json:"valid"` // Valid is true if StaffRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStaffRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.StaffRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.StaffRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStaffRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.StaffRole), nil
+}
+
+type AuditLog struct {
+	ID        int64              `json:"id"`
+	StaffID   pgtype.Int8        `json:"staff_id"`
+	Action    string             `json:"action"`
+	Entity    string             `json:"entity"`
+	EntityID  pgtype.Int8        `json:"entity_id"`
+	Details   []byte             `json:"details"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type Category struct {
 	ID               int64              `json:"id"`
 	ParentID         pgtype.Int8        `json:"parent_id"`
@@ -152,14 +206,16 @@ type ProductDetail struct {
 }
 
 type ProductImage struct {
-	ID         int64       `json:"id"`
-	ProductID  int64       `json:"product_id"`
-	ColourID   pgtype.Int8 `json:"colour_id"`
-	StorageKey string      `json:"storage_key"`
-	Kind       string      `json:"kind"`
-	Position   int32       `json:"position"`
-	Width      int32       `json:"width"`
-	Height     int32       `json:"height"`
+	ID         int64              `json:"id"`
+	ProductID  int64              `json:"product_id"`
+	ColourID   pgtype.Int8        `json:"colour_id"`
+	StorageKey string             `json:"storage_key"`
+	Kind       string             `json:"kind"`
+	Position   int32              `json:"position"`
+	Width      int32              `json:"width"`
+	Height     int32              `json:"height"`
+	Warnings   []string           `json:"warnings"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProductPairing struct {
@@ -181,6 +237,24 @@ type SizeSet struct {
 	Name         string             `json:"name"`
 	MeasureLabel string             `json:"measure_label"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type Staff struct {
+	ID           int64              `json:"id"`
+	Email        string             `json:"email"`
+	Name         string             `json:"name"`
+	PasswordHash string             `json:"password_hash"`
+	Role         StaffRole          `json:"role"`
+	Active       bool               `json:"active"`
+	LastLoginAt  pgtype.Timestamptz `json:"last_login_at"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type StaffSession struct {
+	TokenHash []byte             `json:"token_hash"`
+	StaffID   int64              `json:"staff_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
 }
 
 type StoreSetting struct {

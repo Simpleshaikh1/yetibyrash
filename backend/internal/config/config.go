@@ -12,6 +12,9 @@ type Config struct {
 	Env         string // "development" or "production"
 	HTTPAddr    string // address the API listens on, e.g. ":8090"
 	DatabaseURL string
+	MediaDir    string // folder for uploaded product photos (local storage)
+	// AdminOrigins are the addresses the admin app is served from; admin changes from anywhere else are refused.
+	AdminOrigins []string
 }
 
 // Load reads backend/.env (if present) and then the environment.
@@ -19,9 +22,11 @@ type Config struct {
 func Load() Config {
 	loadDotEnv(".env")
 	return Config{
-		Env:         get("APP_ENV", "development"),
-		HTTPAddr:    get("HTTP_ADDR", ":8090"),
-		DatabaseURL: get("DATABASE_URL", "postgres://yetibyrash:yetibyrash@localhost:5432/yetibyrash?sslmode=disable"),
+		Env:          get("APP_ENV", "development"),
+		HTTPAddr:     get("HTTP_ADDR", ":8090"),
+		DatabaseURL:  get("DATABASE_URL", "postgres://yetibyrash:yetibyrash@localhost:5432/yetibyrash?sslmode=disable"),
+		MediaDir:     get("MEDIA_DIR", "var/media"),
+		AdminOrigins: list(get("ADMIN_ORIGINS", "http://localhost:5174,http://127.0.0.1:5174")),
 	}
 }
 
@@ -32,6 +37,16 @@ func get(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func list(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 // loadDotEnv sets KEY=VALUE lines from path as environment variables,

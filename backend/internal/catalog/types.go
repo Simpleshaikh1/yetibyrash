@@ -61,6 +61,7 @@ type ProductCard struct {
 	ColourCount   int    `json:"colourCount"`
 	InStock       bool   `json:"inStock"`
 	Preorder      bool   `json:"preorder"`
+	Image         string `json:"image"` // main photo key, "" if none; files are /media/<key>-<400|800|1600>.jpg
 }
 
 type ProductFilter struct {
@@ -140,23 +141,23 @@ type Image struct {
 }
 
 type ProductDetail struct {
-	ID              int64        `json:"id"`
-	Slug            string       `json:"slug"`
-	Name            string       `json:"name"`
-	Description     string       `json:"description"`
-	Tier            Tier         `json:"tier"`
-	MaterialLine    string       `json:"materialLine"`
-	Badges          []string     `json:"badges"`
-	GiftBoxAllowed  bool         `json:"giftBoxAllowed"`
-	PreorderAllowed bool         `json:"preorderAllowed"`
-	Category        CategoryRef  `json:"category"`
-	Parent          *CategoryRef `json:"parent"`
-	ReturnRule      string       `json:"returnRule"`
-	Colours         []Colour     `json:"colours"` // in the order the shop shows them
-	SizeSet         *SizeSet     `json:"sizeSet"` // null for one-size products
-	Variants        []Variant    `json:"variants"`
-	Details         []Detail     `json:"details"`
-	Images          []Image      `json:"images"`
+	ID              int64         `json:"id"`
+	Slug            string        `json:"slug"`
+	Name            string        `json:"name"`
+	Description     string        `json:"description"`
+	Tier            Tier          `json:"tier"`
+	MaterialLine    string        `json:"materialLine"`
+	Badges          []string      `json:"badges"`
+	GiftBoxAllowed  bool          `json:"giftBoxAllowed"`
+	PreorderAllowed bool          `json:"preorderAllowed"`
+	Category        CategoryRef   `json:"category"`
+	Parent          *CategoryRef  `json:"parent"`
+	ReturnRule      string        `json:"returnRule"`
+	Colours         []Colour      `json:"colours"` // in the order the shop shows them
+	SizeSet         *SizeSet      `json:"sizeSet"` // null for one-size products
+	Variants        []Variant     `json:"variants"`
+	Details         []Detail      `json:"details"`
+	Images          []Image       `json:"images"`
 	Pairings        []ProductCard `json:"pairings"`
 	// LowStockThreshold: show "Only X left" when a variant's stock is at or below this.
 	LowStockThreshold int `json:"lowStockThreshold"`

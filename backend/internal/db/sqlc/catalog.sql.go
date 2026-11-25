@@ -205,7 +205,9 @@ func (q *Queries) ListFilterSizes(ctx context.Context, categorySlug pgtype.Text)
 
 const listPairedProducts = `-- name: ListPairedProducts :many
 SELECT p.id, p.slug, p.name, p.tier, p.material_line,
-       MIN(v.price_kobo)::bigint AS min_price_kobo
+       MIN(v.price_kobo)::bigint AS min_price_kobo,
+       COALESCE((SELECT im.storage_key FROM product_images im WHERE im.product_id = p.id
+                 ORDER BY im.position, im.id LIMIT 1), '')::text AS image_key
 FROM product_pairings pp
 JOIN products p ON p.id = pp.paired_id AND p.status = 'visible'
 JOIN variants v ON v.product_id = p.id AND v.active
@@ -221,6 +223,7 @@ type ListPairedProductsRow struct {
 	Tier         ProductTier `json:"tier"`
 	MaterialLine string      `json:"material_line"`
 	MinPriceKobo int64       `json:"min_price_kobo"`
+	ImageKey     string      `json:"image_key"`
 }
 
 // "Complete the look" cards for a product.
@@ -240,6 +243,7 @@ func (q *Queries) ListPairedProducts(ctx context.Context, productID int64) ([]Li
 			&i.Tier,
 			&i.MaterialLine,
 			&i.MinPriceKobo,
+			&i.ImageKey,
 		); err != nil {
 			return nil, err
 		}
@@ -399,6 +403,8 @@ WITH filtered AS (
 )
 SELECT id, slug, name, tier, material_line, badges, preorder_allowed, category_name,
        min_price_kobo, max_price_kobo, compare_at_kobo, colour_count, total_stock,
+       COALESCE((SELECT im.storage_key FROM product_images im WHERE im.product_id = filtered.id
+                 ORDER BY im.position, im.id LIMIT 1), '')::text AS image_key, -- '' = no photo yet
        COUNT(*) OVER ()::int AS total_count
 FROM filtered
 WHERE ($1::bigint IS NULL OR min_price_kobo >= $1::bigint)
@@ -437,6 +443,7 @@ type ListProductsRow struct {
 	CompareAtKobo   int64       `json:"compare_at_kobo"`
 	ColourCount     int32       `json:"colour_count"`
 	TotalStock      int32       `json:"total_stock"`
+	ImageKey        string      `json:"image_key"`
 	TotalCount      int32       `json:"total_count"`
 }
 
@@ -476,6 +483,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			&i.CompareAtKobo,
 			&i.ColourCount,
 			&i.TotalStock,
+			&i.ImageKey,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

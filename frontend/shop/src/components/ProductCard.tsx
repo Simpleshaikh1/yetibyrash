@@ -11,7 +11,7 @@ export function ProductCard({ p }: { p: Card }) {
 
   return (
     <Link to={`/p/${p.slug}`} className="card">
-      <Photo name={p.name}>
+      <Photo name={p.name} imageKey={p.image || undefined}>
         <Badge product={p} />
       </Photo>
       <span className="card-meta">

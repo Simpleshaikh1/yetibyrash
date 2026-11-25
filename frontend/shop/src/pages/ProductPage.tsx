@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { formatNaira } from "@yetibyrash/ui";
+import { formatNaira, photoUrl } from "@yetibyrash/ui";
 import { api, type ProductDetail, type Variant } from "../api";
 import { Badge } from "../components/Badge";
 import { Icon } from "../components/Icon";
@@ -36,6 +36,7 @@ function Product({ p }: { p: ProductDetail }) {
   const firstColour = p.colours.find((c) => p.variants.some((v) => v.colour === c.name && v.stock > 0))?.name ?? p.colours[0]?.name ?? "";
   const [colour, setColour] = useState(firstColour);
   const [size, setSize] = useState("");
+  const [photoIndex, setPhotoIndex] = useState(0);
 
   const variant: Variant | undefined = useMemo(
     () => p.variants.find((v) => v.colour === (hasColours ? colour : "") && (hasSizes ? v.size === size : true)),
@@ -62,9 +63,18 @@ function Product({ p }: { p: ProductDetail }) {
         <Icon name="back" />
       </Link>
 
-      <Photo name={p.name} large>
+      <Photo name={p.name} imageKey={p.images[photoIndex]?.key} large>
         <Badge product={{ ...p, compareAtKobo: compareAt }} />
       </Photo>
+      {p.images.length > 1 && (
+        <div className="thumbs" role="list" aria-label="More photos">
+          {p.images.map((im, i) => (
+            <button key={im.id} className={i === photoIndex ? "thumb on" : "thumb"} aria-label={`Photo ${i + 1} of ${p.images.length}`} aria-pressed={i === photoIndex} onClick={() => setPhotoIndex(i)}>
+              <img src={photoUrl(im.key, 400)} alt="" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="stack-xs">
         <span className="small muted">

@@ -30,6 +30,18 @@ The API waits up to 30 seconds for the database, so starting everything at once 
 
 **Example products:** run **seed demo products** once (or `cd backend; go run ./cmd/seed -reset`) to fill the shop with 14 example products. `-reset` replaces any products already there. It refuses to run when `APP_ENV=production`.
 
+**Admin sign-in:** the seed also creates a development owner account if there are no staff yet. Its email and password are `DEV_OWNER_EMAIL` and `DEV_OWNER_PASSWORD` in `backend/.env.example`. Sign in at http://localhost:5174/admin/. Add other staff on the **Staff** screen.
+
+**Photos** you upload are saved in `backend/var/media` (ignored by git) and served at `/media/...`.
+
+**First owner on a real server** (no seed there):
+
+```powershell
+cd backend; go run ./cmd/createstaff -email you@example.com -name "Your Name" -role owner
+```
+
+It asks for the password on the next line, so it never lands in your shell history.
+
 ## Without GoLand
 
 ```powershell

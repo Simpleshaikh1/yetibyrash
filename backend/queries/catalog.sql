@@ -47,6 +47,8 @@ WITH filtered AS (
 )
 SELECT id, slug, name, tier, material_line, badges, preorder_allowed, category_name,
        min_price_kobo, max_price_kobo, compare_at_kobo, colour_count, total_stock,
+       COALESCE((SELECT im.storage_key FROM product_images im WHERE im.product_id = filtered.id
+                 ORDER BY im.position, im.id LIMIT 1), '')::text AS image_key, -- '' = no photo yet
        COUNT(*) OVER ()::int AS total_count
 FROM filtered
 WHERE (sqlc.narg(min_kobo)::bigint IS NULL OR min_price_kobo >= sqlc.narg(min_kobo)::bigint)
@@ -130,7 +132,9 @@ ORDER BY position;
 -- name: ListPairedProducts :many
 -- "Complete the look" cards for a product.
 SELECT p.id, p.slug, p.name, p.tier, p.material_line,
-       MIN(v.price_kobo)::bigint AS min_price_kobo
+       MIN(v.price_kobo)::bigint AS min_price_kobo,
+       COALESCE((SELECT im.storage_key FROM product_images im WHERE im.product_id = p.id
+                 ORDER BY im.position, im.id LIMIT 1), '')::text AS image_key
 FROM product_pairings pp
 JOIN products p ON p.id = pp.paired_id AND p.status = 'visible'
 JOIN variants v ON v.product_id = p.id AND v.active

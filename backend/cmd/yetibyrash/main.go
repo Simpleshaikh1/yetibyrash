@@ -16,6 +16,8 @@ import (
 	"yetibyrash/backend/internal/config"
 	"yetibyrash/backend/internal/db"
 	"yetibyrash/backend/internal/httpapi"
+	"yetibyrash/backend/internal/media"
+	"yetibyrash/backend/internal/staff"
 )
 
 // version is set at build time: go build -ldflags "-X main.version=1.2.3"
@@ -51,16 +53,26 @@ func run() error {
 		return err
 	}
 
+	photos, err := media.NewLocalStorage(cfg.MediaDir)
+	if err != nil {
+		return err
+	}
+
 	srv := &http.Server{
-		Addr:              cfg.HTTPAddr,
+		Addr: cfg.HTTPAddr,
 		Handler: httpapi.NewRouter(httpapi.Deps{
-			DB:      pool,
-			Catalog: catalog.NewService(pool),
-			Version: version,
+			DB:             pool,
+			Catalog:        catalog.NewService(pool),
+			Staff:          staff.NewService(pool),
+			Admin:          catalog.NewAdminService(pool, photos),
+			Media:          photos.Handler(),
+			Version:        version,
+			SecureCookies:  cfg.IsProduction(),
+			AllowedOrigins: cfg.AdminOrigins,
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       15 * time.Second,
-		WriteTimeout:      30 * time.Second,
+		ReadTimeout:       60 * time.Second,
+		WriteTimeout:      60 * time.Second, // photo uploads on slow mobile data need time
 		IdleTimeout:       60 * time.Second,
 	}
 

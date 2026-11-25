@@ -105,6 +105,7 @@ func (s *Service) ListProducts(ctx context.Context, f ProductFilter) (ProductLis
 			ColourCount:   int(r.ColourCount),
 			InStock:       r.TotalStock > 0,
 			Preorder:      r.PreorderAllowed,
+			Image:         r.ImageKey,
 		})
 	}
 
@@ -211,6 +212,7 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 		d.Pairings = append(d.Pairings, ProductCard{
 			ID: x.ID, Slug: x.Slug, Name: x.Name, Tier: Tier(x.Tier), MaterialLine: x.MaterialLine,
 			Badges: []string{}, PriceKobo: x.MinPriceKobo, MaxPriceKobo: x.MinPriceKobo, InStock: true,
+			Image: x.ImageKey,
 		})
 	}
 
