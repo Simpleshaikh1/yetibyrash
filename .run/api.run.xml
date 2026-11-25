@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="api" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="Yetibyrash" />
+    <working_directory value="$PROJECT_DIR$/backend" />
+    <kind value="PACKAGE" />
+    <package value="yetibyrash/backend/cmd/yetibyrash" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/backend/cmd/yetibyrash/main.go" />
+    <method v="2" />
+  </configuration>
+</component>

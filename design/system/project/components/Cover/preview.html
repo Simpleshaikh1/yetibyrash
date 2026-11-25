@@ -1,0 +1,37 @@
+<!-- @dsCard height=288 -->
+<div class="cover">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500&family=Jost:wght@400&display=swap">
+  <style>
+    body{margin:0;background:var(--ground-shop)}
+    .cover{position:relative;width:960px;height:288px;background:var(--ground-shop);overflow:hidden}
+    svg{position:absolute;inset:0}
+    .ink{fill:var(--ink)}.petal{fill:var(--surface-petal)}.rose{fill:var(--accent-rose-gold)}.soft{fill:var(--surface-soft)}.cream{fill:var(--surface-card)}.deep{fill:var(--accent-rose)}
+    .thread{stroke:var(--accent-rose-light);stroke-width:2;fill:none}
+    .name{position:absolute;left:48px;bottom:56px;max-width:440px;font-family:var(--font-display);font-weight:500;font-size:76px;line-height:.95;color:var(--ink)}
+    .tag{position:absolute;left:48px;bottom:30px;font-family:var(--font-body);font-size:14px;color:var(--ink-secondary)}
+  </style>
+  <svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+    <!-- blocks: ink 200×288 slab, surface-petal 280×144, accent-rose-gold 144×144, surface-soft 136×144 (sides from space-6 multiples) -->
+    <!-- arrangement: one tall espresso slab bleeding top and bottom with two satellites stacked right, a soft square closing the corner -->
+    <!-- pattern: discs on a thread; the brand's bead-string order tracker is the one shape only Yetibyrash has -->
+    <!-- steps and radii: bead pitch 32 (space-6), discs r 9 and 12 (done and current bead), block corners radius-hero 24 -->
+    <rect class="ink" x="512" y="-24" width="200" height="336" rx="24"/>
+    <rect class="petal" x="736" y="0" width="248" height="136" rx="24"/>
+    <rect class="rose" x="736" y="160" width="112" height="152" rx="24"/>
+    <rect class="soft" x="872" y="160" width="112" height="152" rx="24"/>
+    <path class="thread" d="M540 214 Q 640 250 760 214 T 960 214"/>
+    <circle class="cream" cx="556" cy="219" r="9"/>
+    <circle class="cream" cx="588" cy="228" r="9"/>
+    <circle class="petal" cx="620" cy="234" r="9"/>
+    <circle class="petal" cx="652" cy="236" r="9"/>
+    <circle class="cream" cx="684" cy="234" r="12"/>
+    <circle class="deep" cx="716" cy="228" r="9"/>
+    <circle class="ink" cx="760" cy="214" r="9"/>
+    <circle class="ink" cx="792" cy="204" r="9"/>
+    <circle class="cream" cx="824" cy="198" r="12"/>
+    <circle class="ink" cx="900" cy="214" r="9"/>
+    <circle class="deep" cx="932" cy="222" r="9"/>
+  </svg>
+  <div class="name">Yetibyrash</div>
+  <div class="tag">Elegance meets affordability.</div>
+</div>

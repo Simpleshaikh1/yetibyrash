@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 960px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}<span style="{{ n.countStyle }}">{{ n.count }}</span></a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div><span style="font-size: 14px; color: #76574F;">Tuesday 24 November</span><h1 style="margin: 0; font-size: 30px; font-weight: 600;">Good morning</h1></div>
+      <div style="display: flex; gap: 10px;">
+        <a href="CmsProductEdit.dc.html" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #3A2420; color: #FFF8F5; display: flex; align-items: center; font-size: 15px; font-weight: 500;">+ Add product</a>
+        <a href="CmsOrders.dc.html" style="height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #E3D2CC; background: #FFFFFF; color: #2B1C19; display: flex; align-items: center; font-size: 15px;">Open orders board</a>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+      <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #5A3E38;">Sales today</span><b style="font-size: 30px; font-weight: 600; font-variant-numeric: tabular-nums;">₦184,500</b><span style="font-size: 13px; color: #2F6B4F;">12 paid orders</span></div>
+      <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #5A3E38;">Waiting to pack</span><b style="font-size: 30px; font-weight: 600;">7</b><span style="font-size: 13px; color: #8A5A10;">2 waiting over 24 hours</span></div>
+      <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #5A3E38;">On the way</span><b style="font-size: 30px; font-weight: 600;">15</b><span style="font-size: 13px; color: #5A3E38;">4 out for delivery today</span></div>
+      <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #5A3E38;">Low stock</span><b style="font-size: 30px; font-weight: 600;">5</b><span style="font-size: 13px; color: #A3302A;">1 sold out</span></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; flex: 1; min-height: 0;">
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 600;">Needs your attention</h2>
+        <a href="CmsOrders.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; background: #FDF3E6; color: #2B1C19;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #C98A1F; flex: none;"></span><span style="flex: 1;"><b style="font-weight: 600;">YB-20391, YB-20397</b> paid yesterday, still not packed</span><span style="color: #9A4F5B;">Open ›</span></a>
+        <a href="CmsProductEdit.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; background: #FBEAE8; color: #2B1C19;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #A3302A; flex: none;"></span><span style="flex: 1;"><b style="font-weight: 600;">Ribbed lounge joggers · Blush / L</b> is sold out</span><span style="color: #9A4F5B;">Restock ›</span></a>
+        <a href="CmsProducts.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; background: #FDF3E6; color: #2B1C19;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #C98A1F; flex: none;"></span><span style="flex: 1;">4 more options have 3 or fewer left</span><span style="color: #9A4F5B;">View ›</span></a>
+        <a href="CmsContent.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; background: #F4EFEE; color: #2B1C19;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #76574F; flex: none;"></span><span style="flex: 1;">"Detty December" banner goes live on 1 Dec</span><span style="color: #9A4F5B;">Preview ›</span></a>
+        <a href="CmsSettings.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; background: #F4EFEE; color: #2B1C19;"><span style="width: 10px; height: 10px; border-radius: 999px; background: #76574F; flex: none;"></span><span style="flex: 1;">1 Paystack payment succeeded but the order failed to save</span><span style="color: #9A4F5B;">Fix ›</span></a>
+      </section>
+
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;"><h2 style="margin: 0; font-size: 18px; font-weight: 600;">Sales, last 7 days</h2><span style="font-size: 14px; color: #5A3E38; font-variant-numeric: tabular-nums;">₦1.26m total</span></div>
+        <div style="display: flex; align-items: flex-end; gap: 12px; height: 190px; border-bottom: 1px solid #EFE2DE; padding-bottom: 2px;">
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="7">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%;">
+              <span style="font-size: 12px; color: #5A3E38; font-variant-numeric: tabular-nums;">{{ b.label }}</span>
+              <span style="{{ b.style }}"></span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 12px;"><sc-for list="{{ bars }}" as="b" hint-placeholder-count="7"><span style="flex: 1; text-align: center; font-size: 12px; color: #76574F;">{{ b.day }}</span></sc-for></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; border-top: 1px solid #EFE2DE; padding-top: 12px;">
+          <b style="font-weight: 600;">Top sellers this week</b>
+          <div style="display: flex; justify-content: space-between;"><span>Ribbed lounge joggers</span><span style="color: #5A3E38;">31 sold</span></div>
+          <div style="display: flex; justify-content: space-between;"><span>Opaque black tights</span><span style="color: #5A3E38;">24 sold</span></div>
+          <div style="display: flex; justify-content: space-between;"><span>Gold mesh ladies' watch</span><span style="color: #5A3E38;">6 sold</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = 'Overview';
+    const items = [
+      ['Overview', 'CmsOverview.dc.html', ''], ['Orders', 'CmsOrders.dc.html', '7'], ['Products', 'CmsProducts.dc.html', ''],
+      ['Catalogue setup', 'CmsCatalogue.dc.html', ''], ['Homepage and content', 'CmsContent.dc.html', ''], ['Promotions', 'CmsPromotions.dc.html', ''], ['Reviews', 'CmsReviews.dc.html', '3'], ['Delivery', 'CmsDelivery.dc.html', ''],
+      ['Customers', '#customers', ''], ['Payments', 'CmsSettings.dc.html', ''], ['Settings', 'CmsSettings.dc.html', '']
+    ];
+    const data = [[ 'Wed', 142 ], [ 'Thu', 168 ], [ 'Fri', 231 ], [ 'Sat', 264 ], [ 'Sun', 119 ], [ 'Mon', 151 ], [ 'Tue', 185 ]];
+    const max = 264;
+    return {
+      nav: items.map(i => ({
+        label: i[0], href: i[1], count: i[2],
+        style: 'min-height: 42px; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === active ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;'),
+        countStyle: i[2] ? 'background: #B76E79; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 8px;' : 'display: none;'
+      })),
+      bars: data.map((d, i) => ({
+        day: d[0], label: '₦' + d[1] + 'k',
+        style: 'width: 100%; border-radius: 6px 6px 0 0; height: ' + Math.round(d[1] / max * 150) + 'px; background: ' + (i === data.length - 1 ? '#9A4F5B' : '#EAC8BF') + ';'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

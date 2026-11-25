@@ -1,0 +1,22 @@
+<!-- @dsCard group="Shop" height=190 subtitle="Colours and UK sizes, one sold out" -->
+<div class="demo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap">
+  <style>
+    body{margin:0;background:var(--ground-shop)}
+    .demo{font-family:var(--font-body);width:358px;display:flex;flex-direction:column;gap:var(--space-4);padding:var(--space-5);color:var(--ink)}
+    .lbl{font-size:14px;color:var(--ink-secondary);display:flex;justify-content:space-between}
+    .lbl b{color:var(--ink)}
+    .lbl a{color:var(--accent-rose);text-decoration:underline}
+    .row{display:flex;gap:10px}
+    .dot{width:44px;height:44px;border-radius:var(--radius-pill);border:1px solid var(--line-shop);box-sizing:border-box}
+    .dot.on{border:2px solid var(--ink);box-shadow:inset 0 0 0 3px var(--ground-shop)}
+    .sizes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--space-2)}
+    .sizes button{min-height:44px;border-radius:var(--radius-md);border:1px solid var(--line-shop);background:var(--surface-card);color:var(--ink);font:400 14px var(--font-body)}
+    .sizes button.on{background:var(--ink);color:var(--ink-on-dark);border:0;font-weight:600}
+    .sizes button.out{color:var(--ink-muted);text-decoration:line-through}
+  </style>
+  <span class="lbl"><span>Colour: <b>Espresso</b></span></span>
+  <div class="row"><span class="dot on" style="background:#3A2420" aria-label="Espresso"></span><span class="dot" style="background:#EAC8BF" aria-label="Blush"></span><span class="dot" style="background:#1E1A1A" aria-label="Black"></span><span class="dot" style="background:#9A9A9E" aria-label="Grey marl"></span></div>
+  <span class="lbl"><span>Size (UK)</span><a href="#size-guide">Size guide</a></span>
+  <div class="sizes"><button>XS</button><button>S</button><button class="on">M</button><button class="out" disabled>L</button><button>XL</button></div>
+</div>

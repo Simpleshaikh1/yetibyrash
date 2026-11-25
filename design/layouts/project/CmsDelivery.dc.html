@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Delivery zones and fees</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Delivery</h1>
+        <p style="margin: 0; font-size: 15px; color: #5A3E38;">Checkout works out the fee from the shopper's state and LGA. The product page and bag show the same numbers.</p>
+      </div>
+      <button style="height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #3A2420; color: #FFF8F5; font-size: 15px;">Save changes</button>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.2fr) minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #F4ECE9; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+        <span style="padding: 12px 16px;">Zone</span><span style="padding: 12px 16px;">States covered</span><span style="padding: 12px 16px;">Standard</span><span style="padding: 12px 16px;">Express</span><span style="padding: 12px 16px;">Free over</span>
+      </div>
+      <sc-for list="{{ zones }}" as="z" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.2fr) minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1fr); border-top: 1px solid #EFE2DE; font-size: 15px; align-items: center;">
+          <b style="padding: 14px 16px; font-weight: 600;">{{ z.name }}</b>
+          <span style="padding: 14px 16px; color: #5A3E38; font-size: 14px;">{{ z.states }}</span>
+          <span style="padding: 14px 16px; display: flex; flex-direction: column;"><b style="font-weight: 500; font-variant-numeric: tabular-nums;">{{ z.std }}</b><span style="font-size: 13px; color: #5A3E38;">{{ z.stdDays }}</span></span>
+          <span style="padding: 14px 16px; display: flex; flex-direction: column;"><b style="font-weight: 500; font-variant-numeric: tabular-nums;">{{ z.exp }}</b><span style="font-size: 13px; color: #5A3E38;">{{ z.expDays }}</span></span>
+          <span style="padding: 14px 16px; font-variant-numeric: tabular-nums;">{{ z.free }}</span>
+        </div>
+      </sc-for>
+      <div style="border-top: 1px solid #EFE2DE; padding: 12px 16px; font-size: 15px; color: #9A4F5B; font-weight: 500;">+ Add zone · every state must belong to one zone</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 600;">LGAs in Lagos</h2>
+        <span style="font-size: 14px; color: #5A3E38;">Express is offered only in ticked LGAs. Untick an LGA to stop delivering there.</span>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; font-size: 14px;">
+          <span>☑ Eti-Osa · Express</span><span>☑ Ikeja · Express</span><span>☑ Lagos Island · Express</span><span>☑ Surulere · Express</span><span>☑ Alimosho</span><span>☑ Ikorodu</span><span>☑ Kosofe</span><span>☑ Epe</span>
+        </div>
+        <span style="font-size: 13px; color: #9A4F5B;">Show all 20 LGAs ›</span>
+      </section>
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Rules</h2>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="dl-cutoff" style="font-size: 13px; color: #5A3E38;">Express same-day cut-off</label><input id="dl-cutoff" value="12:00 noon" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="dl-days" style="font-size: 13px; color: #5A3E38;">Days you dispatch</label><input id="dl-days" value="Monday – Saturday" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="dl-made" style="font-size: 13px; color: #5A3E38;">Extra days for pre-order items</label><input id="dl-made" value="7" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="dl-bulky" style="font-size: 13px; color: #5A3E38;">Extra fee for bulky items (large bags)</label><input id="dl-bulky" value="₦1,000 per order" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+      </section>
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Couriers</h2>
+        <span style="font-size: 14px; color: #5A3E38;">Staff pick one when marking an order Shipped. Each can have a tracking link pattern.</span>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 14.5px;">
+          <span style="background: #FBF6F4; border-radius: 8px; padding: 10px 12px;">Own rider (Lagos)</span>
+          <span style="background: #FBF6F4; border-radius: 8px; padding: 10px 12px;">Courier partner 1 · interstate</span>
+          <span style="background: #FBF6F4; border-radius: 8px; padding: 10px 12px;">Courier partner 2 · North</span>
+        </div>
+        <span style="font-size: 14px; color: #9A4F5B;">+ Add courier</span>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const navItems = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    const zones = [
+      ['Lagos', 'Lagos (20 LGAs)', '₦2,500', '1–2 days', '₦4,000', 'Same day before 12 noon', '₦40,000'],
+      ['South-West', 'Ogun, Oyo, Osun, Ondo, Ekiti', '₦4,000', '2–4 days', '—', 'Not offered', '₦60,000'],
+      ['Abuja and North-Central', 'FCT, Niger, Kogi, Kwara, Nasarawa, Benue, Plateau', '₦4,500', '2–4 days', '₦7,000', 'Next day (Abuja only)', '₦60,000'],
+      ['South-South and South-East', 'Rivers, Delta, Edo, Akwa Ibom, Cross River, Bayelsa, Anambra, Enugu, Imo, Abia, Ebonyi', '₦5,000', '3–5 days', '—', 'Not offered', '₦75,000'],
+      ['North', 'Kano, Kaduna, Katsina, Sokoto, Kebbi, Zamfara, Jigawa, Bauchi, Gombe, Adamawa, Taraba, Borno, Yobe', '₦6,000', '4–6 days', '—', 'Not offered', '₦80,000']
+    ];
+    return {
+      nav: navItems.map(i => ({ label: i[0], href: i[1], style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Delivery' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') })),
+      zones: zones.map(z => ({ name: z[0], states: z[1], std: z[2], stdDays: z[3], exp: z[4], expDays: z[5], free: z[6] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

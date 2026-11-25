@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Catalogue setup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1150px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Catalogue setup</h1>
+      <p style="margin: 0; font-size: 15px; color: #5A3E38;">The building blocks every product uses. Set these once; the shop's menus, filters, size buttons and colour circles all read from here.</p>
+    </div>
+
+    <div role="tablist" style="display: flex; gap: 4px; border-bottom: 1px solid #EFE2DE;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <button role="tab" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isSizes }}" hint-placeholder-val="{{ true }}">
+      <div style="display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 18px; align-items: start;">
+        <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;">
+          <sc-for list="{{ sets }}" as="s" hint-placeholder-count="8">
+            <button onClick="{{ s.pick }}" style="{{ s.style }}"><b style="font-weight: 600; font-size: 15px;">{{ s.name }}</b><span style="font-size: 13px; color: #5A3E38;">{{ s.summary }}</span></button>
+          </sc-for>
+          <button style="min-height: 52px; border: 0; border-top: 1px solid #EFE2DE; background: #FBF6F4; color: #9A4F5B; font-size: 15px; font-weight: 500;">+ New size set</button>
+        </div>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <h2 style="margin: 0; font-size: 21px; font-weight: 600;">{{ set.name }}</h2>
+              <span style="font-size: 14px; color: #5A3E38;">Used by: <b style="color: #2B1C19; font-weight: 500;">{{ set.usedBy }}</b></span>
+            </div>
+            <button style="height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: #3A2420; color: #FFF8F5; font-size: 15px;">Save size set</button>
+          </div>
+
+          <div style="border: 1px solid #EFE2DE; border-radius: 10px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 40px minmax(0, 1fr) minmax(0, 2fr) 90px; background: #F4ECE9; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+              <span style="padding: 10px 12px;"></span><span style="padding: 10px 12px;">Size button shows</span><span style="padding: 10px 12px;">{{ set.measureHead }}</span><span style="padding: 10px 12px;"></span>
+            </div>
+            <sc-for list="{{ set.rows }}" as="r" hint-placeholder-count="5">
+              <div style="display: grid; grid-template-columns: 40px minmax(0, 1fr) minmax(0, 2fr) 90px; align-items: center; border-top: 1px solid #EFE2DE;">
+                <span aria-hidden="true" style="padding: 0 12px; color: #B9A39D; font-size: 18px;">⋮⋮</span>
+                <span style="padding: 8px 12px;"><input aria-label="Size label" value="{{ r.label }}" style="width: 100%; box-sizing: border-box; height: 38px; border: 1px solid #E3D2CC; border-radius: 8px; padding: 0 10px; font-size: 15px;"></span>
+                <span style="padding: 8px 12px;"><input aria-label="Measurement" value="{{ r.measure }}" style="width: 100%; box-sizing: border-box; height: 38px; border: 1px solid #E3D2CC; border-radius: 8px; padding: 0 10px; font-size: 15px;"></span>
+                <span style="padding: 0 12px; font-size: 14px; color: #A3302A;">Remove</span>
+              </div>
+            </sc-for>
+            <div style="border-top: 1px solid #EFE2DE; padding: 12px; font-size: 15px; color: #9A4F5B; font-weight: 500;">+ Add size</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+            <div style="background: #FBF6F4; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+              <b style="font-size: 14px; font-weight: 600;">How it looks on the product page</b>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <sc-for list="{{ set.rows }}" as="r" hint-placeholder-count="5">
+                  <span style="min-width: 44px; min-height: 40px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border: 1px solid #EAC8BF; border-radius: 10px; background: #FFF8F5; font-size: 14px;">{{ r.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background: #FBF6F4; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14px;">
+              <b style="font-weight: 600;">Linked size guide</b>
+              <span>{{ set.guide }}</span>
+              <a href="CmsContent.dc.html">Edit the guide ›</a>
+              <span style="font-size: 13px; color: #5A3E38;">Removing a size hides it on products; existing orders keep it.</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCats }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.6fr) minmax(0, 1.2fr) minmax(0, 0.8fr); background: #F4ECE9; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+          <span style="padding: 12px 16px;">Category › sub-category</span><span style="padding: 12px 16px;">Default size set</span><span style="padding: 12px 16px;">Filters shown</span><span style="padding: 12px 16px;">Returns</span><span style="padding: 12px 16px;">On homepage</span>
+        </div>
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="12">
+          <div style="{{ c.rowStyle }}">
+            <span style="{{ c.nameStyle }}">{{ c.name }}</span><span style="padding: 7px 16px; color: #5A3E38;">{{ c.set }}</span><span style="padding: 7px 16px; color: #5A3E38;">{{ c.filters }}</span><span style="padding: 7px 16px; color: #5A3E38;">{{ c.returns }}</span><span style="padding: 7px 16px; color: #5A3E38;">{{ c.home }}</span>
+          </div>
+        </sc-for>
+        <div style="border-top: 1px solid #EFE2DE; padding: 12px 16px; font-size: 15px; color: #9A4F5B; font-weight: 500;">+ Add category · drag rows to change the menu order</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isColours }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+        <sc-for list="{{ colours }}" as="c" hint-placeholder-count="12">
+          <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px;">
+            <span style="{{ c.dot }}"></span>
+            <span style="display: flex; flex-direction: column;"><b style="font-weight: 500; font-size: 15px;">{{ c.name }}</b><span style="font-size: 13px; color: #5A3E38;">{{ c.hex }} · {{ c.used }}</span></span>
+          </div>
+        </sc-for>
+        <div style="border: 2px dashed #E3D2CC; border-radius: 12px; display: grid; place-items: center; min-height: 64px; color: #9A4F5B; font-size: 15px;">+ Add colour</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFilters }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start;">
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600;">Price bands (₦)</h2>
+          <span style="font-size: 14px; color: #5A3E38;">Shown as tick boxes in the shop's Filter sheet.</span>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 15px;">
+            <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: #FBF6F4; border-radius: 8px;"><span>Under ₦10,000</span><span style="color: #5A3E38;">0 – 9,999</span></div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: #FBF6F4; border-radius: 8px;"><span>₦10,000 – ₦30,000</span><span style="color: #5A3E38;">10,000 – 30,000</span></div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: #FBF6F4; border-radius: 8px;"><span>₦30,000 – ₦80,000</span><span style="color: #5A3E38;">30,001 – 80,000</span></div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: #FBF6F4; border-radius: 8px;"><span>Over ₦80,000</span><span style="color: #5A3E38;">80,001 +</span></div>
+          </div>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600;">Materials list</h2>
+          <span style="font-size: 14px; color: #5A3E38;">Used by the Material filter and product details.</span>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Cubic zirconia</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Freshwater pearl</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Rib knit</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Brass</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Stainless steel</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">18k gold plated</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Sterling silver</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Cotton</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Nylon</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Faux leather</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Genuine leather</span><span style="background: #F4ECE9; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Raffia</span><span style="border: 1px dashed #E3D2CC; border-radius: 999px; padding: 6px 12px; font-size: 14px; color: #9A4F5B;">+ Add</span>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'Size sets', set: 0 }; }
+  renderVals() {
+    const sets = [
+      { name: 'Clothing sizes (UK)', usedBy: 'Joggers, Tops, Shorts and skirts, Co-ord sets', measureHead: 'UK size · bust · waist · hips', guide: 'Clothing size chart', rows: [['XS', 'UK 6 · bust 78 · waist 60 · hips 86 cm'], ['S', 'UK 8 · bust 82 · waist 64 · hips 90 cm'], ['M', 'UK 10–12 · bust 88 · waist 70 · hips 96 cm'], ['L', 'UK 14 · bust 94 · waist 76 · hips 102 cm'], ['XL', 'UK 16 · bust 100 · waist 82 · hips 108 cm']] },
+      { name: 'Ring sizes (US)', usedBy: 'Rings', measureHead: 'Inner diameter', guide: 'Ring size guide', rows: [['5', '15.7 mm'], ['6', '16.5 mm'], ['7', '17.3 mm'], ['8', '18.2 mm'], ['9', '19.0 mm']] },
+      { name: 'Bracelet sizes', usedBy: 'Bracelets, Bead bracelets', measureHead: 'Wrist size', guide: 'Bracelet size guide', rows: [['S', 'Wrist up to 15 cm'], ['M', 'Wrist 15–17 cm'], ['L', 'Wrist 17–19 cm']] },
+      { name: 'Anklet lengths', usedBy: 'Anklets', measureHead: 'Length', guide: 'Anklet guide', rows: [['9"', '23 cm'], ['10"', '25 cm'], ['11"', '28 cm']] },
+      { name: 'Necklace lengths', usedBy: 'Necklaces, Bead necklaces', measureHead: 'Where it sits', guide: 'Necklace length guide', rows: [['16"', 'Collarbone'], ['18"', 'Just below collarbone'], ['20"', 'Above the bust'], ['24"', 'Below the bust']] },
+      { name: 'Tights sizes', usedBy: 'Tights', measureHead: 'Height and hips', guide: 'Tights size chart', rows: [['S', 'Height 150–160 cm · hips 85–95 cm'], ['M', 'Height 155–170 cm · hips 92–102 cm'], ['L', 'Height 165–175 cm · hips 100–110 cm'], ['XL', 'Height 170–180 cm · hips 108–120 cm'], ['XXL', 'Height 170–185 cm · hips 118–130 cm']] },
+      { name: 'Panty sizes', usedBy: 'Panties', measureHead: 'UK dress size · hips', guide: 'Underwear size chart', rows: [['S', 'UK 8 · hips 86–91 cm'], ['M', 'UK 10–12 · hips 91–99 cm'], ['L', 'UK 14 · hips 99–104 cm'], ['XL', 'UK 16–18 · hips 104–114 cm']] },
+      { name: 'One size', usedBy: 'Watches, Earrings, Bags', measureHead: 'Note', guide: 'None', rows: [['One size', 'No size buttons shown']] }
+    ];
+    const cur = sets[this.state.set];
+    const tabNames = ['Categories', 'Size sets', 'Colours', 'Filters and price bands'];
+    const navItems = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    const cats = [
+      ['Jewelry', '', '', '', 'Yes', true], ['Necklaces', 'Necklace lengths', 'Tier, price, colour, material', '7 days, unworn', ''], ['Earrings', 'One size', 'Tier, price, colour, material', 'No returns (hygiene)', ''], ['Bracelets', 'Bracelet sizes', 'Tier, price, colour, size', '7 days, unworn', ''], ['Rings', 'Ring sizes (US)', 'Tier, price, colour, size', '7 days, unworn', ''], ['Anklets', 'Anklet lengths', 'Price, colour', '7 days, unworn', ''], ['Bead pieces', 'Bracelet sizes', 'Price, colour', '7 days, unworn', ''],
+      ['Watches', 'One size', 'Tier, price, colour, strap', '7 days, with tags', 'Yes', true],
+      ['Bags', '', '', '', 'Yes', true], ['Handbags and totes', 'One size', 'Tier, price, colour, material', '7 days, unused with tags', ''], ['Shoulder and crossbody', 'One size', 'Tier, price, colour, material', '7 days, unused with tags', ''], ['Clutches and evening', 'One size', 'Tier, price, colour', '7 days, unused with tags', ''], ['Mini bags', 'One size', 'Price, colour', '7 days, unused with tags', ''],
+      ['Clothing', '', '', '', 'Yes', true], ['Joggers', 'Clothing sizes (UK)', 'Tier, price, colour, size', '7 days, unworn with tags', ''], ['Tops', 'Clothing sizes (UK)', 'Tier, price, colour, size', '7 days, unworn with tags', ''], ['Shorts and skirts', 'Clothing sizes (UK)', 'Price, colour, size', '7 days, unworn with tags', ''], ['Co-ord sets', 'Clothing sizes (UK)', 'Price, colour, size', '7 days, unworn with tags', ''],
+      ['Intimates', '', '', '', 'Yes', true], ['Tights', 'Tights sizes', 'Price, colour, size, denier', 'No returns once opened', ''], ['Panties', 'Panty sizes', 'Price, colour, size', 'No returns once opened', '']
+    ];
+    const colours = [['Espresso', '#3A2420', 22], ['Blush', '#EAC8BF', 18], ['Ivory', '#F3E9DC', 14], ['Tan', '#B07A4F', 7], ['Cream', '#EFE4D2', 5], ['Gold', '#C9A24B', 38], ['Silver', '#C7C7CC', 21], ['Rose gold', '#C98F8F', 12], ['Grey marl', '#9A9A9E', 9], ['Black', '#1E1A1A', 17], ['Nude 1', '#E6C1A6', 6], ['Nude 2', '#B9845E', 6], ['Nude 3', '#7A4E33', 6], ['Ruby', '#9B2335', 3]];
+    return {
+      nav: navItems.map(i => ({ label: i[0], href: i[1], style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Catalogue setup' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') })),
+      tabs: tabNames.map(t => ({ label: t, pick: () => this.setState({ tab: t }),
+        style: 'min-height: 46px; padding: 0 18px; border: 0; background: transparent; font-size: 15.5px; margin-bottom: -1px; ' + (t === this.state.tab ? 'border-bottom: 3px solid #3A2420; color: #2B1C19; font-weight: 600;' : 'border-bottom: 3px solid transparent; color: #5A3E38;') })),
+      isSizes: this.state.tab === 'Size sets', isCats: this.state.tab === 'Categories', isColours: this.state.tab === 'Colours', isFilters: this.state.tab === 'Filters and price bands',
+      sets: sets.map((s, i) => ({ name: s.name, summary: s.rows.map(r => r[0]).join(' · '), pick: () => this.setState({ set: i }),
+        style: 'display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 12px 16px; border: 0; border-top: ' + (i ? '1px solid #EFE2DE' : '0') + '; color: #2B1C19; background: ' + (i === this.state.set ? '#F7E7E2; box-shadow: inset 4px 0 0 #3A2420' : '#FFFFFF') + ';' })),
+      set: { name: cur.name, usedBy: cur.usedBy, measureHead: cur.measureHead, guide: cur.guide, rows: cur.rows.map(r => ({ label: r[0], measure: r[1] })) },
+      cats: cats.map(c => ({ name: c[5] ? c[0] : '› ' + c[0], set: c[1], filters: c[2], returns: c[3], home: c[4],
+        rowStyle: 'display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.6fr) minmax(0, 1.2fr) minmax(0, 0.8fr); border-top: 1px solid #EFE2DE; font-size: 15px; ' + (c[5] ? 'background: #FBF6F4;' : ''),
+        nameStyle: 'padding: 7px 16px; ' + (c[5] ? 'font-weight: 600;' : 'padding-left: 32px;') })),
+      colours: colours.map(c => ({ name: c[0], hex: c[1], used: c[2] + ' products', dot: 'width: 36px; height: 36px; border-radius: 999px; flex: none; border: 1px solid rgba(0,0,0,0.12); background: ' + c[1] + ';' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

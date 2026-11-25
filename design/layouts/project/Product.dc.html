@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Product</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 1750px; box-sizing: border-box; background: #F7E7E2; color: #3A2420; font-family: 'Jost', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="height: 430px; background: #EAC8BF; position: relative; display: grid; place-items: center; color: #5A3E38; font-size: 14px; flex: none;">
+    Product photo (swipe for 4 more)
+    <a href="Shop.dc.html" aria-label="Back" style="position: absolute; top: 16px; left: 16px; width: 44px; height: 44px; border-radius: 999px; background: #FFF8F5; display: grid; place-items: center; color: #3A2420;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+    </a>
+    <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px;">
+      <button aria-label="Share on WhatsApp" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #FFF8F5; display: grid; place-items: center; color: #3A2420;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 4v11M7 9l5-5 5 5M5 14v5h14v-5"/></svg>
+      </button>
+      <button aria-label="Save" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #FFF8F5; display: grid; place-items: center; color: #3A2420;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg>
+      </button>
+    </div>
+    <div aria-hidden="true" style="position: absolute; bottom: 16px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px;">
+      <span style="width: 18px; height: 6px; border-radius: 999px; background: #3A2420;"></span>
+      <span style="width: 6px; height: 6px; border-radius: 999px; background: rgba(58,36,32,0.3);"></span>
+      <span style="width: 6px; height: 6px; border-radius: 999px; background: rgba(58,36,32,0.3);"></span>
+      <span style="width: 6px; height: 6px; border-radius: 999px; background: rgba(58,36,32,0.3);"></span>
+      <span style="width: 6px; height: 6px; border-radius: 999px; background: rgba(58,36,32,0.3);"></span>
+    </div>
+  </div>
+
+  <div style="padding: 20px 16px 0; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="align-self: flex-start; background: #FFF8F5; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; padding: 4px 10px; border-radius: 999px;">Everyday · Clothing</span>
+      <h1 style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 28px; line-height: 1.1;">Ribbed lounge joggers</h1>
+      <span style="font-size: 14px; color: #5A3E38;">Cotton-blend rib · <b style="color: #3A2420;">★ 4.8</b> (32 reviews)</span>
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <span style="font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums;">₦14,500</span>
+        <span style="font-size: 14px; color: #9A4F5B;">Only 6 left, ships from Lagos</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 14px; color: #5A3E38;">Colour: <b style="color: #3A2420;">{{ colourName }}</b></span>
+      <div style="display: flex; gap: 10px;">
+        <sc-for list="{{ colours }}" as="c" hint-placeholder-count="3">
+          <button aria-label="{{ c.name }}" onClick="{{ c.pick }}" style="{{ c.style }}"></button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-size: 14px; color: #5A3E38;">Size (UK)</span>
+        <a href="#size" style="font-size: 14px; text-decoration: underline;">Size guide</a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;">
+        <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="4">
+          <button onClick="{{ s.pick }}" style="{{ s.style }}">{{ s.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background: #FFF8F5; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #5A3E38;">
+      <span style="color: #3A2420;"><b>Order within 3h 20m</b>, get it in Lagos by Thu 26 Nov</span>
+      <span><b style="color: #3A2420;">Other states:</b> 2–6 working days</span>
+      <span><b style="color: #3A2420;">Payment:</b> Paystack, card, transfer or USSD</span>
+      <span><b style="color: #3A2420;">Packaging:</b> Yetibyrash pouch, discreet outer bag</span>
+    </div>
+
+    <label for="pd-gift" style="background: #FFF8F5; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-size: 15px;">
+      <input id="pd-gift" type="checkbox" style="width: 22px; height: 22px; accent-color: #3A2420; flex: none;">
+      <span style="display: flex; flex-direction: column;">Is this a gift?<span style="font-size: 13px; color: #5A3E38;">Gift box and handwritten note, ₦1,500</span></span>
+    </label>
+
+    <div style="display: flex; flex-direction: column; border-top: 1px solid #EAC8BF;">
+      <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #EAC8BF; font-size: 15px;"><span>Description</span><span aria-hidden="true">+</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #EAC8BF; font-size: 15px;"><span>Materials and care</span><span aria-hidden="true">+</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #EAC8BF; font-size: 15px;"><span>Delivery, returns and FAQ</span><span aria-hidden="true">+</span></div>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <h2 style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 21px;">Worn by you</h2>
+        <span style="font-size: 14px;"><b>★ 4.8</b> · 32 reviews</span>
+      </div>
+      <div style="background: #FFF8F5; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;">
+        <span style="color: #9A4F5B; letter-spacing: 0.1em;" aria-label="5 stars">★★★★★</span>
+        <span style="font-size: 14.5px; line-height: 1.45;">So soft and the fit is perfect. I ordered M and it sits right on my waist.</span>
+        <span style="font-size: 12.5px; color: #5A3E38;">Chioma E. · Verified buyer · Size M, Espresso</span>
+      </div>
+      <div style="background: #FFF8F5; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;">
+        <span style="color: #9A4F5B; letter-spacing: 0.1em;" aria-label="4 stars">★★★★☆</span>
+        <span style="font-size: 14.5px; line-height: 1.45;">Delivered to Abuja in 3 days. Runs slightly long if you're petite.</span>
+        <span style="font-size: 12.5px; color: #5A3E38;">Zainab M. · Verified buyer · Size S, Blush</span>
+      </div>
+      <a href="#reviews" style="font-size: 14px; text-decoration: underline;">Read all 32 reviews</a>
+    </section>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <h2 style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 21px;">Complete the look</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px;"><span style="aspect-ratio: 1; border-radius: 14px; background: #F0D9D2;"></span>Cropped baby tee<b style="font-variant-numeric: tabular-nums;">₦9,000</b></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px;"><span style="aspect-ratio: 1; border-radius: 14px; background: #F0D9D2;"></span>Gold huggie hoops<b style="font-variant-numeric: tabular-nums;">₦11,000</b></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px;"><span style="aspect-ratio: 1; border-radius: 14px; background: #F0D9D2;"></span>Drop earrings<b style="font-variant-numeric: tabular-nums;">₦12,000</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 1;"></div>
+
+  <div style="background: #FFF8F5; border-top: 1px solid #F0D9D2; padding: 12px 16px 20px; display: flex; gap: 10px; align-items: center;">
+    <div style="display: flex; align-items: center; border: 1px solid #EAC8BF; border-radius: 999px; height: 50px;">
+      <button aria-label="Fewer" onClick="{{ minus }}" style="width: 44px; height: 48px; border: 0; background: transparent; font-size: 20px; color: #3A2420;">−</button>
+      <span style="min-width: 20px; text-align: center; font-size: 16px; font-variant-numeric: tabular-nums;">{{ qty }}</span>
+      <button aria-label="More" onClick="{{ plus }}" style="width: 44px; height: 48px; border: 0; background: transparent; font-size: 20px; color: #3A2420;">+</button>
+    </div>
+    <a href="Bag.dc.html" style="flex: 1; height: 50px; border-radius: 999px; background: #3A2420; color: #FFF8F5; display: grid; place-items: center; font-size: 16px; font-weight: 500;">Add to bag · {{ total }}</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1750}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { colour: 0, size: 2, qty: 1 }; }
+  renderVals() {
+    const colours = [
+      { name: 'Espresso', hex: '#3A2420' }, { name: 'Blush', hex: '#EAC8BF' }, { name: 'Black', hex: '#1E1A1A' }, { name: 'Grey marl', hex: '#9A9A9E' }
+    ];
+    const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+    const qty = this.state.qty;
+    return {
+      colourName: colours[this.state.colour].name,
+      colours: colours.map((c, i) => ({
+        name: c.name,
+        pick: () => this.setState({ colour: i }),
+        style: 'width: 44px; height: 44px; border-radius: 999px; background: ' + c.hex + '; border: ' + (i === this.state.colour ? '2px solid #3A2420; box-shadow: inset 0 0 0 3px #F7E7E2;' : '1px solid #EAC8BF;')
+      })),
+      sizes: sizes.map((s, i) => ({
+        label: s,
+        pick: () => this.setState({ size: i }),
+        style: 'min-height: 44px; border-radius: 12px; font-size: 13.5px; ' + (i === this.state.size ? 'border: 0; background: #3A2420; color: #FFF8F5; font-weight: 600;' : 'border: 1px solid #EAC8BF; background: #FFF8F5; color: #3A2420;')
+      })),
+      qty: qty,
+      minus: () => this.setState({ qty: Math.max(1, qty - 1) }),
+      plus: () => this.setState({ qty: Math.min(9, qty + 1) }),
+      total: '₦' + (14500 * qty).toLocaleString('en-NG')
+    };
+  }
+}
+</script>
+</body>
+</html>

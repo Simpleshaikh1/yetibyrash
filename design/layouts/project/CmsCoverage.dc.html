@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What the CMS controls</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B}a:hover{color:#3A2420}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1250px; box-sizing: border-box; padding: 56px 64px; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex; flex-direction: column; gap: 28px;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #9A4F5B; font-weight: 600;">Yetibyrash admin</span>
+      <h1 style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 44px;">Nothing on the shop is hard-coded</h1>
+    </div>
+    <p style="margin: 0; max-width: 520px; font-size: 16px; line-height: 1.5; color: #5A3E38;">Every word, photo, size, price and fee a shopper sees comes from one of these admin screens. If the shop shows it, staff can change it without a developer.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; border: 1px solid #EFE2DE; border-radius: 16px; overflow: hidden; background: #FFFFFF;">
+    <div style="display: grid; grid-template-columns: 300px 300px minmax(0, 1fr); background: #3A2420; color: #FFF8F5; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">
+      <span style="padding: 12px 18px;">On the shop</span><span style="padding: 12px 18px;">Managed in</span><span style="padding: 12px 18px;">What staff can change</span>
+    </div>
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="18">
+      <div style="{{ r.rowStyle }}">
+        <span style="padding: 8px 18px; font-weight: 500;">{{ r.site }}</span>
+        <span style="padding: 8px 18px; color: #9A4F5B; font-weight: 500;">{{ r.where }}</span>
+        <span style="padding: 8px 18px; color: #5A3E38;">{{ r.what }}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const rows = [
+      ['Homepage hero banner', 'Content › Banners', 'Photo (phone and desktop crops), small label, headline, button text and link, Everyday or Premium version, start and end dates'],
+      ['Everyday / Premium switch', 'Products › Tier', 'Which tier each product belongs to; what the homepage shows for each tier'],
+      ['Shop by category circles', 'Catalogue › Categories', 'Name, icon or photo, display order, show on homepage or not'],
+      ['Category tabs (Joggers, Tops…)', 'Catalogue › Sub-categories', 'Sub-categories under each category and their order'],
+      ['Filters and ₦ price bands', 'Catalogue › Filters', 'Price bands, which filters each category shows'],
+      ['Product name, photos, price, description', 'Products › Product editor', 'All text, up to 8 photos, price, "was" price, badges (New, Bestseller), hide or show'],
+      ['Colour circles', 'Catalogue › Colours', 'Colour name and swatch; products pick from this list'],
+      ['Sizes (clothing XS–XL, rings, bracelets, tights)', 'Catalogue › Size sets', 'Each size set and its sizes, in order; each category gets a default size set'],
+      ['Bag details (dimensions, strap drop, what fits)', 'Product editor › Category details', 'Fields set per category: bags get dimensions, strap drop, closure and what fits inside'],
+      ['Price and stock for each size and colour', 'Product editor › Options table', 'Price, stock and SKU per combination, e.g. Espresso / M'],
+      ['"Only 6 left" warning', 'Settings › Store', 'Stock level that triggers the warning'],
+      ['Size guide', 'Content › Size guides', 'Size guide table and how-to-measure text, linked to a size set'],
+      ['Materials and care, returns', 'Product editor + Content › Policies', 'Material and care text per product; return rules per category'],
+      ['Complete the look sets', 'Content › Looks', 'Set name, photo, the pieces in it, set price'],
+      ['Trust strip and announcement bar', 'Content › Homepage', 'Short messages under the hero and at the top of the site'],
+      ['States, LGAs, delivery speeds and fees', 'Delivery › Zones', 'Fee and days per zone, which LGAs are covered, express cut-off time, free-delivery minimum'],
+      ['Tracker steps and customer messages', 'Settings › Messages', 'Email and WhatsApp/SMS text sent at each delivery step'],
+      ['Star ratings and reviews', 'Reviews', 'Approve, hide or reply; ask buyers for a review after delivery'],
+      ['Sale prices, sale badges, gift with purchase', 'Promotions', 'Store-wide or category sale with end date, discount codes, free gift above a spend'],
+      ['"Get it by…" countdown, gift box, pre-order', 'Delivery + Product editor', 'Cut-off times per zone; gift box price; which products allow gift box or pre-order'],
+      ['Help, FAQ, About, Privacy, Terms', 'Content › Pages', 'Page text and images'],
+      ['Logo, WhatsApp number, socials', 'Settings › Store', 'Logo upload, contact details, Instagram and TikTok links']
+    ];
+    return {
+      rows: rows.map((r, i) => ({
+        site: r[0], where: r[1], what: r[2],
+        rowStyle: 'display: grid; grid-template-columns: 300px 300px minmax(0, 1fr); font-size: 15px; line-height: 1.4; border-top: 1px solid #EFE2DE; background: ' + (i % 2 ? '#FFFFFF' : '#FDF9F8') + ';'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

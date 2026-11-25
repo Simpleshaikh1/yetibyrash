@@ -1,0 +1,18 @@
+# Dependencies and builds
+node_modules/
+dist/
+backend/bin/
+backend/tmp/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# GoLand: ignore personal settings, keep shared run configurations in .run/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Settings</h1>
+    <div role="tablist" style="display: flex; gap: 4px; border-bottom: 1px solid #EFE2DE;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <button role="tab" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isMessages }}" hint-placeholder-val="{{ true }}">
+      <div style="display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start;">
+        <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="6">
+            <button onClick="{{ s.pick }}" style="{{ s.style }}"><b style="font-weight: 600; font-size: 15px;">{{ s.name }}</b><span style="font-size: 13px; color: #5A3E38;">{{ s.when }}</span></button>
+          </sc-for>
+        </div>
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 18px; font-weight: 600;">{{ step.name }}</h2><span style="font-size: 14px; color: #5A3E38;">Tracker label on the shop: <b style="color: #2B1C19;">{{ step.label }}</b></span></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="st-wa" style="font-size: 13px; color: #5A3E38;">WhatsApp / SMS message</label><textarea id="st-wa" rows="3" style="border: 1px solid #E3D2CC; border-radius: 10px; padding: 10px 12px; font-size: 15px; line-height: 1.5; resize: vertical;">{{ step.wa }}</textarea></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="st-subj" style="font-size: 13px; color: #5A3E38;">Email subject</label><input id="st-subj" value="{{ step.subject }}" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; font-size: 13px;">
+            <span style="color: #5A3E38;">Insert:</span>
+            <span style="background: #F4ECE9; border-radius: 6px; padding: 3px 8px;">{first_name}</span><span style="background: #F4ECE9; border-radius: 6px; padding: 3px 8px;">{order_number}</span><span style="background: #F4ECE9; border-radius: 6px; padding: 3px 8px;">{total}</span><span style="background: #F4ECE9; border-radius: 6px; padding: 3px 8px;">{courier}</span><span style="background: #F4ECE9; border-radius: 6px; padding: 3px 8px;">{tracking_link}</span><span style="background: #F4ECE9; border-radius: 6px; padding: 3px 8px;">{delivery_date}</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button style="height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: #3A2420; color: #FFF8F5; font-size: 15px;">Save message</button>
+            <button style="height: 42px; padding: 0 18px; border: 1px solid #E3D2CC; border-radius: 10px; background: #FFFFFF; color: #2B1C19; font-size: 15px;">Send a test to me</button>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 18px; align-items: start;">
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600;">Paystack</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px;"><span>Connection</span><span style="background: #EAF3EE; color: #2F6B4F; font-weight: 600; font-size: 13px; padding: 4px 10px; border-radius: 999px;">Connected · Live mode</span></div>
+          <span style="font-size: 14px; color: #5A3E38; line-height: 1.5;">API keys are stored on the server and never shown here. Only the Owner can switch between Test and Live mode.</span>
+          <span style="font-size: 14px; color: #5A3E38;">Payment methods shown: card, bank transfer, USSD.</span>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden;">
+          <div style="padding: 14px 16px; background: #FBEAE8; font-size: 14.5px; display: flex; justify-content: space-between; align-items: center; gap: 12px;"><span><b style="font-weight: 600;">PSK_77a0…</b> ₦18,000 was paid but no order was saved.</span><span style="color: #9A4F5B; font-weight: 600;">Create the order ›</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr); background: #F4ECE9; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+            <span style="padding: 10px 16px;">Reference</span><span style="padding: 10px 16px;">Order</span><span style="padding: 10px 16px;">Amount</span><span style="padding: 10px 16px;">Method</span><span style="padding: 10px 16px;">Status</span>
+          </div>
+          <sc-for list="{{ payments }}" as="p" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr); border-top: 1px solid #EFE2DE; font-size: 14.5px;">
+              <span style="padding: 11px 16px; color: #5A3E38;">{{ p.ref }}</span><span style="padding: 11px 16px;">{{ p.order }}</span><span style="padding: 11px 16px; font-variant-numeric: tabular-nums;">{{ p.amount }}</span><span style="padding: 11px 16px; color: #5A3E38;">{{ p.method }}</span><span style="{{ p.statusStyle }}">{{ p.status }}</span>
+            </div>
+          </sc-for>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStore }}" hint-placeholder-val="{{ false }}">
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-size: 13px; color: #5A3E38;">Logo</span><span style="height: 90px; border: 2px dashed #E3D2CC; border-radius: 12px; display: grid; place-items: center; font-size: 14px; color: #5A3E38;">Upload logo (SVG or PNG)</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="sto-name" style="font-size: 13px; color: #5A3E38;">Shop name and tagline</label><input id="sto-name" value="Yetibyrash · Elegance meets affordability" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="sto-wa" style="font-size: 13px; color: #5A3E38;">WhatsApp number</label><input id="sto-wa" placeholder="[YOUR WHATSAPP NUMBER]" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="sto-email" style="font-size: 13px; color: #5A3E38;">Support email</label><input id="sto-email" placeholder="[YOUR SUPPORT EMAIL]" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="sto-ig" style="font-size: 13px; color: #5A3E38;">Instagram and TikTok</label><input id="sto-ig" placeholder="@yetibyrash" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="sto-low" style="font-size: 13px; color: #5A3E38;">Show "Only X left" at</label><input id="sto-low" value="6 or fewer" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isStaff }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start;">
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden;">
+          <sc-for list="{{ staff }}" as="m" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #EFE2DE;">
+              <span style="width: 40px; height: 40px; border-radius: 999px; background: #F0D9D2; display: grid; place-items: center; font-weight: 600;">{{ m.initial }}</span>
+              <span style="flex: 1; display: flex; flex-direction: column;"><b style="font-weight: 500;">{{ m.name }}</b><span style="font-size: 13px; color: #5A3E38;">{{ m.last }}</span></span>
+              <span style="background: #F4ECE9; border-radius: 999px; padding: 5px 12px; font-size: 13.5px; font-weight: 600;">{{ m.role }}</span>
+            </div>
+          </sc-for>
+          <div style="padding: 12px 16px; font-size: 15px; color: #9A4F5B; font-weight: 500;">+ Invite staff by email</div>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">What each role can do</h2>
+          <span><b style="font-weight: 600;">Owner:</b> everything, including payments and staff.</span>
+          <span><b style="font-weight: 600;">Manager:</b> orders, products, catalogue, content, delivery.</span>
+          <span><b style="font-weight: 600;">Packer:</b> orders only: pack, ship, update tracking.</span>
+          <span><b style="font-weight: 600;">Content editor:</b> products, photos, homepage and pages.</span>
+          <span style="font-size: 13px; color: #5A3E38;">Every change is logged with who made it and when.</span>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'Customer messages', step: 2 }; }
+  renderVals() {
+    const navItems = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    const tabNames = ['Customer messages', 'Payments', 'Store details', 'Staff and roles'];
+    const steps = [
+      { name: 'Payment received', label: 'Paid', when: 'Sent when Paystack confirms', subject: 'We’ve got your order, {first_name}', wa: 'Hi {first_name}, thank you! We received {total} for order {order_number}. We’ll let you know when it’s packed.' },
+      { name: 'Packed', label: 'Packed', when: 'Sent when moved to Packed', subject: 'Your order {order_number} is packed', wa: 'Hi {first_name}, your Yetibyrash pieces are wrapped and ready to go. Order {order_number}.' },
+      { name: 'Shipped', label: 'Shipped', when: 'Sent when moved to Shipped', subject: 'Order {order_number} is on its way', wa: 'Hi {first_name}, order {order_number} has left our studio with {courier}. Expected {delivery_date}. Track it: {tracking_link}' },
+      { name: 'Out for delivery', label: 'Out for delivery', when: 'Sent when moved to Out for delivery', subject: 'Arriving today', wa: 'Hi {first_name}, your order is out for delivery today. Please keep your phone close, the rider will call.' },
+      { name: 'Delivered', label: 'Delivered', when: 'Sent when moved to Delivered', subject: 'Delivered! How did we do?', wa: 'Hi {first_name}, your order has been delivered. We hope you love it! Reply here if anything isn’t right.' },
+      { name: 'Payment failed', label: 'Not shown', when: 'Sent if a payment is abandoned', subject: 'Your bag is still waiting', wa: 'Hi {first_name}, your payment didn’t go through. Your bag is saved: {tracking_link}' }
+    ];
+    const pays = [
+      ['PSK_8f21c…', 'YB-20418', '₦29,000', 'Card', 'Success'], ['PSK_77a0…', '—', '₦18,000', 'Transfer', 'No order'], ['PSK_61be…', 'YB-20431', '₦11,000', 'USSD', 'Success'],
+      ['PSK_5c09…', 'YB-20425', '₦72,000', 'Card', 'Success'], ['PSK_4d33…', '—', '₦9,500', 'Card', 'Abandoned']
+    ];
+    const cur = steps[this.state.step];
+    return {
+      nav: navItems.map(i => ({ label: i[0], href: i[1], style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Settings' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') })),
+      tabs: tabNames.map(t => ({ label: t, pick: () => this.setState({ tab: t }),
+        style: 'min-height: 46px; padding: 0 18px; border: 0; background: transparent; font-size: 15.5px; margin-bottom: -1px; ' + (t === this.state.tab ? 'border-bottom: 3px solid #3A2420; color: #2B1C19; font-weight: 600;' : 'border-bottom: 3px solid transparent; color: #5A3E38;') })),
+      isMessages: this.state.tab === 'Customer messages', isPayments: this.state.tab === 'Payments', isStore: this.state.tab === 'Store details', isStaff: this.state.tab === 'Staff and roles',
+      steps: steps.map((s, i) => ({ name: s.name, when: s.when, pick: () => this.setState({ step: i }),
+        style: 'display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 12px 16px; border: 0; border-top: ' + (i ? '1px solid #EFE2DE' : '0') + '; color: #2B1C19; background: ' + (i === this.state.step ? '#F7E7E2; box-shadow: inset 4px 0 0 #3A2420' : '#FFFFFF') + ';' })),
+      step: cur,
+      payments: pays.map(p => ({ ref: p[0], order: p[1], amount: p[2], method: p[3], status: p[4],
+        statusStyle: 'padding: 11px 16px; font-weight: 600; color: ' + (p[4] === 'Success' ? '#2F6B4F' : p[4] === 'No order' ? '#A3302A' : '#76574F') + ';' })),
+      staff: [
+        { initial: 'O', name: 'Owner', last: 'Active now', role: 'Owner' },
+        { initial: 'M', name: 'Store manager', last: 'Active 2 hours ago', role: 'Manager' },
+        { initial: 'P', name: 'Packing staff', last: 'Active today', role: 'Packer' },
+        { initial: 'C', name: 'Content and photos', last: 'Active yesterday', role: 'Content editor' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

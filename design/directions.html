@@ -1,0 +1,255 @@
+<title>Yetibyrash Design Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Jost:wght@400;500;600&family=Manrope:wght@400;500;700&display=swap">
+<style>
+/* Layout: intro, three direction columns side by side (stacked on phones), each with palette, type and a live phone mockup; shared decisions below. */
+:root{
+  --bg:#F6F3F5; --surface:#FFFFFF; --fg:#241B24; --muted:#6E626C; --line:#E4DCE2; --accent:#6B2A5E;
+  --f-head:"Fraunces",Georgia,serif; --f-body:"Manrope",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171217;--surface:#211A21;--fg:#F1EAF0;--muted:#A99DA7;--line:#3A2F39;--accent:#D9A6CC;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#171217;--surface:#211A21;--fg:#F1EAF0;--muted:#A99DA7;--line:#3A2F39;--accent:#D9A6CC;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3{font-family:var(--f-head);font-weight:500;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,5vw,3rem)}
+h2{font-size:1.6rem}
+h3{font-size:1.15rem}
+p{margin:0}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.intro{display:flex;flex-direction:column;gap:14px;max-width:68ch}
+.intro p{color:var(--muted)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.facts span{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.82rem;background:var(--surface)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:28px}
+@media (max-width:400px){.grid{grid-template-columns:1fr}}
+.dir{display:flex;flex-direction:column;gap:18px;min-width:0}
+.dir-head{display:flex;flex-direction:column;gap:6px}
+.dir-head .tag{font-size:.75rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.dir-head p{color:var(--muted);font-size:.92rem}
+.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.sw{display:flex;flex-direction:column;gap:4px;font-size:.68rem;color:var(--muted);min-width:0}
+.sw i{display:block;aspect-ratio:1;border-radius:8px;border:1px solid var(--line);max-width:100%}
+.typesample{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-block:12px;display:flex;flex-direction:column;gap:2px}
+.typesample .d{font-size:1.7rem;line-height:1.1}
+.typesample .b{font-size:.85rem;color:var(--muted)}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.85rem}
+.notes b{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.notes ul{margin:0;padding-left:16px}
+
+/* ---------- phone mockup (each direction scopes its own fixed palette) ---------- */
+.phone{width:min(310px,100%);margin:0 auto;border-radius:38px;padding:10px;background:#1b1b1d;box-shadow:0 18px 40px rgba(20,10,20,.18)}
+.screen{border-radius:30px;overflow:hidden;background:var(--p-bg);color:var(--p-ink);font-family:var(--p-body);font-size:12px;display:flex;flex-direction:column}
+.p-top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px}
+.p-logo{font-family:var(--p-display);font-size:20px;letter-spacing:.02em;color:var(--p-primary)}
+.p-bag{position:relative;width:22px;height:22px}
+.p-bag::after{content:"2";position:absolute;top:-4px;right:-6px;background:var(--p-accent);color:var(--p-onaccent);font-size:9px;font-weight:700;border-radius:999px;width:14px;height:14px;display:grid;place-items:center}
+.p-hero{margin:0 12px;border-radius:20px;padding:22px 18px;color:var(--p-heroink);background:var(--p-herobg);position:relative;overflow:hidden;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+.p-hero small{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.85;position:relative}
+.p-hero h4{margin:0;font-family:var(--p-display);font-weight:500;font-size:27px;line-height:1.02;position:relative}
+.p-hero .cta{align-self:flex-start;position:relative;background:var(--p-accent);color:var(--p-onaccent);border-radius:999px;padding:7px 14px;font-weight:600;font-size:11px}
+.p-tier{display:grid;grid-template-columns:1fr 1fr;margin:14px 12px 0;background:var(--p-soft);border-radius:999px;padding:3px}
+.p-tier span{text-align:center;padding:7px 0;border-radius:999px;font-weight:600;font-size:11px;color:var(--p-muted)}
+.p-tier span.on{background:var(--p-surface);color:var(--p-ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.p-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.p-card{background:var(--p-surface);border-radius:16px;overflow:hidden}
+.p-card .art{aspect-ratio:1;display:grid;place-items:center;background:var(--p-soft);position:relative}
+.p-card .art svg{width:78%;height:auto}
+.p-card .badge{position:absolute;top:8px;left:8px;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:3px 7px;border-radius:999px}
+.badge.everyday{background:var(--p-surface);color:var(--p-ink)}
+.badge.premium{background:var(--p-premium);color:var(--p-onpremium)}
+.p-card .meta{padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px}
+.p-card .nm{font-size:11px;line-height:1.25}
+.p-card .pr{font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums}
+.p-track{margin:0 12px 12px;background:var(--p-surface);border-radius:16px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:6px}
+.p-track .t1{display:flex;justify-content:space-between;font-size:10.5px}
+.p-track .t1 b{font-family:var(--p-display);font-size:14px;font-weight:600}
+.p-track .t1 span{color:var(--p-muted)}
+.p-track svg{width:100%;height:auto;overflow:visible}
+.p-track .where{font-size:10.5px;color:var(--p-muted)}
+.p-nav{display:grid;grid-template-columns:repeat(5,1fr);padding:10px 6px 16px;border-top:1px solid var(--p-soft);background:var(--p-surface)}
+.p-nav span{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:var(--p-muted)}
+.p-nav span i{width:16px;height:16px;border-radius:5px;border:1.6px solid currentColor;display:block}
+.p-nav span.on{color:var(--p-primary);font-weight:700}
+
+/* Direction A: Jewel Box */
+.A{--p-bg:#F4EEE8;--p-surface:#FFFFFF;--p-soft:#EBE1DA;--p-ink:#2A1529;--p-muted:#85737F;--p-primary:#5B1F4F;--p-accent:#C9A66B;--p-onaccent:#2A1529;
+   --p-herobg:radial-gradient(circle at 85% 15%,#7A2E6A 0,#5B1F4F 45%,#3E1236 100%);--p-heroink:#F7EBDD;--p-premium:#2A1529;--p-onpremium:#E7CD9B;
+   --p-display:"Cormorant Garamond",Georgia,serif;--p-body:"Manrope",system-ui,sans-serif}
+.A .p-hero::before{content:"";position:absolute;right:-50px;top:-50px;width:190px;height:190px;border-radius:50%;border:1px solid rgba(201,166,107,.55);box-shadow:0 0 0 18px rgba(201,166,107,.08),0 0 0 36px rgba(201,166,107,.05)}
+.A .p-hero h4{font-style:italic;font-size:30px}
+/* Direction B: Adire Indigo */
+.B{--p-bg:#EDF0F6;--p-surface:#FFFFFF;--p-soft:#DFE4EF;--p-ink:#0F1A3A;--p-muted:#66708C;--p-primary:#1E2F6E;--p-accent:#C8683A;--p-onaccent:#FFFFFF;
+   --p-herobg:#1E2F6E;--p-heroink:#F2EFE8;--p-premium:#0F1A3A;--p-onpremium:#F0B38E;
+   --p-display:"Fraunces",Georgia,serif;--p-body:"DM Sans",system-ui,sans-serif}
+.B .p-hero::before{content:"";position:absolute;inset:0;opacity:.35;
+   background:
+    radial-gradient(circle,#B9C6EE 2px,transparent 2.5px) 0 0/16px 16px,
+    repeating-linear-gradient(45deg,transparent 0 22px,rgba(185,198,238,.5) 22px 23px),
+    repeating-linear-gradient(-45deg,transparent 0 22px,rgba(185,198,238,.5) 22px 23px);}
+.B .p-hero::after{content:"";position:absolute;inset:auto 0 0 0;height:70%;background:linear-gradient(to top,#1E2F6E 35%,transparent)}
+.B .p-hero h4{font-weight:700;letter-spacing:-.01em}
+/* Direction C: Blush & Espresso */
+.C{--p-bg:#F7E7E2;--p-surface:#FFF8F5;--p-soft:#F0D9D2;--p-ink:#3A2420;--p-muted:#8C6E68;--p-primary:#3A2420;--p-accent:#B76E79;--p-onaccent:#FFFFFF;
+   --p-herobg:#EAC8BF;--p-heroink:#3A2420;--p-premium:#3A2420;--p-onpremium:#F2C6B9;
+   --p-display:"Bodoni Moda",Georgia,serif;--p-body:"Jost",system-ui,sans-serif}
+.C .p-hero::before{content:"Y";position:absolute;right:-8px;top:-34px;font-family:"Bodoni Moda",serif;font-size:190px;line-height:1;color:rgba(58,36,32,.09);font-style:italic}
+.C .p-hero h4{font-size:26px;text-transform:uppercase;letter-spacing:.02em;font-weight:500}
+.C .p-logo{text-transform:uppercase;letter-spacing:.18em;font-size:15px}
+
+/* ---------- shared section ---------- */
+.shared{display:flex;flex-direction:column;gap:18px}
+.shared-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.shared-grid section{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.shared-grid p,.shared-grid li{font-size:.9rem;color:var(--muted)}
+.shared-grid ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.pick{border:1px dashed var(--line);border-radius:14px;padding:18px;color:var(--muted);font-size:.92rem}
+.pick b{color:var(--fg)}
+@media (prefers-reduced-motion:no-preference){.phone{transition:transform .3s}.phone:hover{transform:translateY(-4px)}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <div class="eyebrow">Yetibyrash · design stage</div>
+    <h1>Three ways Yetibyrash could look</h1>
+    <p>Each direction shows the same phone home screen: the tagline, the Everyday/Premium switch, two products in naira and the bead-string order tracker. Pick one to develop, or mix parts, for example A's colours with B's pattern.</p>
+    <div class="facts"><span>Nigerian shoppers · ₦</span><span>Paystack, pay before delivery</span><span>Everyday + Premium sections</span><span>Pro photos + phone shots</span><span>Logo coming later</span></div>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="shared">
+    <h2>Decisions shared by all three</h2>
+    <div class="shared-grid">
+      <section>
+        <h3>Everyday vs Premium</h3>
+        <ul>
+          <li>One shop with a two-way switch, not two separate shops. "Everyday" is affordable, "Premium" is the high end.</li>
+          <li>Premium items get a dark label and a slightly richer product page (gift box option, care card, larger gallery).</li>
+          <li>Price filters in ₦ bands: under ₦10k, ₦10k–30k, ₦30k–80k, ₦80k+.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Mixed photo quality</h3>
+        <ul>
+          <li>Every product image sits on a soft tinted square, so phone shots and studio shots look consistent side by side.</li>
+          <li>The admin upload screen crops to a square, shows a preview and warns when a photo is too small or dark.</li>
+          <li>Studio photos lead on Premium products; phone shots can appear as "real life" extra images.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Paying and tracking</h3>
+        <ul>
+          <li>Checkout ends in Paystack (card, bank transfer, USSD). The order exists only after Paystack confirms the payment.</li>
+          <li>Tracker beads: Paid → Packed → Shipped → Out for delivery → Delivered, with the city it's in.</li>
+          <li>Track by order number + phone number, no login needed. Updates by email and WhatsApp/SMS.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Phone-first patterns</h3>
+        <ul>
+          <li>Bottom navigation bar, sticky "Add to bag" button, filters that slide up from the bottom.</li>
+          <li>Nigerian address form: state, then LGA, then street, plus a landmark field.</li>
+          <li>Light pages that load fast on mobile data, with lazily loaded images.</li>
+        </ul>
+      </section>
+    </div>
+    <p class="pick"><b>Logo:</b> the name in the mockups is set in each direction's display font as a placeholder. When you send the logo, the chosen direction's colours can be adjusted to match it.</p>
+  </div>
+</div>
+
+<script>
+const dirs = [
+  {k:"A", name:"Jewel Box", tag:"Direction A · soft luxury",
+   mood:"Deep plum and champagne gold on warm ivory. Feels like opening a velvet-lined jewelry box: calm and quietly expensive.",
+   sw:[["#F4EEE8","Ivory"],["#5B1F4F","Plum"],["#C9A66B","Champagne"],["#2A1529","Ink"],["#EBE1DA","Blush sand"]],
+   dfont:"'Cormorant Garamond',serif", dstyle:"italic", bfont:"Manrope",
+   good:["Strongest premium feel","Gold works well for jewelry and watches"],
+   risk:["Can feel too formal for everyday beads","Close to many luxury brands"],
+   bead:["#C9A66B","#B35A3F","#5B1F4F"]},
+  {k:"B", name:"Adire Indigo", tag:"Direction B · proudly Nigerian",
+   mood:"Indigo and copper drawn from Yoruba adire cloth, with a dye pattern behind the hero. Modern, but recognisably Nigerian.",
+   sw:[["#EDF0F6","Mist"],["#1E2F6E","Indigo"],["#C8683A","Copper"],["#0F1A3A","Night"],["#DFE4EF","Haze"]],
+   dfont:"Fraunces,serif", dstyle:"normal", bfont:"DM Sans",
+   good:["Most unique, nobody else looks like this","Pattern gives instant brand recognition"],
+   risk:["Pattern must stay subtle behind products","Blue is less typical for women's jewelry"],
+   bead:["#C8683A","#1E2F6E","#E9C46A"]},
+  {k:"C", name:"Blush & Espresso", tag:"Direction C · young and fashion-forward",
+   mood:"Blush pink, espresso brown and rose gold with fashion-magazine type. Playful, friendly to the Everyday shopper.",
+   sw:[["#F7E7E2","Blush"],["#3A2420","Espresso"],["#B76E79","Rose gold"],["#FFF8F5","Cream"],["#EAC8BF","Petal"]],
+   dfont:"'Bodoni Moda',serif", dstyle:"normal", bfont:"Jost",
+   good:["Most approachable for affordable items","Suits intimates and tights well"],
+   risk:["Premium items need extra care to look high-end","Pink can feel too narrow as the brand grows"],
+   bead:["#B76E79","#E7B9A9","#3A2420"]}
+];
+
+function beadsSVG(c){
+  let s='<svg viewBox="0 0 100 70" aria-hidden="true">';
+  for(let i=0;i<11;i++){
+    const t=i/10, x=10+t*80, y=18+Math.sin(t*Math.PI)*34, r=i%5===2?6.5:5;
+    s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${c[i%3]}"/>`;
+  }
+  return s+'</svg>';
+}
+function watchSVG(ink, gold){
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="38" y="4" width="24" height="30" rx="4" fill="${gold}" opacity=".85"/>
+    <rect x="38" y="66" width="24" height="30" rx="4" fill="${gold}" opacity=".85"/>
+    <circle cx="50" cy="50" r="22" fill="${gold}"/>
+    <circle cx="50" cy="50" r="17" fill="#FFFDF8"/>
+    <line x1="50" y1="50" x2="50" y2="38" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="58" y2="53" stroke="${ink}" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="50" cy="50" r="1.8" fill="${ink}"/></svg>`;
+}
+function trackerSVG(){
+  const labels=["Paid","Packed","Shipped","On the way","Delivered"], done=3;
+  let s='<svg viewBox="0 0 260 46" role="img" aria-label="Order progress: shipped, 3 of 5 steps done">';
+  s+='<line x1="16" y1="14" x2="244" y2="14" stroke="var(--p-soft)" stroke-width="2"/>';
+  s+=`<line x1="16" y1="14" x2="${16+57*(done-1)}" y2="14" stroke="var(--p-accent)" stroke-width="2"/>`;
+  labels.forEach((l,i)=>{
+    const x=16+57*i, on=i<done;
+    s+=`<circle cx="${x}" cy="14" r="${i===done-1?8:6.5}" fill="${on?'var(--p-accent)':'var(--p-surface)'}" stroke="${on?'var(--p-accent)':'var(--p-muted)'}" stroke-width="1.5"/>`;
+    s+=`<text x="${x}" y="40" text-anchor="middle" font-size="8.5" fill="${on?'var(--p-ink)':'var(--p-muted)'}" font-weight="${i===done-1?700:400}">${l}</text>`;
+  });
+  return s+'</svg>';
+}
+
+const grid=document.getElementById('grid');
+dirs.forEach(d=>{
+  const gold=d.k==="B"?"#C8683A":d.k==="C"?"#C98F8F":"#C9A66B";
+  const ink=d.sw[3][0];
+  grid.insertAdjacentHTML('beforeend',`
+  <article class="dir">
+    <div class="dir-head"><span class="tag">${d.tag}</span><h2>${d.name}</h2><p>${d.mood}</p></div>
+    <div class="swatches">${d.sw.map(s=>`<div class="sw"><i style="background:${s[0]}"></i>${s[1]}</div>`).join('')}</div>
+    <div class="typesample">
+      <span class="d" style="font-family:${d.dfont};font-style:${d.dstyle}">Elegance meets affordability</span>
+      <span class="b" style="font-family:'${d.bfont}',sans-serif">Body text in ${d.bfont}: Coral waist beads, hand-strung in Lagos. ₦8,500</span>
+    </div>
+    <div class="phone"><div class="screen ${d.k}">
+      <div class="p-top"><span class="p-logo">Yetibyrash</span>
+        <svg class="p-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></div>
+      <div class="p-hero"><small>New in · Waist beads</small><h4>Elegance meets affordability</h4><span class="cta">Shop the edit</span></div>
+      <div class="p-tier"><span class="on">Everyday</span><span>Premium</span></div>
+      <div class="p-row">
+        <div class="p-card"><div class="art"><span class="badge everyday">Everyday</span>${beadsSVG(d.bead)}</div>
+          <div class="meta"><span class="nm">Coral waist beads</span><span class="pr">₦8,500</span></div></div>
+        <div class="p-card"><div class="art"><span class="badge premium">Premium</span>${watchSVG(ink,gold)}</div>
+          <div class="meta"><span class="nm">Gold mesh ladies' watch</span><span class="pr">₦64,000</span></div></div>
+      </div>
+      <div class="p-track">
+        <div class="t1"><b>Order YB-20418</b><span>Arrives Thu</span></div>
+        ${trackerSVG()}
+        <span class="where">Shipped · Lagos hub → Abuja</span>
+      </div>
+      <div class="p-nav"><span class="on"><i></i>Home</span><span><i></i>Shop</span><span><i></i>Search</span><span><i></i>Bag</span><span><i></i>Track</span></div>
+    </div></div>
+    <div class="notes"><div><b>Strengths</b><ul>${d.good.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      <div><b>Watch out</b><ul>${d.risk.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+  </article>`);
+});
+</script>

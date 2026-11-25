@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checkout</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 1200px; box-sizing: border-box; background: #F7E7E2; color: #3A2420; font-family: 'Jost', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+
+  <header style="display: flex; align-items: center; gap: 8px; padding: 16px 16px 6px;">
+    <a href="Bag.dc.html" aria-label="Back to bag" style="width: 44px; height: 44px; display: grid; place-items: center; color: #3A2420;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+    </a>
+    <h1 style="margin: 0; flex: 1; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 26px;">Checkout</h1>
+    <span style="font-size: 13px; color: #5A3E38;">No account needed</span>
+  </header>
+
+  <div style="padding: 8px 16px 0; display: flex; flex-direction: column; gap: 16px;">
+    <section style="background: #FFF8F5; border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; gap: 12px;">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 600;">1. Contact</h2>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-name" style="font-size: 13px; color: #5A3E38;">Full name</label><input id="co-name" value="Amaka Obi" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #3A2420;"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-phone" style="font-size: 13px; color: #5A3E38;">Phone (for delivery and WhatsApp updates)</label><input id="co-phone" type="tel" value="0803 000 0000" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #3A2420;"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-email" style="font-size: 13px; color: #5A3E38;">Email (for your receipt)</label><input id="co-email" type="email" value="amaka@example.com" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #3A2420;"></div>
+    </section>
+
+    <section style="background: #FFF8F5; border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; gap: 12px;">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 600;">2. Delivery address</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-state" style="font-size: 13px; color: #5A3E38;">State</label><select id="co-state" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 10px; font-size: 15px; background: #FFFFFF; color: #3A2420;"><option>Lagos</option><option>Abuja (FCT)</option><option>Rivers</option><option>Oyo</option></select></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-lga" style="font-size: 13px; color: #5A3E38;">LGA</label><select id="co-lga" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 10px; font-size: 15px; background: #FFFFFF; color: #3A2420;"><option>Eti-Osa</option><option>Ikeja</option><option>Surulere</option></select></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-street" style="font-size: 13px; color: #5A3E38;">House number and street</label><input id="co-street" value="12 Admiralty Way, Lekki Phase 1" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #3A2420;"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="co-landmark" style="font-size: 13px; color: #5A3E38;">Nearest landmark (optional)</label><input id="co-landmark" placeholder="e.g. opposite the filling station" style="height: 46px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #3A2420;"></div>
+    </section>
+
+    <section style="background: #FFF8F5; border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 600;">3. Delivery speed</h2>
+      <sc-for list="{{ options }}" as="o" hint-placeholder-count="2">
+        <button onClick="{{ o.pick }}" style="{{ o.style }}">
+          <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;"><b style="font-size: 15px;">{{ o.name }}</b><span style="font-size: 13px; color: #5A3E38;">{{ o.when }}</span></span>
+          <b style="font-size: 15px; font-variant-numeric: tabular-nums;">{{ o.feeLabel }}</b>
+        </button>
+      </sc-for>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 6px; font-size: 15px; padding: 0 4px;">
+      <div style="display: flex; justify-content: space-between;"><span>Items (2)</span><span style="font-variant-numeric: tabular-nums;">₦26,500</span></div>
+      <div style="display: flex; justify-content: space-between;"><span>Delivery</span><span style="font-variant-numeric: tabular-nums;">{{ feeLabel }}</span></div>
+      <div style="display: flex; justify-content: space-between; font-size: 19px; font-weight: 600; padding-top: 6px; border-top: 1px solid #EAC8BF;"><span>Total</span><span style="font-variant-numeric: tabular-nums;">{{ total }}</span></div>
+    </section>
+  </div>
+
+  <div style="flex: 1;"></div>
+
+  <div style="background: #FFF8F5; border-top: 1px solid #F0D9D2; padding: 14px 16px 22px; display: flex; flex-direction: column; gap: 10px;">
+    <a href="Confirmed.dc.html" style="height: 54px; border-radius: 999px; background: #3A2420; color: #FFF8F5; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; font-weight: 500;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      Pay {{ total }} with Paystack
+    </a>
+    <span style="font-size: 13px; color: #5A3E38; text-align: center; line-height: 1.45;">Card, bank transfer or USSD on Paystack's secure page. Your order is placed once the payment succeeds.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { opt: 0 }; }
+  renderVals() {
+    const fmt = n => '₦' + n.toLocaleString('en-NG');
+    const opts = [
+      { name: 'Standard', when: 'Lagos: 1–2 working days', fee: 2500 },
+      { name: 'Express', when: 'Lagos: same day if paid before 12 noon', fee: 4000 }
+    ];
+    const fee = opts[this.state.opt].fee;
+    return {
+      options: opts.map((o, i) => ({
+        ...o,
+        feeLabel: fmt(o.fee),
+        pick: () => this.setState({ opt: i }),
+        style: 'min-height: 64px; display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: left; padding: 10px 14px; border-radius: 14px; color: #3A2420; ' + (i === this.state.opt ? 'border: 2px solid #3A2420; background: #F7E7E2;' : 'border: 1px solid #EAC8BF; background: #FFFFFF;')
+      })),
+      feeLabel: fmt(fee),
+      total: fmt(26500 + fee)
+    };
+  }
+}
+</script>
+</body>
+</html>

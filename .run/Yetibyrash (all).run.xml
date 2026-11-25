@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Yetibyrash (all)" type="CompoundRunConfigurationType">
+    <toRun name="db" type="docker-deploy" />
+    <toRun name="api" type="GoApplicationRunConfiguration" />
+    <toRun name="shop" type="js.build_tools.npm" />
+    <toRun name="admin" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>

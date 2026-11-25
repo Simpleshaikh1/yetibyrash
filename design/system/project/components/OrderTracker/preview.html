@@ -1,0 +1,32 @@
+<!-- @dsCard group="Orders" height=380 subtitle="Shipped, step 3 of 5" -->
+<div class="demo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500&family=Jost:wght@400;500;600;700&display=swap">
+  <style>
+    body{margin:0;background:var(--ground-shop)}
+    .demo{font-family:var(--font-body);width:358px;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-5);color:var(--ink)}
+    .sum{background:var(--ink);color:var(--ink-on-dark);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:4px}
+    .sum small{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-rose-light)}
+    .sum b{font-family:var(--font-display);font-weight:500;font-size:26px}
+    .tr{background:var(--surface-card);border-radius:22px;padding:18px;display:flex;flex-direction:column}
+    .st{display:flex;gap:14px}
+    .rail{width:26px;display:flex;flex-direction:column;align-items:center}
+    .bead{width:18px;height:18px;border-radius:50%;box-sizing:border-box;flex:none}
+    .done{background:var(--accent-rose-gold)}
+    .cur{width:24px;height:24px;background:var(--accent-rose-gold);box-shadow:0 0 0 5px var(--surface-soft)}
+    .todo{background:var(--surface-card);border:2px solid #C9A9A2}
+    .th{flex:1;width:2px;min-height:20px}
+    .th.d{background:var(--accent-rose-gold)}.th.t{background:var(--surface-petal)}
+    .tx{display:flex;flex-direction:column;padding-bottom:16px}
+    .tx span:first-child{font-size:15px}
+    .tx span:last-child{font-size:13px;color:var(--ink-secondary)}
+    .muted{color:var(--ink-muted)}
+  </style>
+  <div class="sum"><small>YB-20418 · 2 items</small><b>On its way</b><span>Expected Thu 26 Nov · Lekki, Lagos</span></div>
+  <div class="tr" aria-label="Delivery progress: Shipped, step 3 of 5">
+    <div class="st"><div class="rail"><span class="bead done"></span><span class="th d"></span></div><div class="tx"><span>Paid</span><span>Mon 23 Nov, 4:12 pm · Paystack</span></div></div>
+    <div class="st"><div class="rail"><span class="bead done"></span><span class="th d"></span></div><div class="tx"><span>Packed</span><span>Tue 24 Nov, 10:30 am</span></div></div>
+    <div class="st"><div class="rail"><span class="bead cur"></span><span class="th t"></span></div><div class="tx"><span style="font-weight:700">Shipped</span><span>Tue 24 Nov, 2:05 pm · with our courier</span></div></div>
+    <div class="st"><div class="rail"><span class="bead todo"></span><span class="th t"></span></div><div class="tx"><span class="muted">Out for delivery</span><span>Rider will call before arriving</span></div></div>
+    <div class="st"><div class="rail"><span class="bead todo"></span></div><div class="tx"><span class="muted">Delivered</span><span>Expected Thu 26 Nov</span></div></div>
+  </div>
+</div>

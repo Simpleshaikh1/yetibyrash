@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Track order</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 960px; box-sizing: border-box; background: #F7E7E2; color: #3A2420; font-family: 'Jost', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+
+  <header style="display: flex; align-items: center; gap: 8px; padding: 16px 16px 6px;">
+    <a href="Home.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: grid; place-items: center; color: #3A2420;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+    </a>
+    <h1 style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 26px;">Track order</h1>
+  </header>
+
+  <div style="padding: 6px 16px 0; display: flex; flex-direction: column; gap: 14px;">
+    <form style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="tr-order" style="font-size: 12.5px; color: #5A3E38;">Order number</label><input id="tr-order" value="YB-20418" style="height: 44px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFF8F5; color: #3A2420;"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="tr-phone" style="font-size: 12.5px; color: #5A3E38;">Phone number</label><input id="tr-phone" type="tel" value="0803 000 0000" style="height: 44px; border: 1px solid #EAC8BF; border-radius: 12px; padding: 0 12px; font-size: 15px; background: #FFF8F5; color: #3A2420;"></div>
+    </form>
+
+    <section style="background: #3A2420; color: #FFF8F5; border-radius: 22px; padding: 20px 18px; display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #F2C6B9;">YB-20418 · 2 items</span>
+      <h2 style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 500; font-size: 28px; line-height: 1.1;">{{ headline }}</h2>
+      <span style="font-size: 14px; color: #F2DCD5;">{{ subline }}</span>
+    </section>
+
+    <section aria-label="Delivery progress" style="background: #FFF8F5; border-radius: 22px; padding: 20px 18px; display: flex; flex-direction: column;">
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+        <div style="display: flex; gap: 14px;">
+          <div style="display: flex; flex-direction: column; align-items: center; width: 26px; flex: none;">
+            <span style="{{ s.beadStyle }}"></span>
+            <span style="{{ s.threadStyle }}"></span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px; padding-bottom: 18px; min-width: 0;">
+            <span style="{{ s.labelStyle }}">{{ s.label }}</span>
+            <span style="font-size: 13px; color: #5A3E38;">{{ s.detail }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="background: #FFF8F5; border-radius: 18px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+      <span style="font-size: 14px; line-height: 1.4;">Question about this order?<br><span style="color: #5A3E38;">We reply on WhatsApp within the hour.</span></span>
+      <a href="#chat" style="flex: none; background: #3A2420; color: #FFF8F5; border-radius: 999px; padding: 10px 16px; font-size: 14px;">Chat with us</a>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"range","min":1,"max":5,"step":1,"default":3},"$preview":{"width":390,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const step = Math.max(1, Math.min(5, this.props.step ?? 3));
+    const steps = [
+      { label: 'Paid', detail: 'Mon 23 Nov, 4:12 pm · Paystack' },
+      { label: 'Packed', detail: 'Tue 24 Nov, 10:30 am · Yetibyrash studio, Lekki' },
+      { label: 'Shipped', detail: 'Tue 24 Nov, 2:05 pm · with our courier' },
+      { label: 'Out for delivery', detail: 'Rider will call before arriving' },
+      { label: 'Delivered', detail: 'Expected Thu 26 Nov' }
+    ];
+    const heads = ['Payment received', 'Being packed', 'On its way', 'Out for delivery today', 'Delivered'];
+    const subs = ['We’re getting your order ready.', 'Your pieces are being wrapped.', 'Expected Thu 26 Nov · Lekki, Lagos', 'Keep your phone close, the rider will call.', 'Enjoy! Tell us how you like it.'];
+    return {
+      headline: heads[step - 1],
+      subline: subs[step - 1],
+      steps: steps.map((s, i) => {
+        const done = i < step, current = i === step - 1, last = i === steps.length - 1;
+        const size = current ? 24 : 18;
+        return {
+          ...s,
+          beadStyle: 'width: ' + size + 'px; height: ' + size + 'px; border-radius: 999px; flex: none; box-sizing: border-box; ' + (done ? 'background: #B76E79; border: 0;' : 'background: #FFF8F5; border: 2px solid #C9A9A2;') + (current ? ' box-shadow: 0 0 0 5px #F0D9D2;' : ''),
+          threadStyle: last ? 'display: none;' : 'flex: 1; width: 2px; min-height: 22px; background: ' + (i < step - 1 ? '#B76E79' : '#EAC8BF') + ';',
+          labelStyle: 'font-size: 15px; ' + (done ? 'color: #3A2420; font-weight: ' + (current ? '700' : '500') + ';' : 'color: #76574F;')
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

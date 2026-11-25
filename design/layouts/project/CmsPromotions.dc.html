@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Promotions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Promotions</h1>
+        <p style="margin: 0; font-size: 15px; color: #5A3E38;">Sales, free gifts and discount codes. Prices, badges and the banner change on the shop automatically and switch back when the sale ends.</p>
+      </div>
+      <button style="height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #3A2420; color: #FFF8F5; font-size: 15px;">+ New promotion</button>
+    </div>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2 style="margin: 0; font-size: 19px; font-weight: 600;">Black Friday week</h2>
+          <span style="background: #EAF3EE; color: #2F6B4F; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px;">Live · ends in 4 days</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pm-type" style="font-size: 13px; color: #5A3E38;">Discount</label><select id="pm-type" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF;"><option>20% off</option><option>Fixed ₦ off</option></select></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pm-on" style="font-size: 13px; color: #5A3E38;">Applies to</label><select id="pm-on" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF;"><option>Everything</option><option>Everyday only</option><option>Clothing only</option></select></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pm-dates" style="font-size: 13px; color: #5A3E38;">Dates</label><input id="pm-dates" value="24 Nov – 30 Nov" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pm-badge" style="font-size: 13px; color: #5A3E38;">Badge on products</label><input id="pm-badge" value="20% OFF · BLACK FRIDAY" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pm-banner" style="font-size: 13px; color: #5A3E38;">Homepage banner</label><select id="pm-banner" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF;"><option>Black Friday banner</option></select></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pm-bar" style="font-size: 13px; color: #5A3E38;">Announcement bar</label><input id="pm-bar" value="20% off everything until Sunday" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+        </div>
+        <label for="pm-exclude" style="display: flex; gap: 10px; align-items: center; font-size: 14.5px;"><input id="pm-exclude" type="checkbox" checked style="width: 20px; height: 20px; accent-color: #3A2420;">Leave out products that are already on sale</label>
+      </div>
+      <div style="background: #FBF6F4; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <b style="font-size: 14px; font-weight: 600;">How a product card looks during the sale</b>
+        <div style="background: #FFF8F5; border-radius: 16px; overflow: hidden; width: 200px; display: flex; flex-direction: column;">
+          <span style="aspect-ratio: 1; background: #F0D9D2; position: relative;"><span style="position: absolute; top: 8px; left: 8px; background: #9A4F5B; color: #FFFFFF; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; padding: 4px 8px; border-radius: 999px;">20% OFF · BLACK FRIDAY</span></span>
+          <span style="padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px;">Ribbed lounge joggers<span><b style="font-size: 15px;">₦11,600</b> <s style="color: #76574F;">₦14,500</s></span></span>
+        </div>
+        <span style="font-size: 13px; color: #5A3E38;">Sales so far: 41 orders · ₦612,400</span>
+      </div>
+    </section>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: start;">
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+        <h2 style="margin: 0; font-size: 17px; font-weight: 600;">Free gift with purchase</h2>
+        <span style="font-size: 14.5px;">Spend <b>₦50,000</b> or more, get a <b>Gold huggie hoops</b> pair free.</span>
+        <div style="height: 10px; border-radius: 999px; background: #F4ECE9; overflow: hidden;"><span style="display: block; width: 62%; height: 100%; background: #B76E79;"></span></div>
+        <span style="font-size: 13px; color: #5A3E38;">31 of 50 gifts given · stops when gifts run out. The bag shows "₦X more for your free gift".</span>
+      </section>
+
+      <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; padding: 16px 18px;"><h2 style="margin: 0; font-size: 17px; font-weight: 600;">Discount codes</h2><span style="font-size: 14px; color: #9A4F5B; font-weight: 500;">+ New code</span></div>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 0.8fr); background: #F4ECE9; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+          <span style="padding: 10px 18px;">Code</span><span style="padding: 10px 18px;">What it gives</span><span style="padding: 10px 18px;">Used</span><span style="padding: 10px 18px;">Status</span>
+        </div>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 0.8fr); border-top: 1px solid #EFE2DE; font-size: 14.5px;"><b style="padding: 11px 18px; font-weight: 600;">WELCOME10</b><span style="padding: 11px 18px; color: #5A3E38;">10% off first order</span><span style="padding: 11px 18px;">128</span><span style="padding: 11px 18px; color: #2F6B4F; font-weight: 600;">Active</span></div>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 0.8fr); border-top: 1px solid #EFE2DE; font-size: 14.5px;"><b style="padding: 11px 18px; font-weight: 600;">BESTIE5K</b><span style="padding: 11px 18px; color: #5A3E38;">₦5,000 off orders over ₦30,000</span><span style="padding: 11px 18px;">44 / 100</span><span style="padding: 11px 18px; color: #2F6B4F; font-weight: 600;">Active</span></div>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 0.8fr); border-top: 1px solid #EFE2DE; font-size: 14.5px;"><b style="padding: 11px 18px; font-weight: 600;">FREESHIPLAG</b><span style="padding: 11px 18px; color: #5A3E38;">Free Lagos delivery</span><span style="padding: 11px 18px;">60</span><span style="padding: 11px 18px; color: #76574F; font-weight: 600;">Ended</span></div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const navItems = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    return {
+      nav: navItems.map(i => ({ label: i[0], href: i[1], style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Promotions' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+/* Yetibyrash design tokens, copied from the design system (design/system/project/tokens.json).
+   Change a value there first, then here. */
+:root {
+  /* Grounds and surfaces */
+  --ground-shop: #F7E7E2;
+  --ground-admin: #FBF6F4;
+  --surface-card: #FFF8F5;
+  --surface-white: #FFFFFF;
+  --surface-soft: #F0D9D2;
+  --surface-petal: #EAC8BF;
+  --surface-panel: #F4ECE9;
+
+  /* Text */
+  --ink: #3A2420;
+  --ink-admin: #2B1C19;
+  --ink-secondary: #5A3E38;
+  --ink-muted: #76574F;
+  --ink-on-dark: #FFF8F5;
+
+  /* Accents */
+  --accent-rose: #9A4F5B;
+  --accent-rose-gold: #B76E79; /* decoration only, never behind text */
+  --accent-rose-light: #F2C6B9;
+
+  /* Lines */
+  --line-shop: #EAC8BF;
+  --line-admin: #EFE2DE;
+  --line-field: #E3D2CC;
+
+  /* States (admin and order status only) */
+  --success: #2F6B4F;
+  --success-tint: #EAF3EE;
+  --warning: #7A4E0C;
+  --warning-edge: #C98A1F;
+  --warning-tint: #FDF3E6;
+  --danger: #A3302A;
+  --danger-tint: #FBEAE8;
+
+  /* Type */
+  --font-display: "Bodoni Moda", Georgia, serif;
+  --font-body: Jost, system-ui, sans-serif;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Corners */
+  --radius-sm: 8px;
+  --radius-field: 10px;
+  --radius-md: 12px;
+  --radius-panel: 14px;
+  --radius-card: 18px;
+  --radius-hero: 24px;
+  --radius-pill: 999px;
+
+  --shadow-raised: 0 1px 3px rgba(58, 36, 32, 0.12);
+
+  /* Sizes */
+  --touch-min: 44px;
+  --button-height: 52px;
+  --field-height: 46px;
+}

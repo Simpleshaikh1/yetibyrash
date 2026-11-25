@@ -1,0 +1,43 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-24T12:00:00Z"},
+  "title": "Yetibyrash Phone Layouts",
+  "launch": {"view": "canvas"},
+  "pages": [{"id": "shop", "name": "Shop (phone)"}, {"id": "admin", "name": "Admin CMS"}],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1840, "h": 1500, "title": "Site map", "page": "shop"},
+    "Home.dc.html": {"x": 0, "y": 1880, "w": 390, "h": 1600, "title": "1 · Home", "is_interactive": true, "page": "shop"},
+    "Shop.dc.html": {"x": 470, "y": 1880, "w": 390, "h": 1100, "title": "2 · Shop", "is_interactive": true, "page": "shop"},
+    "Product.dc.html": {"x": 940, "y": 1880, "w": 390, "h": 1750, "title": "3 · Product", "is_interactive": true, "page": "shop"},
+    "Bag.dc.html": {"x": 1410, "y": 1880, "w": 390, "h": 844, "title": "4 · Bag", "is_interactive": true, "page": "shop"},
+    "Checkout.dc.html": {"x": 1880, "y": 1880, "w": 390, "h": 1200, "title": "5 · Checkout", "is_interactive": true, "page": "shop"},
+    "Confirmed.dc.html": {"x": 0, "y": 4020, "w": 390, "h": 844, "title": "6 · Payment confirmed", "is_interactive": true, "page": "shop"},
+    "Track.dc.html": {"x": 470, "y": 4020, "w": 390, "h": 960, "title": "7 · Track order", "is_interactive": true, "page": "shop"},
+    "Account.dc.html": {"x": 940, "y": 4020, "w": 390, "h": 844, "title": "8 · Account", "page": "shop"},
+    "AdminOrder.dc.html": {"x": 1410, "y": 4020, "w": 390, "h": 960, "title": "9 · Admin: update order", "page": "shop"},
+    "CmsCoverage.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1250, "title": "A0 · What the CMS controls", "page": "admin"},
+    "CmsOverview.dc.html": {"x": 0, "y": 1630, "w": 1440, "h": 960, "title": "A1 · Overview", "page": "admin"},
+    "CmsOrders.dc.html": {"x": 1520, "y": 1630, "w": 1440, "h": 960, "title": "A2 · Orders", "page": "admin", "is_interactive": true},
+    "CmsProducts.dc.html": {"x": 0, "y": 2970, "w": 1440, "h": 960, "title": "A3 · Products", "page": "admin"},
+    "CmsProductEdit.dc.html": {"x": 1520, "y": 2970, "w": 1440, "h": 1560, "title": "A4 · Add / edit product", "page": "admin", "is_interactive": true},
+    "CmsCatalogue.dc.html": {"x": 0, "y": 4910, "w": 1440, "h": 1150, "title": "A5 · Catalogue setup (categories, sizes, colours)", "page": "admin", "is_interactive": true},
+    "CmsContent.dc.html": {"x": 1520, "y": 4910, "w": 1440, "h": 1150, "title": "A6 · Homepage and content", "page": "admin"},
+    "CmsDelivery.dc.html": {"x": 0, "y": 6440, "w": 1440, "h": 1000, "title": "A7 · Delivery zones and fees", "page": "admin"},
+    "CmsSettings.dc.html": {"x": 1520, "y": 6440, "w": 1440, "h": 1000, "title": "A8 · Messages, payments, store, staff", "page": "admin", "is_interactive": true},
+    "CmsPromotions.dc.html": {"x": 0, "y": 7820, "w": 1440, "h": 1000, "title": "A9 · Promotions", "page": "admin"},
+    "CmsReviews.dc.html": {"x": 1520, "y": 7820, "w": 1440, "h": 1000, "title": "A10 · Reviews", "page": "admin", "is_interactive": true}
+  },
+  "order": ["Main.dc.html", "Home.dc.html", "Shop.dc.html", "Product.dc.html", "Bag.dc.html", "Checkout.dc.html", "Confirmed.dc.html", "Track.dc.html", "Account.dc.html", "AdminOrder.dc.html", "CmsCoverage.dc.html", "CmsOverview.dc.html", "CmsOrders.dc.html", "CmsProducts.dc.html", "CmsProductEdit.dc.html", "CmsCatalogue.dc.html", "CmsContent.dc.html", "CmsDelivery.dc.html", "CmsSettings.dc.html", "CmsPromotions.dc.html", "CmsReviews.dc.html"],
+  "notes": {
+    "t-map": {"x": 0, "y": -280, "text": "Site map", "kind": "title1", "maxW": 1840, "page": "shop"},
+    "t-flow": {"x": 0, "y": 1600, "text": "Shopping flow (press Play on Home to tap through)", "kind": "title1", "maxW": 2270, "page": "shop"},
+    "t-after": {"x": 0, "y": 3740, "text": "After payment, account and admin", "kind": "title1", "maxW": 1800, "page": "shop"},
+    "a-cover": {"x": 0, "y": -280, "text": "Admin CMS: everything the shop shows, and where it is managed", "kind": "title1", "maxW": 2960, "page": "admin"},
+    "a-daily": {"x": 0, "y": 1350, "text": "Daily work: overview and orders", "kind": "title1", "maxW": 2960, "page": "admin"},
+    "a-products": {"x": 0, "y": 2690, "text": "Products", "kind": "title1", "maxW": 2960, "page": "admin"},
+    "a-setup": {"x": 0, "y": 4630, "text": "Catalogue setup and site content", "kind": "title1", "maxW": 2960, "page": "admin"},
+    "a-settings": {"x": 0, "y": 6160, "text": "Delivery and settings", "kind": "title1", "maxW": 2960, "page": "admin"},
+    "a-grow": {"x": 0, "y": 7540, "text": "Promotions and reviews", "kind": "title1", "maxW": 2960, "page": "admin"}
+  },
+  "designSystems": []
+}

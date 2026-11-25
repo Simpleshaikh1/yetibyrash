@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add or edit product</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1560px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; flex-direction: column;">
+        <a href="CmsProducts.dc.html" style="font-size: 14px;">‹ Products</a>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600;">{{ title }}</h1>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <a href="Product.dc.html" style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #E3D2CC; background: #FFFFFF; color: #2B1C19; display: flex; align-items: center; font-size: 15px;">Preview on phone</a>
+        <button style="height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #3A2420; color: #FFF8F5; font-size: 15px; font-weight: 500;">Save product</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 18px; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600;">1. What is it?</h2>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 13px; color: #5A3E38;">Category: decides the sizes, filters and extra details below</span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <sc-for list="{{ catChips }}" as="c" hint-placeholder-count="4">
+                <button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pe-name" style="font-size: 13px; color: #5A3E38;">Product name</label><input id="pe-name" value="{{ title }}" style="height: 44px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #2B1C19;"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pe-desc" style="font-size: 13px; color: #5A3E38;">Description</label><textarea id="pe-desc" rows="3" style="border: 1px solid #E3D2CC; border-radius: 10px; padding: 10px 12px; font-size: 15px; background: #FFFFFF; color: #2B1C19; resize: vertical;">{{ desc }}</textarea></div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;"><h2 style="margin: 0; font-size: 17px; font-weight: 600;">2. Photos</h2><span style="font-size: 13px; color: #5A3E38;">Drag to reorder · first photo shows in the shop grid</span></div>
+          <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px;">
+            <div style="aspect-ratio: 1; border-radius: 10px; background: #F0D9D2; position: relative;"><span style="position: absolute; left: 6px; bottom: 6px; background: #3A2420; color: #FFF8F5; font-size: 11px; padding: 2px 7px; border-radius: 999px;">Main · Studio</span></div>
+            <div style="aspect-ratio: 1; border-radius: 10px; background: #F0D9D2; position: relative;"><span style="position: absolute; left: 6px; bottom: 6px; background: #FFFFFF; color: #2B1C19; font-size: 11px; padding: 2px 7px; border-radius: 999px;">Studio</span></div>
+            <div style="aspect-ratio: 1; border-radius: 10px; background: #F0D9D2; position: relative;"><span style="position: absolute; left: 6px; bottom: 6px; background: #FFFFFF; color: #2B1C19; font-size: 11px; padding: 2px 7px; border-radius: 999px;">Real life</span></div>
+            <div style="aspect-ratio: 1; border-radius: 10px; background: #FDF3E6; position: relative; box-shadow: inset 0 0 0 2px #C98A1F; display: grid; place-items: center; text-align: center; font-size: 11.5px; color: #7A4E0C; padding: 6px;">Too dark. Retake or brighten?</div>
+            <div style="aspect-ratio: 1; border-radius: 10px; border: 2px dashed #E3D2CC; display: grid; place-items: center; text-align: center; font-size: 13px; color: #5A3E38; padding: 6px;">+ Add photos</div>
+            <div style="aspect-ratio: 1; border-radius: 10px; border: 2px dashed #EFE2DE;"></div>
+          </div>
+          <span style="font-size: 13px; color: #5A3E38;">Photos are cropped to a square and placed on the soft blush background. Phone shots under 1200 px or too dark get a warning. Each colour can have its own photos.</span>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600;">3. Colours and sizes</h2>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 13px; color: #5A3E38;">Colours (from Catalogue › Colours). Tap to turn on or off.</span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <sc-for list="{{ colourChips }}" as="c" hint-placeholder-count="4">
+                <button onClick="{{ c.pick }}" style="{{ c.style }}"><span style="{{ c.dot }}"></span>{{ c.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 13px; color: #5A3E38;">{{ sizeSetLabel }}</span>
+            <sc-if value="{{ hasSizes }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <sc-for list="{{ sizeChips }}" as="s" hint-placeholder-count="5">
+                  <button onClick="{{ s.pick }}" style="{{ s.style }}">{{ s.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="border: 1px solid #EFE2DE; border-radius: 10px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.7fr); background: #F4ECE9; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+              <span style="padding: 10px 12px;">Option</span><span style="padding: 10px 12px;">SKU</span><span style="padding: 10px 12px;">Price ₦</span><span style="padding: 10px 12px;">Stock</span><span style="padding: 10px 12px;">On sale</span>
+            </div>
+            <sc-for list="{{ variants }}" as="v" hint-placeholder-count="8">
+              <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.7fr); align-items: center; border-top: 1px solid #EFE2DE; font-size: 14.5px;">
+                <span style="padding: 6px 12px;">{{ v.label }}</span>
+                <span style="padding: 6px 12px; color: #5A3E38; font-size: 13px;">{{ v.sku }}</span>
+                <span style="padding: 6px 12px;"><input aria-label="Price for {{ v.label }}" value="{{ v.price }}" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid #E3D2CC; border-radius: 8px; padding: 0 8px; font-size: 14px; font-variant-numeric: tabular-nums;"></span>
+                <span style="padding: 6px 12px;"><input aria-label="Stock for {{ v.label }}" value="{{ v.stock }}" style="{{ v.stockStyle }}"></span>
+                <span style="padding: 6px 12px; color: #2F6B4F; font-weight: 600;">{{ v.onSale }}</span>
+              </div>
+            </sc-for>
+            <div style="border-top: 1px solid #EFE2DE; padding: 10px 12px; font-size: 14px; display: flex; justify-content: space-between; color: #5A3E38;">
+              <span>{{ variantSummary }}</span><span>Set all prices: <b style="color: #2B1C19;">₦{{ basePrice }}</b> · Set all stock</span>
+            </div>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600;">4. {{ cat }} details</h2>
+          <span style="font-size: 13px; color: #5A3E38;">These fields come from the category's template and show on the product page under "Materials and care".</span>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <sc-for list="{{ extras }}" as="x" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 13px; color: #5A3E38;">{{ x.label }}</span><input aria-label="{{ x.label }}" value="{{ x.value }}" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #2B1C19;"></div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">On the shop</h2>
+          <button onClick="{{ toggleLive }}" style="{{ liveStyle }}"><span>{{ liveLabel }}</span><span style="{{ knob }}"></span></button>
+          <span style="font-size: 13px; color: #5A3E38;">Or schedule: goes live on a date you pick.</span>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Tier</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; background: #F4ECE9; border-radius: 10px; padding: 4px;">
+            <button onClick="{{ setEveryday }}" style="{{ everydayStyle }}">Everyday</button>
+            <button onClick="{{ setPremium }}" style="{{ premiumStyle }}">Premium</button>
+          </div>
+          <span style="font-size: 13px; color: #5A3E38;">Premium adds the dark label and the gift-box option on the product page.</span>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Price</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pe-price" style="font-size: 13px; color: #5A3E38;">Price ₦</label><input id="pe-price" value="{{ basePrice }}" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px;"></div>
+            <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pe-was" style="font-size: 13px; color: #5A3E38;">Was ₦ (optional)</label><input id="pe-was" placeholder="Shows as a sale" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px;"></div>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Sub-category and badges</h2>
+          <label for="pe-sub" style="font-size: 13px; color: #5A3E38;">Sub-category</label>
+          <select id="pe-sub" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF;"><option>{{ sub }}</option></select>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span style="border: 1px solid #3A2420; background: #F7E7E2; border-radius: 999px; padding: 6px 12px; font-size: 14px;">New ✓</span>
+            <span style="border: 1px solid #E3D2CC; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Bestseller</span>
+            <span style="border: 1px solid #E3D2CC; border-radius: 999px; padding: 6px 12px; font-size: 14px;">Handmade</span>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Size guide and returns</h2>
+          <span style="font-size: 14px;">Size guide: <b style="font-weight: 600;">{{ guide }}</b></span>
+          <span style="font-size: 14px;">Returns: <b style="font-weight: 600;">{{ returns }}</b></span>
+          <span style="font-size: 13px; color: #5A3E38;">Both come from the category. Change them in Content.</span>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Selling options</h2>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><label for="pe-material" style="font-size: 13px; color: #5A3E38;">Line under the name</label><input id="pe-material" value="Cotton-blend rib" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px;"></div>
+          <label for="pe-gift" style="display: flex; gap: 10px; align-items: center; font-size: 14.5px;"><input id="pe-gift" type="checkbox" checked style="width: 20px; height: 20px; accent-color: #3A2420;">Offer gift box (₦1,500)</label>
+          <label for="pe-preorder" style="display: flex; gap: 10px; align-items: center; font-size: 14.5px;"><input id="pe-preorder" type="checkbox" style="width: 20px; height: 20px; accent-color: #3A2420;">Allow pre-order when sold out</label>
+          <span style="font-size: 13px; color: #5A3E38;">Reviews: ★ 4.8 from 32 · <a href="CmsReviews.dc.html">manage</a></span>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Complete the look</h2>
+          <span style="font-size: 14px; color: #5A3E38;">Pieces shown under this product:</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <span style="background: #F4ECE9; border-radius: 999px; padding: 5px 10px; font-size: 13.5px;">Cropped baby tee ✕</span>
+            <span style="background: #F4ECE9; border-radius: 999px; padding: 5px 10px; font-size: 13.5px;">Pearl drop earrings ✕</span>
+            <span style="border: 1px dashed #E3D2CC; border-radius: 999px; padding: 5px 10px; font-size: 13.5px; color: #5A3E38;">+ Add</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { cat: 'Joggers', offC: {}, offS: {}, live: true, tier: 'Everyday' }; }
+  renderVals() {
+    const C = {
+      'Joggers': { title: 'Ribbed lounge joggers', sub: 'Clothing › Joggers', desc: 'Soft ribbed joggers with a high, wide waistband and a relaxed leg. Pairs with the matching crop top.', set: 'Clothing sizes (UK)', sizes: ['XS', 'S', 'M', 'L', 'XL'], colours: [['Espresso', '#3A2420'], ['Blush', '#EAC8BF'], ['Black', '#1E1A1A'], ['Grey marl', '#9A9A9E']], price: 14500, code: 'JG-RIB', guide: 'Clothing size chart', returns: '7 days, unworn with tags', extras: [['Fabric', '95% cotton, 5% elastane rib'], ['Fit', 'Relaxed, high waist'], ['Inside leg (size M)', '74 cm'], ['Model wears', 'Size S · 168 cm tall']] },
+      'Rings': { title: 'Solitaire ring', sub: 'Jewelry › Rings', desc: 'A single cubic zirconia stone on a slim 18k gold-plated band.', set: 'Ring sizes (US)', sizes: ['5', '6', '7', '8', '9'], colours: [['Gold', '#C9A24B'], ['Silver', '#C7C7CC'], ['Rose gold', '#C98F8F']], price: 48000, code: 'RG-SOL', guide: 'Ring size guide', returns: '7 days, unworn', extras: [['Metal', 'Brass'], ['Plating', '18k gold'], ['Stone', 'Cubic zirconia'], ['Hypoallergenic', 'Yes']] },
+      'Tights': { title: 'Opaque black tights', sub: 'Intimates › Tights', desc: 'Soft, opaque 40 denier tights with a comfort waistband.', set: 'Tights sizes', sizes: ['S', 'M', 'L', 'XL', 'XXL'], colours: [['Black', '#1E1A1A'], ['Nude 1', '#E6C1A6'], ['Nude 2', '#B9845E'], ['Nude 3', '#7A4E33']], price: 3500, code: 'TT-OPQ', guide: 'Tights size chart (height × hips)', returns: 'No returns once opened', extras: [['Denier', '40'], ['Fabric', '88% nylon, 12% elastane'], ['Pack size', '1 pair'], ['Washing', 'Hand wash cold']] },
+      'Bags': { title: 'Mini structured tote', sub: 'Bags › Totes', desc: 'A compact structured tote with a detachable crossbody strap. Fits your phone, wallet and keys.', set: 'No sizes for this category (dimensions go in the details below)', sizes: [], colours: [['Tan', '#B07A4F'], ['Black', '#1E1A1A'], ['Cream', '#EFE4D2'], ['Blush', '#EAC8BF']], price: 32000, code: 'BG-TOT', guide: 'None (dimensions show on the product page)', returns: '7 days, unused with tags', extras: [['Dimensions (W × H × D)', '24 × 18 × 10 cm'], ['Strap drop', 'Handle 10 cm · strap 55 cm, detachable'], ['Material', 'Faux leather, suede-feel lining'], ['Closure', 'Magnetic snap'], ['Inside', '1 zip pocket, 2 slip pockets'], ['Fits', 'Phone up to 6.7", wallet, keys']] },
+      'Watches': { title: 'Gold mesh ladies’ watch', sub: 'Watches', desc: 'A slim gold-tone case on a fine stainless mesh strap.', set: 'No sizes for this category (adjustable strap)', sizes: [], colours: [['Gold', '#C9A24B'], ['Silver', '#C7C7CC'], ['Rose gold', '#C98F8F']], price: 64000, code: 'WT-MSH', guide: 'None', returns: '7 days, unworn, with tags', extras: [['Case size', '28 mm'], ['Strap', 'Stainless steel mesh'], ['Movement', 'Quartz'], ['Water resistance', '3 ATM (splash proof)'], ['Warranty', '6 months'], ['In the box', 'Gift box and spare battery']] }
+    };
+    const cfg = C[this.state.cat];
+    const fmt = n => n.toLocaleString('en-NG');
+    const chip = on => 'min-height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 999px; font-size: 14.5px; ' + (on ? 'border: 2px solid #3A2420; background: #F7E7E2; color: #2B1C19; font-weight: 600;' : 'border: 1px solid #E3D2CC; background: #FFFFFF; color: #76574F; text-decoration: line-through;');
+    const colsOn = cfg.colours.filter(c => !this.state.offC[c[0]]);
+    const sizesOn = cfg.sizes.filter(s => !this.state.offS[s]);
+    const combos = [];
+    colsOn.forEach((c, ci) => { (sizesOn.length ? sizesOn : ['']).forEach((s, si) => combos.push({ c: c[0], s: s, ci: ci, si: si })); });
+    const shown = combos.slice(0, 8);
+    const navItems = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    const tierOn = 'min-height: 38px; border: 0; border-radius: 8px; background: #FFFFFF; color: #2B1C19; font-size: 14.5px; font-weight: 600; box-shadow: 0 1px 2px rgba(43,28,25,0.12);';
+    const tierOff = 'min-height: 38px; border: 0; border-radius: 8px; background: transparent; color: #5A3E38; font-size: 14.5px;';
+    return {
+      nav: navItems.map(i => ({ label: i[0], href: i[1], style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Products' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') })),
+      cat: this.state.cat, title: cfg.title, desc: cfg.desc, sub: cfg.sub, guide: cfg.guide, returns: cfg.returns,
+      basePrice: fmt(cfg.price),
+      catChips: Object.keys(C).map(k => ({ label: k, pick: () => this.setState({ cat: k, offC: {}, offS: {}, tier: k === 'Watches' || k === 'Rings' ? 'Premium' : 'Everyday' }),
+        style: 'min-height: 40px; padding: 0 16px; border-radius: 10px; font-size: 15px; ' + (k === this.state.cat ? 'border: 0; background: #3A2420; color: #FFF8F5; font-weight: 600;' : 'border: 1px solid #E3D2CC; background: #FFFFFF; color: #2B1C19;') })),
+      colourChips: cfg.colours.map(c => { const on = !this.state.offC[c[0]]; return { label: c[0], style: chip(on), dot: 'width: 14px; height: 14px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.15); background: ' + c[1] + ';',
+        pick: () => this.setState({ offC: { ...this.state.offC, [c[0]]: on } }) }; }),
+      sizeSetLabel: 'Size set: ' + cfg.set + (cfg.sizes.length ? ' (from Catalogue › Size sets). Turn off sizes you don’t stock.' : ''),
+      hasSizes: cfg.sizes.length > 0,
+      sizeChips: cfg.sizes.map(s => { const on = !this.state.offS[s]; return { label: s, style: chip(on), pick: () => this.setState({ offS: { ...this.state.offS, [s]: on } }) }; }),
+      variants: shown.map((v, i) => {
+        const stock = (v.ci * 7 + v.si * 5 + 3) % 16;
+        return { label: v.c + (v.s ? ' / ' + v.s : ''), sku: cfg.code + '-' + v.c.slice(0, 3).toUpperCase().replace(' ', '') + (v.s ? '-' + (v.si + 1) : ''),
+          price: fmt(cfg.price + (v.s && v.si >= 3 && this.state.cat === 'Tights' ? 700 : 0)), stock: String(stock), onSale: stock > 0 ? 'Yes' : 'Sold out',
+          stockStyle: 'width: 100%; box-sizing: border-box; height: 34px; border-radius: 8px; padding: 0 8px; font-size: 14px; font-variant-numeric: tabular-nums; ' + (stock === 0 ? 'border: 2px solid #A3302A; color: #A3302A;' : stock <= 3 ? 'border: 2px solid #C98A1F;' : 'border: 1px solid #E3D2CC;') };
+      }),
+      variantSummary: combos.length + ' options' + (combos.length > shown.length ? ' · showing ' + shown.length + ', scroll for the rest' : ''),
+      extras: cfg.extras.map(x => ({ label: x[0], value: x[1] })),
+      toggleLive: () => this.setState({ live: !this.state.live }),
+      liveLabel: this.state.live ? 'Visible to shoppers' : 'Hidden (draft)',
+      liveStyle: 'min-height: 46px; display: flex; justify-content: space-between; align-items: center; padding: 0 14px; border-radius: 10px; font-size: 15px; font-weight: 500; border: 1px solid #E3D2CC; color: #2B1C19; background: ' + (this.state.live ? '#EAF3EE' : '#F4ECE9') + ';',
+      knob: 'width: 40px; height: 24px; border-radius: 999px; position: relative; background: ' + (this.state.live ? '#2F6B4F' : '#C9B8B3') + '; box-shadow: inset ' + (this.state.live ? '18px' : '-18px') + ' 0 0 -2px ' + (this.state.live ? '#2F6B4F' : '#C9B8B3') + ', inset 0 0 0 2px ' + (this.state.live ? '#2F6B4F' : '#C9B8B3') + ';',
+      setEveryday: () => this.setState({ tier: 'Everyday' }), setPremium: () => this.setState({ tier: 'Premium' }),
+      everydayStyle: this.state.tier === 'Everyday' ? tierOn : tierOff, premiumStyle: this.state.tier === 'Premium' ? tierOn : tierOff
+    };
+  }
+}
+</script>
+</body>
+</html>

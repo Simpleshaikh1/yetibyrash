@@ -1,0 +1,87 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground-admin);
+  color: var(--ink-admin);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.layout {
+  min-height: 100dvh;
+  display: flex;
+}
+
+.sidebar {
+  width: 240px;
+  flex: none;
+  background: var(--ink);
+  color: var(--ink-on-dark);
+  padding: 28px var(--space-4);
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0 var(--space-3);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.content h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+}
+
+.panel {
+  background: var(--surface-white);
+  border: 1px solid var(--line-admin);
+  border-radius: var(--radius-panel);
+  padding: 20px;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.pill {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.pill.ok {
+  background: var(--success-tint);
+  color: var(--success);
+}
+
+.pill.bad {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+@media (max-width: 720px) {
+  .layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: auto;
+  }
+}

@@ -1,0 +1,5 @@
+### Health check (API + database)
+GET http://localhost:8090/api/health
+
+### Unknown endpoint returns a JSON 404
+GET http://localhost:8090/api/does-not-exist

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin: update order</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 960px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+
+  <header style="background: #3A2420; color: #FFF8F5; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <a href="#orders" aria-label="Back to orders" style="width: 44px; height: 44px; display: grid; place-items: center; color: #FFF8F5;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+      </a>
+      <div style="flex: 1; display: flex; flex-direction: column;">
+        <span style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F2C6B9;">Yetibyrash admin</span>
+        <h1 style="margin: 0; font-size: 22px; font-weight: 600;">Order YB-20418</h1>
+      </div>
+      <span style="background: #2F6B4F; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px;">Paid ✓</span>
+    </div>
+  </header>
+
+  <div style="padding: 14px 16px 0; display: flex; flex-direction: column; gap: 12px;">
+    <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px; font-size: 14px;">
+      <b style="font-size: 15px; font-weight: 600;">Amaka Obi · 0803 000 0000</b>
+      <span style="color: #5A3E38;">12 Admiralty Way, Lekki Phase 1, Eti-Osa, Lagos</span>
+      <span style="color: #5A3E38;">Standard delivery · Paystack ref PSK_8f21c… · ₦29,000</span>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+      <div style="display: flex; justify-content: space-between;"><span>Ribbed lounge joggers · Espresso · M × 1</span><b style="font-variant-numeric: tabular-nums;">₦14,500</b></div>
+      <div style="display: flex; justify-content: space-between;"><span>Pearl drop earrings · Gold tone × 1</span><b style="font-variant-numeric: tabular-nums;">₦12,000</b></div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Delivery status</h2>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="5">
+          <button onClick="{{ s.pick }}" style="{{ s.style }}"><span>{{ s.label }}</span><span>{{ s.mark }}</span></button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="ad-courier" style="font-size: 13px; color: #5A3E38;">Courier and tracking number</label><input id="ad-courier" placeholder="e.g. courier name · waybill number" style="height: 44px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #2B1C19;"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px;"><label for="ad-note" style="font-size: 13px; color: #5A3E38;">Note to customer (optional)</label><textarea id="ad-note" rows="2" style="border: 1px solid #E3D2CC; border-radius: 10px; padding: 10px 12px; font-size: 15px; background: #FFFFFF; color: #2B1C19; resize: none;">Your order left our Lekki studio today.</textarea></div>
+    </section>
+  </div>
+
+  <div style="flex: 1;"></div>
+
+  <div style="background: #FFFFFF; border-top: 1px solid #EFE2DE; padding: 12px 16px 20px; display: flex; flex-direction: column; gap: 6px;">
+    <button style="height: 52px; border: 0; border-radius: 12px; background: #3A2420; color: #FFF8F5; font-size: 16px; font-weight: 500;">Save: mark as {{ current }}</button>
+    <span style="text-align: center; font-size: 13px; color: #5A3E38;">Amaka gets an email and a WhatsApp message.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { status: 2 }; }
+  renderVals() {
+    const labels = ['Paid', 'Packed', 'Shipped', 'Out for delivery', 'Delivered'];
+    const cur = this.state.status;
+    return {
+      current: labels[cur],
+      statuses: labels.map((l, i) => ({
+        label: l,
+        mark: i < cur ? 'Done' : (i === cur ? 'Selected' : ''),
+        pick: () => this.setState({ status: i }),
+        style: 'min-height: 46px; display: flex; justify-content: space-between; align-items: center; padding: 0 14px; border-radius: 10px; font-size: 15px; ' +
+          (i === cur ? 'border: 2px solid #3A2420; background: #F7E7E2; color: #2B1C19; font-weight: 600;' :
+           i < cur ? 'border: 1px solid #EFE2DE; background: #FBF6F4; color: #5A3E38;' :
+           'border: 1px solid #E3D2CC; background: #FFFFFF; color: #2B1C19;')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

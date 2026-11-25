@@ -1,0 +1,11 @@
+{
+  "name": "yetibyrash-frontend",
+  "private": true,
+  "workspaces": ["ui", "shop", "admin"],
+  "scripts": {
+    "dev:shop": "npm run dev -w shop",
+    "dev:admin": "npm run dev -w admin",
+    "build": "npm run build -w shop && npm run build -w admin",
+    "typecheck": "npm run typecheck -w shop && npm run typecheck -w admin"
+  }
+}

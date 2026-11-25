@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin products</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 960px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 32px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h1 style="margin: 0; font-size: 30px; font-weight: 600;">Products <span style="font-size: 18px; color: #76574F; font-weight: 400;">146</span></h1>
+      <a href="CmsProductEdit.dc.html" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #3A2420; color: #FFF8F5; display: flex; align-items: center; font-size: 15px; font-weight: 500;">+ Add product</a>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <label for="pr-search" style="position: absolute; left: -9999px;">Search products</label>
+      <input id="pr-search" placeholder="Search by name or SKU" style="width: 280px; height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 12px; font-size: 15px; background: #FFFFFF; color: #2B1C19;">
+      <label for="pr-cat" style="position: absolute; left: -9999px;">Category</label>
+      <select id="pr-cat" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF; color: #2B1C19;"><option>All categories</option><option>Jewelry</option><option>Watches</option><option>Clothing</option><option>Bags</option><option>Intimates</option></select>
+      <label for="pr-tier" style="position: absolute; left: -9999px;">Tier</label>
+      <select id="pr-tier" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF; color: #2B1C19;"><option>Everyday + Premium</option><option>Everyday</option><option>Premium</option></select>
+      <label for="pr-stock" style="position: absolute; left: -9999px;">Stock</label>
+      <select id="pr-stock" style="height: 42px; border: 1px solid #E3D2CC; border-radius: 10px; padding: 0 10px; font-size: 15px; background: #FFFFFF; color: #2B1C19;"><option>Any stock</option><option>Low stock</option><option>Sold out</option></select>
+      <span style="margin-left: auto; font-size: 14px; color: #5A3E38;">Select rows to hide, show, or change tier for many at once</span>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 56px minmax(0, 2.4fr) minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 0.9fr); align-items: center; background: #F4ECE9; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A3E38;">
+        <span style="padding: 12px 16px;"></span><span style="padding: 12px 8px;">Product</span><span style="padding: 12px 8px;">Category</span><span style="padding: 12px 8px;">Tier</span><span style="padding: 12px 8px;">Price</span><span style="padding: 12px 8px;">Stock</span><span style="padding: 12px 8px;">On shop</span>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+        <a href="CmsProductEdit.dc.html" style="display: grid; grid-template-columns: 56px minmax(0, 2.4fr) minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 0.9fr); align-items: center; border-top: 1px solid #EFE2DE; color: #2B1C19; font-size: 15px; min-height: 64px;">
+          <span style="padding: 0 16px;"><span style="display: block; width: 40px; height: 40px; border-radius: 8px; background: #F0D9D2;"></span></span>
+          <span style="padding: 0 8px; display: flex; flex-direction: column;"><b style="font-weight: 500;">{{ r.name }}</b><span style="font-size: 13px; color: #76574F;">{{ r.opts }}</span></span>
+          <span style="padding: 0 8px; color: #5A3E38;">{{ r.cat }}</span>
+          <span style="padding: 0 8px;"><span style="{{ r.tierStyle }}">{{ r.tier }}</span></span>
+          <span style="padding: 0 8px; font-variant-numeric: tabular-nums;">{{ r.price }}</span>
+          <span style="{{ r.stockStyle }}">{{ r.stock }}</span>
+          <span style="padding: 0 8px; color: #5A3E38;">{{ r.live }}</span>
+        </a>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const items = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    const data = [
+      ['Ribbed lounge joggers', '4 colours × sizes XS–XL', 'Clothing › Joggers', 'Everyday', '₦14,500', '62 · 1 sold out', 'low', 'Visible'],
+      ['Gold mesh ladies’ watch', '2 strap colours', 'Watches', 'Premium', '₦64,000', '9', 'ok', 'Visible'],
+      ['Opaque black tights', 'Sizes S–XXL · 40/80 denier', 'Intimates › Tights', 'Everyday', '₦3,500 – ₦4,200', '140', 'ok', 'Visible'],
+      ['18k plated tennis bracelet', '3 wrist sizes', 'Jewelry › Bracelets', 'Premium', '₦95,000', '3 left', 'low', 'Visible'],
+      ['Mini structured tote', '4 colours · 24 × 18 × 10 cm', 'Bags › Totes', 'Everyday', '₦32,000', '18', 'ok', 'Visible'],
+      ['Leather evening clutch', '2 colours', 'Bags › Clutches', 'Premium', '₦78,000', '4 left', 'low', 'Visible'],
+      ['Seamless cotton panties (3-pack)', 'Sizes S–XL · 2 colourways', 'Intimates › Panties', 'Everyday', '₦6,500', '58', 'ok', 'Visible'],
+      ['Solitaire ring', 'Ring sizes 5–9', 'Jewelry › Rings', 'Premium', '₦48,000', '14', 'ok', 'Hidden'],
+      ['Cropped baby tee', 'Sizes XS–XL · 3 colours', 'Clothing › Tops', 'Everyday', '₦9,000', 'Sold out · pre-order on', 'out', 'Visible'],
+      ['Pearl drop earrings', 'Gold or silver tone', 'Jewelry › Earrings', 'Everyday', '₦12,000', '31', 'ok', 'Visible']
+    ];
+    return {
+      nav: items.map(i => ({ label: i[0], href: i[1],
+        style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Products' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') })),
+      rows: data.map(d => ({
+        name: d[0], opts: d[1], cat: d[2], tier: d[3], price: d[4], stock: d[5], live: d[7],
+        tierStyle: 'font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; ' + (d[3] === 'Premium' ? 'background: #3A2420; color: #F2C6B9;' : 'background: #F7E7E2; color: #3A2420;'),
+        stockStyle: 'padding: 0 8px; font-variant-numeric: tabular-nums; ' + (d[6] === 'out' ? 'color: #A3302A; font-weight: 600;' : d[6] === 'low' ? 'color: #8A5A10; font-weight: 600;' : 'color: #2B1C19;')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

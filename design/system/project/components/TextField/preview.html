@@ -1,0 +1,17 @@
+<!-- @dsCard group="Forms" height=230 subtitle="Shop field, error, admin field" -->
+<div class="demo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap">
+  <style>
+    body{margin:0;background:var(--surface-card)}
+    .demo{font-family:var(--font-body);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4);padding:var(--space-5);color:var(--ink)}
+    .f{display:flex;flex-direction:column;gap:var(--space-1)}
+    label{font-size:13px;line-height:18px;color:var(--ink-secondary)}
+    input{height:var(--field-height);border:1px solid var(--line-shop);border-radius:var(--radius-md);padding:0 12px;font:400 15px var(--font-body);color:var(--ink);background:var(--surface-white)}
+    input.err{border:2px solid var(--danger)}
+    .msg{font-size:13px;color:var(--danger)}
+    input.admin{height:42px;border-color:var(--line-field);border-radius:var(--radius-field);color:var(--ink-admin)}
+  </style>
+  <div class="f"><label for="tf1">Full name</label><input id="tf1" value="Amaka Obi"></div>
+  <div class="f"><label for="tf2">Phone (for delivery and WhatsApp updates)</label><input id="tf2" class="err" value="0803 000"><span class="msg">Enter an 11-digit phone number, e.g. 0803 000 0000.</span></div>
+  <div class="f"><label for="tf3">Courier and tracking number</label><input id="tf3" class="admin" placeholder="e.g. courier name · waybill number"></div>
+</div>

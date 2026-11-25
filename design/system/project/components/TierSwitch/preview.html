@@ -1,0 +1,13 @@
+<!-- @dsCard group="Shop" height=120 subtitle="Everyday selected, Premium selected" -->
+<div class="demo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap">
+  <style>
+    body{margin:0;background:var(--ground-shop)}
+    .demo{font-family:var(--font-body);display:flex;gap:var(--space-5);padding:var(--space-5)}
+    .sw{width:340px;display:grid;grid-template-columns:1fr 1fr;background:var(--surface-soft);border-radius:var(--radius-pill);padding:4px}
+    .sw button{min-height:40px;border:0;border-radius:var(--radius-pill);font:500 15px var(--font-body);background:transparent;color:var(--ink-secondary)}
+    .sw button.on{background:var(--surface-card);color:var(--ink);font-weight:600;box-shadow:var(--shadow-raised)}
+  </style>
+  <div class="sw" role="tablist"><button class="on" role="tab" aria-selected="true">Everyday</button><button role="tab" aria-selected="false">Premium</button></div>
+  <div class="sw" role="tablist"><button role="tab" aria-selected="false">Everyday</button><button class="on" role="tab" aria-selected="true">Premium</button></div>
+</div>

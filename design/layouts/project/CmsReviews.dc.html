@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reviews</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;1,500&amp;family=Jost:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9A4F5B;text-decoration:none}a:hover{color:#3A2420}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; background: #FBF6F4; color: #2B1C19; font-family: 'Jost', system-ui, sans-serif; display: flex;">
+
+  <aside style="width: 240px; flex: none; background: #3A2420; color: #FFF8F5; padding: 28px 16px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'Bodoni Moda', Georgia, serif; font-size: 20px; letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px;">Yetibyrash</span>
+    <nav aria-label="Admin" style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+        <a href="{{ n.href }}" style="{{ n.style }}">{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="margin-top: auto; padding: 0 12px; font-size: 13px; color: #E8CFC8;">Signed in · Owner</div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Reviews <span style="font-size: 18px; color: #76574F; font-weight: 400;">★ 4.7 average · 214 published</span></h1>
+        <p style="margin: 0; font-size: 15px; color: #5A3E38;">Only buyers can review. Nothing shows on the shop until you approve it.</p>
+      </div>
+      <div style="display: flex; gap: 6px; background: #F4ECE9; border-radius: 10px; padding: 4px; font-size: 14.5px;">
+        <span style="background: #FFFFFF; border-radius: 8px; padding: 8px 14px; font-weight: 600;">Waiting ({{ waiting }})</span>
+        <span style="padding: 8px 14px; color: #5A3E38;">Published</span>
+        <span style="padding: 8px 14px; color: #5A3E38;">Hidden</span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 18px; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+        <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="3">
+          <article style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <span style="display: flex; align-items: center; gap: 10px;"><span style="color: #9A4F5B; letter-spacing: 0.1em;">{{ r.stars }}</span><b style="font-weight: 600;">{{ r.product }}</b></span>
+              <span style="{{ r.pill }}">{{ r.state }}</span>
+            </div>
+            <p style="margin: 0; font-size: 15px; line-height: 1.5;">{{ r.text }}</p>
+            <span style="font-size: 13px; color: #5A3E38;">{{ r.who }}</span>
+            <div style="display: flex; gap: 8px;">
+              <button onClick="{{ r.approve }}" style="min-height: 38px; padding: 0 16px; border: 0; border-radius: 8px; background: #3A2420; color: #FFF8F5; font-size: 14px;">Approve</button>
+              <button onClick="{{ r.hide }}" style="min-height: 38px; padding: 0 16px; border: 1px solid #E3D2CC; border-radius: 8px; background: #FFFFFF; color: #2B1C19; font-size: 14px;">Hide</button>
+              <button style="min-height: 38px; padding: 0 16px; border: 1px solid #E3D2CC; border-radius: 8px; background: #FFFFFF; color: #2B1C19; font-size: 14px;">Reply publicly</button>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Asking for reviews</h2>
+          <span>Send a WhatsApp and email <b>3 days after delivery</b> asking for a review.</span>
+          <span>Buyers can add up to 3 photos.</span>
+          <span style="font-size: 13px; color: #5A3E38;">The message text is in Settings › Customer messages.</span>
+        </section>
+        <section style="background: #FFFFFF; border: 1px solid #EFE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14.5px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Where reviews show</h2>
+          <span>Stars and count under each product name</span>
+          <span>"Worn by you" on the product page</span>
+          <span>Reviews strip on the homepage (5-star only)</span>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { st: ['Waiting', 'Waiting', 'Waiting'] }; }
+  renderVals() {
+    const navItems = [
+      ['Overview', 'CmsOverview.dc.html'], ['Orders', 'CmsOrders.dc.html'], ['Products', 'CmsProducts.dc.html'],
+      ['Catalogue setup', 'CmsCatalogue.dc.html'], ['Homepage and content', 'CmsContent.dc.html'], ['Promotions', 'CmsPromotions.dc.html'], ['Reviews', 'CmsReviews.dc.html'], ['Delivery', 'CmsDelivery.dc.html'],
+      ['Customers', '#customers'], ['Payments', 'CmsSettings.dc.html'], ['Settings', 'CmsSettings.dc.html']
+    ];
+    const data = [
+      ['★★★★★', 'Ribbed lounge joggers', 'So soft and the fit is perfect. I ordered M and it sits right on my waist.', 'Chioma E. · Enugu · Size M, Espresso · order YB-20397'],
+      ['★★★★☆', 'Gold mesh ladies’ watch', 'Beautiful watch, came in a lovely box. Strap was a little long but easy to adjust.', 'Grace U. · Port Harcourt · order YB-20402'],
+      ['★★☆☆☆', 'Cropped baby tee', 'Pre-order took longer than I expected. The top itself is nice.', 'Bisi K. · Lagos · Size S, Blush · order YB-20376']
+    ];
+    const st = this.state.st;
+    const set = (i, v) => { const n = st.slice(); n[i] = v; this.setState({ st: n }); };
+    return {
+      nav: navItems.map(i => ({ label: i[0], href: i[1], style: 'min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 15px; ' + (i[0] === 'Reviews' ? 'background: #FFF8F5; color: #3A2420; font-weight: 600;' : 'color: #F2DCD5;') })),
+      waiting: st.filter(s => s === 'Waiting').length,
+      reviews: data.map((d, i) => ({
+        stars: d[0], product: d[1], text: d[2], who: d[3], state: st[i],
+        approve: () => set(i, 'Published'), hide: () => set(i, 'Hidden'),
+        pill: 'font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; ' + (st[i] === 'Published' ? 'background: #EAF3EE; color: #2F6B4F;' : st[i] === 'Hidden' ? 'background: #EFE2DE; color: #5A3E38;' : 'background: #FDF3E6; color: #7A4E0C;')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
