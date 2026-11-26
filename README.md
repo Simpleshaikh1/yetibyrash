@@ -62,6 +62,17 @@ Pages use light formatting: `## heading`, `- list`, `**bold**`, `[link](/shop)`.
 
 A code's use and a gift are held at checkout and given back if the order goes unpaid or is cancelled.
 
+**Accounts and reviews:**
+
+- Shoppers can sign in at `/account` with a one-time code sent to their phone or email; there are no passwords, and guests still check out as before.
+- A signed-in shopper sees:
+  - their orders, including earlier guest orders with the same phone or email
+  - their saved addresses, which are offered at checkout
+  - their saved items (the heart on products)
+- Three days after an order is marked Delivered, the customer gets an email and a text asking for a review through a private link. Reviews wait on the admin's **Reviews** screen until approved, then show as stars and quotes on the shop.
+
+**Text messages (SMS):** order updates, sign-in codes and review requests go by SMS through [Termii](https://termii.com) when `TERMII_API_KEY` is set in `backend/.env` (with `TERMII_SENDER_ID`, a sender name registered with Termii, and optionally `TERMII_CHANNEL=dnd` once Termii enables it). Without a key in development, every text lands in Mailpit, addressed to `sms-<phone>@sms.yetibyrash.test`. The wording of each text is on **Customer messages**.
+
 For real email, set `SMTP_ADDR`, `SMTP_USERNAME`, `SMTP_PASSWORD` and `MAIL_FROM` in `backend/.env`. Emails are sent from a queue, so a mail outage only delays them (they retry for several hours).
 
 **First owner on a real server** (no seed there):

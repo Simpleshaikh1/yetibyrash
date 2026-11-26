@@ -149,12 +149,13 @@ func (h adminOrderHandlers) previewMessage(w http.ResponseWriter, r *http.Reques
 	var in struct {
 		Subject string `json:"subject"`
 		Body    string `json:"body"`
+		SMS     string `json:"sms"`
 	}
 	if !decodeJSON(w, r, &in) {
 		return
 	}
 	s, b := notify.Preview(in.Subject, in.Body)
-	writeJSON(w, http.StatusOK, map[string]string{"subject": s, "body": b})
+	writeJSON(w, http.StatusOK, map[string]string{"subject": s, "body": b, "sms": notify.PreviewSMS(in.SMS)})
 }
 
 // ---------- Shopper tracking ----------

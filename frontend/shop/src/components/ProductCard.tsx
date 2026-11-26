@@ -3,6 +3,7 @@ import { formatNaira } from "@yetibyrash/ui";
 import type { ProductCard as Card } from "../api";
 import { Badge } from "./Badge";
 import { Photo } from "./Photo";
+import { SaveButton, Stars } from "./SaveButton";
 
 // One product in a grid (design system › ProductCard).
 export function ProductCard({ p }: { p: Card }) {
@@ -10,20 +11,28 @@ export function ProductCard({ p }: { p: Card }) {
   const note = !p.inStock ? (p.preorder ? "Pre-order" : "Sold out") : p.colourCount > 1 ? `${p.colourCount} colours` : p.materialLine;
 
   return (
-    <Link to={`/p/${p.slug}`} className="card">
-      <Photo name={p.name} imageKey={p.image || undefined}>
-        <Badge product={p} />
-      </Photo>
-      <span className="card-meta">
-        <span className="card-name">{p.name}</span>
-        <span className="price">
-          {ranged && "From "}
-          {formatNaira(p.priceKobo)}
-          {p.compareAtKobo && <s>{formatNaira(p.compareAtKobo)}</s>}
+    <div className="card-wrap">
+      <Link to={`/p/${p.slug}`} className="card">
+        <Photo name={p.name} imageKey={p.image || undefined}>
+          <Badge product={p} />
+        </Photo>
+        <span className="card-meta">
+          <span className="card-name">{p.name}</span>
+          <span className="price">
+            {ranged && "From "}
+            {formatNaira(p.priceKobo)}
+            {p.compareAtKobo && <s>{formatNaira(p.compareAtKobo)}</s>}
+          </span>
+          {p.rating.count > 0 && (
+            <span className="small card-rating">
+              <Stars value={p.rating.average} /> ({p.rating.count})
+            </span>
+          )}
+          <span className="small muted-2">{note}</span>
         </span>
-        <span className="small muted-2">{note}</span>
-      </span>
-    </Link>
+      </Link>
+      <SaveButton productId={p.id} name={p.name} />
+    </div>
   );
 }
 

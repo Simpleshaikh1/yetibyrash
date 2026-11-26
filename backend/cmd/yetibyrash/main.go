@@ -16,6 +16,7 @@ import (
 	"yetibyrash/backend/internal/catalog"
 	"yetibyrash/backend/internal/config"
 	"yetibyrash/backend/internal/content"
+	"yetibyrash/backend/internal/customers"
 	"yetibyrash/backend/internal/db"
 	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/httpapi"
@@ -25,6 +26,7 @@ import (
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/promotions"
+	"yetibyrash/backend/internal/reviews"
 	"yetibyrash/backend/internal/staff"
 )
 
@@ -87,16 +89,29 @@ func run() error {
 
 	// Customer emails go through the job queue, so a slow or down mail server never blocks an order.
 	mailer := notify.SMTPMailer{Addr: cfg.SMTPAddr, From: cfg.MailFrom, Username: cfg.SMTPUsername, Password: cfg.SMTPPassword}
-	notifySvc := notify.NewOrders(pool, mailer, cfg.ShopURL)
+	var sms notify.SMS
+	switch {
+	case cfg.TermiiAPIKey != "":
+		sms = notify.TermiiSMS{APIKey: cfg.TermiiAPIKey, SenderID: cfg.TermiiSenderID, Channel: cfg.TermiiChannel}
+	case !cfg.IsProduction():
+		sms = notify.MailSMS{Mailer: mailer}
+		slog.Warn("no TERMII_API_KEY: text messages go to Mailpit instead (development only)")
+	default:
+		slog.Warn("no TERMII_API_KEY: text messages are off; sign-in codes go by email only")
+	}
+	notifySvc := notify.NewOrders(pool, mailer, sms, cfg.ShopURL)
 	runner := jobs.NewRunner(pool)
 	runner.Handle(jobs.KindOrderEmail, notifySvc.HandleJob)
+	runner.Handle(jobs.KindOrderSMS, notifySvc.HandleSMSJob)
+	runner.Handle(jobs.KindReviewRequest, notifySvc.HandleReviewRequest)
 	go runner.Run(ctx)
 
+	catalogSvc := catalog.NewService(pool)
 	srv := &http.Server{
 		Addr: cfg.HTTPAddr,
 		Handler: httpapi.NewRouter(httpapi.Deps{
 			DB:             pool,
-			Catalog:        catalog.NewService(pool),
+			Catalog:        catalogSvc,
 			Staff:          staff.NewService(pool),
 			Admin:          catalog.NewAdminService(pool, photos),
 			Media:          photos.Handler(),
@@ -107,6 +122,9 @@ func run() error {
 			DevPay:         devPay,
 			Notify:         notifySvc,
 			Content:        content.NewService(pool, photos),
+			Customers:      customers.NewService(pool, mailer, sms),
+			Reviews:        reviews.NewService(pool, photos),
+			Cards:          catalogSvc,
 			Promotions:     promotions.NewService(pool),
 			Version:        version,
 			SecureCookies:  cfg.IsProduction(),

@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
-import { api, statusLabels, type MessageTemplate } from "../api";
+import { api, type MessageTemplate } from "../api";
 import { ErrorBanner, Field, Loading, PageHeader, Panel, SavedBanner } from "../components/ui";
 import { useAction, useApi } from "../useApi";
 
+const labels: Record<string, string> = {
+  paid: "Paid",
+  packed: "Packed",
+  shipped: "Shipped",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+  review_request: "Review request",
+};
+
 const when: Record<string, string> = {
+  review_request: "Sent 3 days after an order is delivered",
   paid: "Sent when Paystack confirms the payment",
   packed: "Sent when an order is moved to Packed",
   shipped: "Sent when an order is moved to Shipped",
@@ -28,7 +39,7 @@ export function MessagesPage() {
           <div className="list-panel">
             {data.data.templates.map((t) => (
               <button key={t.event} className={t.event === selected ? "list-item on" : "list-item"} onClick={() => setSelected(t.event)}>
-                <b>{statusLabels[t.event]}</b>
+                <b>{labels[t.event] ?? t.event}</b>
                 <span className="small muted">{t.active ? when[t.event] : "Switched off"}</span>
               </button>
             ))}
@@ -44,20 +55,21 @@ function Editor({ tpl, placeholders, reload }: { tpl: MessageTemplate; placehold
   const [subject, setSubject] = useState(tpl.subject);
   const [body, setBody] = useState(tpl.body);
   const [active, setActive] = useState(tpl.active);
+  const [sms, setSms] = useState(tpl.sms);
   const [saved, setSaved] = useState(false);
-  const [preview, setPreview] = useState<{ subject: string; body: string } | null>(null);
+  const [preview, setPreview] = useState<{ subject: string; body: string; sms: string } | null>(null);
   const { busy, error, run } = useAction();
 
   // Live preview with example values.
   useEffect(() => {
     const t = setTimeout(() => {
-      api.previewMessage(subject, body).then(setPreview).catch(() => setPreview(null));
+      api.previewMessage(subject, body, sms).then(setPreview).catch(() => setPreview(null));
     }, 300);
     return () => clearTimeout(t);
-  }, [subject, body]);
+  }, [subject, body, sms]);
 
   const save = async () => {
-    const ok = await run(() => api.saveMessage({ event: tpl.event, subject, body, active }).then(() => true));
+    const ok = await run(() => api.saveMessage({ event: tpl.event, subject, body, sms, active }).then(() => true));
     if (ok) {
       setSaved(true);
       reload();
@@ -66,7 +78,7 @@ function Editor({ tpl, placeholders, reload }: { tpl: MessageTemplate; placehold
 
   return (
     <div className="stack">
-      <Panel title={statusLabels[tpl.event]} note={when[tpl.event]} actions={<button className="btn primary" disabled={busy} onClick={save}>{busy ? "Saving…" : "Save message"}</button>}>
+      <Panel title={labels[tpl.event] ?? tpl.event} note={when[tpl.event]} actions={<button className="btn primary" disabled={busy} onClick={save}>{busy ? "Saving…" : "Save message"}</button>}>
         <SavedBanner show={saved}>Message saved.</SavedBanner>
         <ErrorBanner error={error} />
         <label className="check" htmlFor="msg-active">
@@ -78,6 +90,14 @@ function Editor({ tpl, placeholders, reload }: { tpl: MessageTemplate; placehold
         </Field>
         <Field label="Message" htmlFor="msg-body" error={error?.field === "body" ? error.message : undefined}>
           <textarea id="msg-body" rows={12} value={body} onChange={(e) => { setSaved(false); setBody(e.target.value); }} />
+        </Field>
+        <Field
+          label="Text message (SMS)"
+          htmlFor="msg-sms"
+          hint={`${sms.length} characters${sms.length > 160 ? " · sends as 2 texts" : ""}. Leave empty to send no text for this step.`}
+          error={error?.field === "sms" ? error.message : undefined}
+        >
+          <textarea id="msg-sms" rows={3} value={sms} onChange={(e) => { setSaved(false); setSms(e.target.value); }} />
         </Field>
         <div className="chips">
           <span className="small muted">Insert:</span>
@@ -94,6 +114,12 @@ function Editor({ tpl, placeholders, reload }: { tpl: MessageTemplate; placehold
             <b>{preview.subject}</b>
             <pre>{preview.body}</pre>
           </div>
+          {preview.sms && (
+            <div className="email-preview">
+              <span className="small muted">Text message</span>
+              <pre>{preview.sms}</pre>
+            </div>
+          )}
         </Panel>
       )}
     </div>

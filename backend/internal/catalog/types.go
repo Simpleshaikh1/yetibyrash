@@ -2,7 +2,10 @@
 // Money is always in kobo (₦1 = 100 kobo); the frontend formats it.
 package catalog
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 // ErrNotFound means the product or category doesn't exist or isn't visible.
 var ErrNotFound = errors.New("not found")
@@ -59,6 +62,7 @@ type ProductCard struct {
 	MaxPriceKobo  int64  `json:"maxPriceKobo"`
 	CompareAtKobo *int64 `json:"compareAtKobo"` // old price when on sale, else null
 	SaleBadge     string `json:"saleBadge"`     // a running sale's badge, e.g. "20% OFF"
+	Rating        Rating `json:"rating"`        // published reviews
 	ColourCount   int    `json:"colourCount"`
 	InStock       bool   `json:"inStock"`
 	Preorder      bool   `json:"preorder"`
@@ -162,7 +166,38 @@ type ProductDetail struct {
 	Images          []Image       `json:"images"`
 	Pairings        []ProductCard `json:"pairings"`
 	// LowStockThreshold: show "Only X left" when a variant's stock is at or below this.
-	LowStockThreshold int `json:"lowStockThreshold"`
+	LowStockThreshold int      `json:"lowStockThreshold"`
+	Rating            Rating   `json:"rating"`
+	Reviews           []Review `json:"reviews"` // newest published, up to 20
+}
+
+// Rating is a product's published reviews in short.
+type Rating struct {
+	Average float64 `json:"average"` // 0 when there are none
+	Count   int     `json:"count"`
+}
+
+// Review is a published review on the product page.
+type Review struct {
+	ID          int64     `json:"id"`
+	Rating      int       `json:"rating"`
+	Text        string    `json:"text"`
+	Photos      []string  `json:"photos"` // photo keys: /media/<key>-<400|800|1600>.jpg
+	Reply       string    `json:"reply"`  // the shop's public reply
+	Author      string    `json:"author"` // "Chioma E."
+	Area        string    `json:"area"`   // "Enugu"
+	Option      string    `json:"option"` // "M / Espresso"
+	PublishedAt time.Time `json:"publishedAt"`
+}
+
+// HomeReview is one quote in the homepage reviews strip.
+type HomeReview struct {
+	ID          int64  `json:"id"`
+	Text        string `json:"text"`
+	Author      string `json:"author"`
+	Area        string `json:"area"`
+	Product     string `json:"product"`
+	ProductSlug string `json:"productSlug"`
 }
 
 // Home is the homepage for one tier. Sections lists the visible blocks in the order the
@@ -175,6 +210,7 @@ type Home struct {
 	NewIn       []ProductCard `json:"newIn"`
 	BestSellers []ProductCard `json:"bestSellers"`
 	Budgets     []PriceBand   `json:"budgets"` // gift shop by budget
+	Reviews     []HomeReview  `json:"reviews"` // 5-star quotes
 }
 
 // HomeSection is one homepage block: hero, categories, new_in, best_sellers, gift_budget or trust.

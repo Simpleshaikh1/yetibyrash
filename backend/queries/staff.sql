@@ -31,11 +31,19 @@ UPDATE staff SET last_login_at = now() WHERE id = $1;
 INSERT INTO staff_sessions (token_hash, staff_id, expires_at) VALUES ($1, $2, $3);
 
 -- name: GetSessionStaff :one
--- The signed-in staff member for a session token, if the session is live and the account active.
+-- The signed-in staff member for a session token: the session must be inside its 7 days,
+-- used within the idle limit, and the account still active.
 SELECT s.id, s.email, s.name, s.role
 FROM staff_sessions ss
 JOIN staff s ON s.id = ss.staff_id
-WHERE ss.token_hash = $1 AND ss.expires_at > now() AND s.active;
+WHERE ss.token_hash = sqlc.arg(token_hash) AND ss.expires_at > now()
+  AND ss.last_seen_at > now() - make_interval(secs => sqlc.arg(idle_seconds)::float8)
+  AND s.active;
+
+-- name: TouchSession :exec
+-- Records that a session was used (at most once a minute, to save writes).
+UPDATE staff_sessions SET last_seen_at = now()
+WHERE token_hash = $1 AND last_seen_at < now() - interval '1 minute';
 
 -- name: DeleteSession :exec
 DELETE FROM staff_sessions WHERE token_hash = $1;
@@ -44,7 +52,8 @@ DELETE FROM staff_sessions WHERE token_hash = $1;
 DELETE FROM staff_sessions WHERE staff_id = $1;
 
 -- name: DeleteExpiredSessions :exec
-DELETE FROM staff_sessions WHERE expires_at <= now();
+DELETE FROM staff_sessions
+WHERE expires_at <= now() OR last_seen_at <= now() - make_interval(secs => sqlc.arg(idle_seconds)::float8);
 
 -- name: InsertAudit :exec
 INSERT INTO audit_log (staff_id, action, entity, entity_id, details)

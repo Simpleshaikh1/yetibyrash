@@ -75,6 +75,27 @@ function Section({ section, home, tier }: { section: HomeSection; home: Home; ti
           </div>
         </section>
       );
+    case "reviews":
+      if (home.reviews.length === 0) return null;
+      return (
+        <section className="stack-sm">
+          <h2>{section.title}</h2>
+          <div className="review-strip">
+            {home.reviews.map((r) => (
+              <figure key={r.id} className="review-quote">
+                <span className="stars small" aria-label="5 out of 5 stars">
+                  ★★★★★
+                </span>
+                <blockquote>{r.text}</blockquote>
+                <figcaption className="small muted">
+                  {r.author}
+                  {r.area && ` · ${r.area}`} · <Link to={`/p/${r.productSlug}`}>{r.product}</Link>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      );
     case "trust":
       if (section.lines.length === 0) return null;
       return (

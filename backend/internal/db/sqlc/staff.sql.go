@@ -63,11 +63,12 @@ func (q *Queries) CreateStaff(ctx context.Context, arg CreateStaffParams) (int64
 }
 
 const deleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
-DELETE FROM staff_sessions WHERE expires_at <= now()
+DELETE FROM staff_sessions
+WHERE expires_at <= now() OR last_seen_at <= now() - make_interval(secs => $1::float8)
 `
 
-func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, deleteExpiredSessions)
+func (q *Queries) DeleteExpiredSessions(ctx context.Context, idleSeconds float64) error {
+	_, err := q.db.Exec(ctx, deleteExpiredSessions, idleSeconds)
 	return err
 }
 
@@ -93,8 +94,15 @@ const getSessionStaff = `-- name: GetSessionStaff :one
 SELECT s.id, s.email, s.name, s.role
 FROM staff_sessions ss
 JOIN staff s ON s.id = ss.staff_id
-WHERE ss.token_hash = $1 AND ss.expires_at > now() AND s.active
+WHERE ss.token_hash = $1 AND ss.expires_at > now()
+  AND ss.last_seen_at > now() - make_interval(secs => $2::float8)
+  AND s.active
 `
+
+type GetSessionStaffParams struct {
+	TokenHash   []byte  `json:"token_hash"`
+	IdleSeconds float64 `json:"idle_seconds"`
+}
 
 type GetSessionStaffRow struct {
 	ID    int64     `json:"id"`
@@ -103,9 +111,10 @@ type GetSessionStaffRow struct {
 	Role  StaffRole `json:"role"`
 }
 
-// The signed-in staff member for a session token, if the session is live and the account active.
-func (q *Queries) GetSessionStaff(ctx context.Context, tokenHash []byte) (GetSessionStaffRow, error) {
-	row := q.db.QueryRow(ctx, getSessionStaff, tokenHash)
+// The signed-in staff member for a session token: the session must be inside its 7 days,
+// used within the idle limit, and the account still active.
+func (q *Queries) GetSessionStaff(ctx context.Context, arg GetSessionStaffParams) (GetSessionStaffRow, error) {
+	row := q.db.QueryRow(ctx, getSessionStaff, arg.TokenHash, arg.IdleSeconds)
 	var i GetSessionStaffRow
 	err := row.Scan(
 		&i.ID,
@@ -252,6 +261,17 @@ type SetStaffPasswordParams struct {
 
 func (q *Queries) SetStaffPassword(ctx context.Context, arg SetStaffPasswordParams) error {
 	_, err := q.db.Exec(ctx, setStaffPassword, arg.ID, arg.PasswordHash)
+	return err
+}
+
+const touchSession = `-- name: TouchSession :exec
+UPDATE staff_sessions SET last_seen_at = now()
+WHERE token_hash = $1 AND last_seen_at < now() - interval '1 minute'
+`
+
+// Records that a session was used (at most once a minute, to save writes).
+func (q *Queries) TouchSession(ctx context.Context, tokenHash []byte) error {
+	_, err := q.db.Exec(ctx, touchSession, tokenHash)
 	return err
 }
 

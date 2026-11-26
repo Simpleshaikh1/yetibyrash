@@ -100,7 +100,7 @@ func (s *Service) ConfirmPayment(ctx context.Context, p paystack.Payment) error 
 			}
 		}
 		// The "we've got your order" email goes out from the job queue, only if this commits.
-		if err := jobs.Enqueue(ctx, q, jobs.KindOrderEmail, jobs.OrderEmail{OrderID: o.ID, Event: string(sqlc.OrderStatusPaid)}); err != nil {
+		if err := jobs.EnqueueOrderMessages(ctx, q, jobs.OrderEmail{OrderID: o.ID, Event: string(sqlc.OrderStatusPaid)}); err != nil {
 			return err
 		}
 		if o.CartID.Valid {

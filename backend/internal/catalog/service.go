@@ -234,6 +234,25 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 		return ProductDetail{}, err
 	}
 
+	d.Reviews = []Review{}
+	revs, err := s.q.ProductReviews(ctx, p.ID)
+	if err != nil {
+		return ProductDetail{}, fmt.Errorf("reviews: %w", err)
+	}
+	for _, r := range revs {
+		photos := r.Photos
+		if photos == nil {
+			photos = []string{}
+		}
+		d.Reviews = append(d.Reviews, Review{ID: r.ID, Rating: int(r.Rating), Text: r.Text, Photos: photos, Reply: r.Reply,
+			Author: r.AuthorName, Area: r.AuthorArea, Option: r.VariantLabel, PublishedAt: r.PublishedAt.Time})
+	}
+	ratings, err := s.ratings(ctx, []int64{p.ID})
+	if err != nil {
+		return ProductDetail{}, err
+	}
+	d.Rating = ratings[p.ID]
+
 	d.LowStockThreshold, err = s.lowStockThreshold(ctx)
 	if err != nil {
 		return ProductDetail{}, err
@@ -245,7 +264,7 @@ func (s *Service) Product(ctx context.Context, slug string) (ProductDetail, erro
 func (s *Service) Home(ctx context.Context, tier Tier) (Home, error) {
 	home := Home{
 		Tagline: "Elegance meets affordability", Sections: []HomeSection{}, Categories: []Category{},
-		NewIn: []ProductCard{}, BestSellers: []ProductCard{}, Budgets: []PriceBand{},
+		NewIn: []ProductCard{}, BestSellers: []ProductCard{}, Budgets: []PriceBand{}, Reviews: []HomeReview{},
 	}
 	if raw, err := s.q.GetStoreSetting(ctx, "tagline"); err == nil {
 		var t string
@@ -299,8 +318,16 @@ func (s *Service) Home(ctx context.Context, tier Tier) (Home, error) {
 			if err != nil {
 				return Home{}, fmt.Errorf("best sellers: %w", err)
 			}
-			if home.BestSellers, err = s.cardsByID(ctx, ids); err != nil {
+			if home.BestSellers, err = s.CardsByID(ctx, ids); err != nil {
 				return Home{}, err
+			}
+		case "reviews":
+			rows, err := s.q.HomeReviews(ctx, int32(n))
+			if err != nil {
+				return Home{}, fmt.Errorf("home reviews: %w", err)
+			}
+			for _, r := range rows {
+				home.Reviews = append(home.Reviews, HomeReview{ID: r.ID, Text: r.Text, Author: r.AuthorName, Area: r.AuthorArea, Product: r.ProductName, ProductSlug: r.ProductSlug})
 			}
 		case "gift_budget":
 			if home.Budgets, err = s.priceBands(ctx); err != nil {
@@ -311,8 +338,8 @@ func (s *Service) Home(ctx context.Context, tier Tier) (Home, error) {
 	return home, nil
 }
 
-// cardsByID returns product cards in the order of ids, skipping hidden products.
-func (s *Service) cardsByID(ctx context.Context, ids []int64) ([]ProductCard, error) {
+// CardsByID returns product cards in the order of ids, skipping hidden products.
+func (s *Service) CardsByID(ctx context.Context, ids []int64) ([]ProductCard, error) {
 	out := []ProductCard{}
 	if len(ids) == 0 {
 		return out, nil
@@ -340,7 +367,20 @@ func (s *Service) cardsByID(ctx context.Context, ids []int64) ([]ProductCard, er
 	return out, s.applySales(ctx, out)
 }
 
-// applySales swaps in sale prices and the sale badge.
+// ratings returns published-review averages and counts by product.
+func (s *Service) ratings(ctx context.Context, ids []int64) (map[int64]Rating, error) {
+	rows, err := s.q.ProductRatings(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("ratings: %w", err)
+	}
+	out := map[int64]Rating{}
+	for _, r := range rows {
+		out[r.ProductID] = Rating{Average: float64(int(r.Average*10+0.5)) / 10, Count: int(r.Count)}
+	}
+	return out, nil
+}
+
+// applySales swaps in sale prices and the sale badge, and adds star ratings.
 func (s *Service) applySales(ctx context.Context, cards []ProductCard) error {
 	if len(cards) == 0 {
 		return nil
@@ -348,6 +388,13 @@ func (s *Service) applySales(ctx context.Context, cards []ProductCard) error {
 	ids := make([]int64, len(cards))
 	for i, c := range cards {
 		ids[i] = c.ID
+	}
+	ratings, err := s.ratings(ctx, ids)
+	if err != nil {
+		return err
+	}
+	for i := range cards {
+		cards[i].Rating = ratings[cards[i].ID]
 	}
 	sales, err := promotions.LoadSales(ctx, s.q, ids)
 	if err != nil {

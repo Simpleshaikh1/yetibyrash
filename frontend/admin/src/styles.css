@@ -370,6 +370,12 @@ input[type="checkbox"] {
   color: var(--success);
 }
 
+.banner.warn {
+  background: var(--warning-tint);
+  color: var(--warning);
+  margin: 0;
+}
+
 .check {
   display: flex;
   align-items: center;
@@ -1181,6 +1187,57 @@ input[type="checkbox"] {
   letter-spacing: 0.04em;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
+}
+
+/* ---------- Reviews ---------- */
+
+.reviews-split {
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+
+@media (max-width: 900px) {
+  .reviews-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tabs .count-pill {
+  margin-left: 6px;
+  background: var(--surface-panel);
+}
+
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.review-text {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.stars {
+  color: var(--accent-rose);
+  letter-spacing: 1px;
+}
+
+.stars-off {
+  color: var(--line-admin);
+}
+
+.review-photo {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-field);
+  display: block;
+}
+
+.review-reply {
+  border-left: 3px solid var(--accent-rose);
+  padding-left: var(--space-3);
+  margin: 0;
 }
 
 /* ---------- Messages ---------- */

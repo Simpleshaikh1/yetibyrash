@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"yetibyrash/backend/internal/db/sqlc"
@@ -21,7 +22,19 @@ import (
 const MaxAttempts = 8
 
 // Kinds of job.
-const KindOrderEmail = "order_email"
+const (
+	KindOrderEmail    = "order_email"
+	KindOrderSMS      = "order_sms"
+	KindReviewRequest = "review_request"
+)
+
+// ReviewRequestDelay is how long after delivery the review request goes out.
+const ReviewRequestDelay = 3 * 24 * time.Hour
+
+// ReviewRequest asks the customer to review a delivered order.
+type ReviewRequest struct {
+	OrderID int64 `json:"orderId"`
+}
 
 // OrderEmail asks for the customer message for an order step (e.g. "shipped").
 type OrderEmail struct {
@@ -37,6 +50,23 @@ func Enqueue(ctx context.Context, q *sqlc.Queries, kind string, payload any) err
 		return err
 	}
 	return q.EnqueueJob(ctx, sqlc.EnqueueJobParams{Kind: kind, Payload: b})
+}
+
+// EnqueueAt adds a job that waits until runAt.
+func EnqueueAt(ctx context.Context, q *sqlc.Queries, kind string, payload any, runAt time.Time) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	return q.EnqueueJobAt(ctx, sqlc.EnqueueJobAtParams{Kind: kind, Payload: b, RunAt: pgtype.Timestamptz{Time: runAt, Valid: true}})
+}
+
+// EnqueueOrderMessages queues the email and the text message for an order step.
+func EnqueueOrderMessages(ctx context.Context, q *sqlc.Queries, m OrderEmail) error {
+	if err := Enqueue(ctx, q, KindOrderEmail, m); err != nil {
+		return err
+	}
+	return Enqueue(ctx, q, KindOrderSMS, m)
 }
 
 // Handler does one job. Returning an error makes it retry later.

@@ -121,8 +121,8 @@ const insertOrder = `-- name: InsertOrder :one
 INSERT INTO orders (cart_id, payment_reference, customer_name, customer_phone, customer_email,
                     state_name, lga_name, street, landmark, zone_name, speed,
                     subtotal_kobo, delivery_kobo, total_kobo, expected_from, expected_to,
-                    discount_kobo, discount_code, promotion_id, gift_offer_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+                    discount_kobo, discount_code, promotion_id, gift_offer_id, customer_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 RETURNING id, number
 `
 
@@ -147,6 +147,7 @@ type InsertOrderParams struct {
 	DiscountCode     string        `json:"discount_code"`
 	PromotionID      pgtype.Int8   `json:"promotion_id"`
 	GiftOfferID      pgtype.Int8   `json:"gift_offer_id"`
+	CustomerID       pgtype.Int8   `json:"customer_id"`
 }
 
 type InsertOrderRow struct {
@@ -176,6 +177,7 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Inser
 		arg.DiscountCode,
 		arg.PromotionID,
 		arg.GiftOfferID,
+		arg.CustomerID,
 	)
 	var i InsertOrderRow
 	err := row.Scan(&i.ID, &i.Number)

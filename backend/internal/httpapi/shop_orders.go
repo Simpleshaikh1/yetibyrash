@@ -24,6 +24,7 @@ type shopHandlers struct {
 	cart           *cart.Service
 	delivery       *delivery.Service
 	orders         *orders.Service
+	accounts       *accountHandlers      // nil when accounts are off
 	paystackSecret string                // verifies webhooks; "" disables the webhook
 	devPay         *paystack.DevProvider // non-nil only in development without Paystack keys
 	secureCookies  bool
@@ -158,7 +159,7 @@ func (h *shopHandlers) checkout(w http.ResponseWriter, r *http.Request) {
 	if !decodeJSON(w, r, &in) {
 		return
 	}
-	started, err := h.orders.Checkout(r.Context(), h.cartID(r), in)
+	started, err := h.orders.Checkout(r.Context(), h.cartID(r), h.accounts.customerID(r), in)
 	if writeAppError(w, err) {
 		return
 	}

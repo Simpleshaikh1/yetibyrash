@@ -273,6 +273,49 @@ func (ns NullPromotionScope) Value() (driver.Value, error) {
 	return string(ns.PromotionScope), nil
 }
 
+type ReviewStatus string
+
+const (
+	ReviewStatusWaiting   ReviewStatus = "waiting"
+	ReviewStatusPublished ReviewStatus = "published"
+	ReviewStatusHidden    ReviewStatus = "hidden"
+)
+
+func (e *ReviewStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReviewStatus(s)
+	case string:
+		*e = ReviewStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReviewStatus: %T", src)
+	}
+	return nil
+}
+
+type NullReviewStatus struct {
+	ReviewStatus ReviewStatus `json:"review_status"`
+	Valid        bool         `json:"valid"` // Valid is true if ReviewStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReviewStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReviewStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReviewStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReviewStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReviewStatus), nil
+}
+
 type StaffRole string
 
 const (
@@ -315,6 +358,17 @@ func (ns NullStaffRole) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.StaffRole), nil
+}
+
+type Address struct {
+	ID         int64              `json:"id"`
+	CustomerID int64              `json:"customer_id"`
+	StateID    int64              `json:"state_id"`
+	LgaID      pgtype.Int8        `json:"lga_id"`
+	LgaText    string             `json:"lga_text"`
+	Street     string             `json:"street"`
+	Landmark   string             `json:"landmark"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type Announcement struct {
@@ -398,6 +452,23 @@ type Courier struct {
 	Active      bool   `json:"active"`
 }
 
+type Customer struct {
+	ID             int64              `json:"id"`
+	Name           string             `json:"name"`
+	Phone          pgtype.Text        `json:"phone"`
+	Email          pgtype.Text        `json:"email"`
+	MarketingOptIn bool               `json:"marketing_opt_in"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	LastSeenAt     pgtype.Timestamptz `json:"last_seen_at"`
+}
+
+type CustomerSession struct {
+	TokenHash  []byte             `json:"token_hash"`
+	CustomerID int64              `json:"customer_id"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
 type DeliverySetting struct {
 	ID            int32       `json:"id"`
 	ExpressCutoff pgtype.Time `json:"express_cutoff"`
@@ -478,10 +549,11 @@ type Lga struct {
 }
 
 type MessageTemplate struct {
-	Event   OrderStatus `json:"event"`
-	Subject string      `json:"subject"`
-	Body    string      `json:"body"`
-	Active  bool        `json:"active"`
+	Event   string `json:"event"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
+	Active  bool   `json:"active"`
+	Sms     string `json:"sms"`
 }
 
 type Order struct {
@@ -513,6 +585,7 @@ type Order struct {
 	DiscountCode     string             `json:"discount_code"`
 	PromotionID      pgtype.Int8        `json:"promotion_id"`
 	GiftOfferID      pgtype.Int8        `json:"gift_offer_id"`
+	CustomerID       pgtype.Int8        `json:"customer_id"`
 }
 
 type OrderEvent struct {
@@ -537,6 +610,17 @@ type OrderItem struct {
 	UnitKobo     int64  `json:"unit_kobo"`
 	Qty          int32  `json:"qty"`
 	IsGift       bool   `json:"is_gift"`
+}
+
+type OtpCode struct {
+	ID        int64              `json:"id"`
+	Target    string             `json:"target"`
+	CodeHash  []byte             `json:"code_hash"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	Attempts  int32              `json:"attempts"`
+	UsedAt    pgtype.Timestamptz `json:"used_at"`
+	Ip        string             `json:"ip"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Page struct {
@@ -626,6 +710,37 @@ type Promotion struct {
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
+type Review struct {
+	ID           int64              `json:"id"`
+	ProductID    int64              `json:"product_id"`
+	OrderItemID  int64              `json:"order_item_id"`
+	Rating       int32              `json:"rating"`
+	Text         string             `json:"text"`
+	Photos       []string           `json:"photos"`
+	Status       ReviewStatus       `json:"status"`
+	Reply        string             `json:"reply"`
+	AuthorName   string             `json:"author_name"`
+	AuthorArea   string             `json:"author_area"`
+	VariantLabel string             `json:"variant_label"`
+	OrderNumber  string             `json:"order_number"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	PublishedAt  pgtype.Timestamptz `json:"published_at"`
+}
+
+type ReviewRequest struct {
+	ID        int64              `json:"id"`
+	OrderID   int64              `json:"order_id"`
+	TokenHash []byte             `json:"token_hash"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type SavedItem struct {
+	CustomerID int64              `json:"customer_id"`
+	ProductID  int64              `json:"product_id"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
 type Size struct {
 	ID          int64  `json:"id"`
 	SizeSetID   int64  `json:"size_set_id"`
@@ -653,10 +768,11 @@ type Staff struct {
 }
 
 type StaffSession struct {
-	TokenHash []byte             `json:"token_hash"`
-	StaffID   int64              `json:"staff_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	TokenHash  []byte             `json:"token_hash"`
+	StaffID    int64              `json:"staff_id"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
+	LastSeenAt pgtype.Timestamptz `json:"last_seen_at"`
 }
 
 type State struct {

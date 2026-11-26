@@ -4,7 +4,7 @@ import { useAuth } from "../auth";
 import { useAction } from "../useApi";
 
 export function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, ended } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { busy, error, run } = useAction();
@@ -20,6 +20,11 @@ export function LoginPage() {
       <form className="login-card" onSubmit={submit}>
         <span className="wordmark dark">Yetibyrash</span>
         <h1>Staff sign-in</h1>
+        {ended && (
+          <p className="banner warn" role="status">
+            You were signed out because the admin wasn't used for a while. Please sign in again.
+          </p>
+        )}
         <div className="field">
           <label htmlFor="login-email">Email</label>
           <input id="login-email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />

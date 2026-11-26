@@ -8,11 +8,13 @@ import (
 
 	"yetibyrash/backend/internal/cart"
 	"yetibyrash/backend/internal/content"
+	"yetibyrash/backend/internal/customers"
 	"yetibyrash/backend/internal/delivery"
 	"yetibyrash/backend/internal/notify"
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/promotions"
+	"yetibyrash/backend/internal/reviews"
 	"yetibyrash/backend/internal/staff"
 )
 
@@ -40,6 +42,9 @@ type Deps struct {
 	Notify         *notify.Orders // customer message templates
 	Content        *content.Service
 	Promotions     *promotions.Service
+	Customers      *customers.Service
+	Reviews        *reviews.Service
+	Cards          CardLoader // product cards by id, for saved items
 
 	SecureCookies  bool     // send cookies over HTTPS only (production)
 	AllowedOrigins []string // admin app addresses allowed to make changes
@@ -57,8 +62,33 @@ func NewRouter(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/v1/products", productsHandler(d.Catalog))
 	mux.HandleFunc("GET /api/v1/products/{slug}", productHandler(d.Catalog))
 
+	var accounts *accountHandlers
+	if d.Customers != nil && d.Cards != nil {
+		accounts = newAccountHandlers(d.Customers, d.Cards, d.SecureCookies)
+		a := accounts
+		mux.HandleFunc("POST /api/v1/auth/code", a.sendCode)
+		mux.HandleFunc("POST /api/v1/auth/verify", a.verify)
+		mux.HandleFunc("POST /api/v1/auth/logout", a.logout)
+		mux.HandleFunc("GET /api/v1/me", a.me)
+		mux.HandleFunc("PUT /api/v1/me", a.signedIn(a.updateMe))
+		mux.HandleFunc("DELETE /api/v1/me", a.signedIn(a.deleteMe))
+		mux.HandleFunc("GET /api/v1/me/orders", a.signedIn(a.orders))
+		mux.HandleFunc("POST /api/v1/me/orders/{number}/review", a.signedIn(a.reviewLink))
+		mux.HandleFunc("GET /api/v1/me/addresses", a.signedIn(a.addresses))
+		mux.HandleFunc("DELETE /api/v1/me/addresses/{id}", a.signedIn(a.deleteAddress))
+		mux.HandleFunc("GET /api/v1/me/saved", a.signedIn(a.saved))
+		mux.HandleFunc("PUT /api/v1/me/saved/{productId}", a.signedIn(a.save))
+		mux.HandleFunc("DELETE /api/v1/me/saved/{productId}", a.signedIn(a.unsave))
+	}
+	if d.Reviews != nil {
+		rh := reviewHandlers{rv: d.Reviews}
+		mux.HandleFunc("GET /api/v1/reviews/{token}", rh.request)
+		mux.HandleFunc("POST /api/v1/reviews/{token}", rh.submit)
+		mux.HandleFunc("POST /api/v1/reviews/{token}/{id}/photos", rh.photo)
+	}
+
 	if d.Orders != nil {
-		registerShopOrders(mux, d)
+		registerShopOrders(mux, d, accounts)
 	}
 	if d.Content != nil {
 		sh := siteHandlers{c: d.Content}
@@ -82,9 +112,9 @@ func NewRouter(d Deps) http.Handler {
 	return recoverPanics(logRequests(mux))
 }
 
-func registerShopOrders(mux *http.ServeMux, d Deps) {
+func registerShopOrders(mux *http.ServeMux, d Deps, accounts *accountHandlers) {
 	h := &shopHandlers{
-		cart: d.Cart, delivery: d.Delivery, orders: d.Orders,
+		cart: d.Cart, delivery: d.Delivery, orders: d.Orders, accounts: accounts,
 		paystackSecret: d.PaystackSecret, devPay: d.DevPay, secureCookies: d.SecureCookies,
 	}
 	mux.HandleFunc("GET /api/v1/cart", h.getCart)
@@ -202,6 +232,13 @@ func registerAdmin(mux *http.ServeMux, d Deps) {
 		mux.Handle("PUT "+p+"/promotions/codes/{id}", promoPerm(ph.saveCode))
 		mux.Handle("POST "+p+"/promotions/gifts", promoPerm(ph.saveGift))
 		mux.Handle("PUT "+p+"/promotions/gifts/{id}", promoPerm(ph.saveGift))
+	}
+
+	if d.Reviews != nil {
+		rh := reviewHandlers{rv: d.Reviews}
+		mux.Handle("GET "+p+"/reviews", products(rh.adminList))
+		mux.Handle("PUT "+p+"/reviews/{id}/status", products(rh.adminStatus))
+		mux.Handle("PUT "+p+"/reviews/{id}/reply", products(rh.adminReply))
 	}
 
 	mux.Handle("GET "+p+"/staff", owner(a.listStaff))

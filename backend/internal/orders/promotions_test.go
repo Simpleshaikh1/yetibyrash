@@ -80,7 +80,7 @@ func TestCheckoutWithPromotions(t *testing.T) {
 		t.Fatalf("bag gift = %+v", bag.Gift)
 	}
 
-	started, err := e.orders.Checkout(ctx, cartID, orders.CheckoutInput{
+	started, err := e.orders.Checkout(ctx, cartID, 0, orders.CheckoutInput{
 		Name: "Amaka Obi", Phone: "08030000000", Email: "amaka@example.test", StateID: e.lagos, LgaID: e.etiOsa,
 		Street: "12 Admiralty Way", Speed: "standard",
 	})
@@ -120,7 +120,7 @@ func TestCheckoutWithPromotions(t *testing.T) {
 		t.Fatalf("second bag code = %+v", bag2.Code)
 	}
 	var conflict *apperr.Conflict
-	_, err = e.orders.Checkout(ctx, cart2, orders.CheckoutInput{
+	_, err = e.orders.Checkout(ctx, cart2, 0, orders.CheckoutInput{
 		Name: "Bisi Ade", Phone: "08031111111", Email: "bisi@example.test", StateID: e.lagos, LgaID: e.etiOsa,
 		Street: "3 Bourdillon Road", Speed: "standard",
 	})

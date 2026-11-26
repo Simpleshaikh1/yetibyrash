@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { api, type Site } from "../api";
+import { useAccount } from "../account";
 import { useBag } from "../bag";
 import { useApi } from "../useApi";
 import { Icon, type IconName } from "./Icon";
@@ -17,6 +18,7 @@ const nav: { to: string; label: string; icon: IconName; end?: boolean }[] = [
 // footer links, and the bottom navigation.
 export function Layout() {
   const { count } = useBag();
+  const { customer } = useAccount();
   const site = useApi("site", (s) => api.site(s));
   const bagLabel = count ? `Bag, ${count} ${count === 1 ? "item" : "items"}` : "Bag";
   return (
@@ -39,14 +41,19 @@ export function Layout() {
               </NavLink>
             ))}
         </nav>
-        <Link to="/bag" className="icon-btn bag-icon" aria-label={bagLabel}>
-          <Icon name="bag" />
-          {count > 0 && (
-            <span className="count" aria-hidden="true">
-              {count}
-            </span>
-          )}
-        </Link>
+        <div className="header-icons">
+          <Link to="/account" className="icon-btn" aria-label={customer ? "My account" : "Sign in"}>
+            <Icon name="user" />
+          </Link>
+          <Link to="/bag" className="icon-btn bag-icon" aria-label={bagLabel}>
+            <Icon name="bag" />
+            {count > 0 && (
+              <span className="count" aria-hidden="true">
+                {count}
+              </span>
+            )}
+          </Link>
+        </div>
       </header>
       <main className="page">
         <Outlet />

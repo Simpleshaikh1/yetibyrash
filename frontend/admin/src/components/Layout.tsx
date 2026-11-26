@@ -9,7 +9,7 @@ const nav: { to: string; label: string; perm?: Permission; soon?: string }[] = [
   { to: "/catalogue", label: "Catalogue setup", perm: "catalogue" },
   { to: "/content", label: "Homepage and content", perm: "content" },
   { to: "/promotions", label: "Promotions", perm: "promotions" },
-  { to: "/reviews", label: "Reviews", perm: "products", soon: "M6" },
+  { to: "/reviews", label: "Reviews", perm: "products" },
   { to: "/delivery", label: "Delivery", perm: "catalogue" },
   { to: "/messages", label: "Customer messages", perm: "catalogue" },
   { to: "/staff", label: "Staff", perm: "staff" },

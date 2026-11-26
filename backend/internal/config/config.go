@@ -25,6 +25,11 @@ type Config struct {
 	SMTPUsername string
 	SMTPPassword string
 	MailFrom     string
+
+	// SMS through Termii. Without a key in development, texts arrive in Mailpit instead.
+	TermiiAPIKey   string
+	TermiiSenderID string
+	TermiiChannel  string
 }
 
 // Load reads backend/.env (if present) and then the environment.
@@ -45,6 +50,10 @@ func Load() Config {
 		SMTPUsername: get("SMTP_USERNAME", ""),
 		SMTPPassword: get("SMTP_PASSWORD", ""),
 		MailFrom:     get("MAIL_FROM", "Yetibyrash <orders@yetibyrash.test>"),
+
+		TermiiAPIKey:   get("TERMII_API_KEY", ""),
+		TermiiSenderID: get("TERMII_SENDER_ID", "Yetibyrash"),
+		TermiiChannel:  get("TERMII_CHANNEL", "generic"),
 	}
 }
 

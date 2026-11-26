@@ -198,7 +198,12 @@ func (s *Service) Advance(ctx context.Context, by staff.Member, id int64, in Adv
 		if err := staff.Audit(ctx, q, by, "order."+string(next), "order", id, map[string]any{"number": o.Number, "note": in.Note}); err != nil {
 			return err
 		}
-		return jobs.Enqueue(ctx, q, jobs.KindOrderEmail, jobs.OrderEmail{OrderID: id, Event: string(next), Note: in.Note})
+		if next == sqlc.OrderStatusDelivered {
+			if err := jobs.EnqueueAt(ctx, q, jobs.KindReviewRequest, jobs.ReviewRequest{OrderID: id}, time.Now().Add(jobs.ReviewRequestDelay)); err != nil {
+				return err
+			}
+		}
+		return jobs.EnqueueOrderMessages(ctx, q, jobs.OrderEmail{OrderID: id, Event: string(next), Note: in.Note})
 	})
 }
 
@@ -243,7 +248,7 @@ func (s *Service) Cancel(ctx context.Context, by staff.Member, id int64, reason 
 		if err := staff.Audit(ctx, q, by, "order.cancelled", "order", id, map[string]any{"number": o.Number, "reason": reason}); err != nil {
 			return err
 		}
-		return jobs.Enqueue(ctx, q, jobs.KindOrderEmail, jobs.OrderEmail{OrderID: id, Event: string(sqlc.OrderStatusCancelled), Note: reason})
+		return jobs.EnqueueOrderMessages(ctx, q, jobs.OrderEmail{OrderID: id, Event: string(sqlc.OrderStatusCancelled), Note: reason})
 	})
 }
 

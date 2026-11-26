@@ -70,14 +70,14 @@ WHERE o.number = upper(sqlc.arg(number)::text);
 -- ---------- Customer messages ----------
 
 -- name: ListTemplates :many
-SELECT event, subject, body, active FROM message_templates
-ORDER BY array_position(ARRAY['paid','packed','shipped','out_for_delivery','delivered','cancelled']::order_status[], event);
+SELECT event, subject, body, sms, active FROM message_templates
+ORDER BY array_position(ARRAY['paid','packed','shipped','out_for_delivery','delivered','cancelled','review_request'], event);
 
 -- name: GetTemplate :one
-SELECT event, subject, body, active FROM message_templates WHERE event = $1;
+SELECT event, subject, body, sms, active FROM message_templates WHERE event = $1;
 
 -- name: UpdateTemplate :exec
-UPDATE message_templates SET subject = $2, body = $3, active = $4 WHERE event = $1;
+UPDATE message_templates SET subject = $2, body = $3, sms = $4, active = $5 WHERE event = $1;
 
 -- ---------- Jobs ----------
 
@@ -150,3 +150,7 @@ LIMIT 50;
 -- Money that arrived but didn't mark an order paid.
 SELECT reference, order_id, amount_kobo, outcome, received_at FROM payments
 WHERE outcome <> 'success' ORDER BY received_at DESC LIMIT 10;
+
+-- name: EnqueueJobAt :exec
+-- A job that waits, e.g. the review request 3 days after delivery.
+INSERT INTO jobs (kind, payload, run_at) VALUES ($1, $2, $3);

@@ -64,6 +64,8 @@ type CheckoutInput struct {
 	Street   string         `json:"street"`
 	Landmark string         `json:"landmark"`
 	Speed    delivery.Speed `json:"speed"`
+	// SaveAddress keeps this address on the signed-in customer's account.
+	SaveAddress bool `json:"saveAddress"`
 }
 
 // Quote is the checkout summary before paying.
@@ -122,8 +124,9 @@ type Started struct {
 	PaymentURL  string `json:"paymentUrl"`
 }
 
-// Checkout creates the order and starts the Paystack payment.
-func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutInput) (Started, error) {
+// Checkout creates the order and starts the Paystack payment. customerID is the signed-in
+// shopper (0 for a guest).
+func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, customerID int64, in CheckoutInput) (Started, error) {
 	if err := cleanCheckout(&in); err != nil {
 		return Started{}, err
 	}
@@ -264,6 +267,7 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 			ExpectedFrom: pgtype.Date{Time: from, Valid: true}, ExpectedTo: pgtype.Date{Time: to, Valid: true},
 			DiscountKobo: discount, DiscountCode: code,
 			PromotionID: pgtype.Int8{Int64: saleID, Valid: saleID != 0},
+			CustomerID:  pgtype.Int8{Int64: customerID, Valid: customerID != 0},
 		}
 		if gift != nil {
 			params.GiftOfferID = pgtype.Int8{Int64: gift.OfferID, Valid: true}
@@ -285,6 +289,11 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 				return err
 			}
 		}
+		if customerID != 0 && in.SaveAddress {
+			if err := saveAddress(ctx, q, customerID, in); err != nil {
+				return err
+			}
+		}
 		if gift != nil {
 			if err := q.InsertOrderItem(ctx, sqlc.InsertOrderItemParams{
 				OrderID: order.ID, VariantID: gift.VariantID, ProductName: gift.Name, ProductSlug: gift.Slug,
@@ -300,6 +309,16 @@ func (s *Service) Checkout(ctx context.Context, cartID pgtype.UUID, in CheckoutI
 	})
 	if err != nil {
 		return Started{}, err
+	}
+	if customerID != 0 {
+		// Fill in the phone/email/name the account doesn't have yet. Another account may
+		// already use them, in which case nothing changes.
+		if err := s.q.SetCustomerContact(ctx, sqlc.SetCustomerContactParams{
+			ID: customerID, Name: in.Name,
+			Phone: pgtype.Text{String: in.Phone, Valid: true}, Email: pgtype.Text{String: strings.ToLower(in.Email), Valid: true},
+		}); err != nil {
+			slog.Info("customer contact not updated", "customer", customerID, "error", err)
+		}
 	}
 
 	payURL, err := s.pay.Initialize(ctx, paystack.Init{
@@ -375,4 +394,26 @@ func randomHex(n int) string {
 	b := make([]byte, n)
 	_, _ = rand.Read(b)
 	return strings.ToUpper(hex.EncodeToString(b))
+}
+
+// saveAddress keeps a checkout address on the customer's account, skipping exact repeats
+// and stopping at 10 addresses.
+func saveAddress(ctx context.Context, q *sqlc.Queries, customerID int64, in CheckoutInput) error {
+	lga := pgtype.Int8{Int64: in.LgaID, Valid: in.LgaID != 0}
+	lgaText := ""
+	if in.LgaID == 0 {
+		lgaText = strings.TrimSpace(in.LgaText)
+	}
+	if _, err := q.FindAddress(ctx, sqlc.FindAddressParams{CustomerID: customerID, StateID: in.StateID, LgaID: lga, LgaText: lgaText, Lower: in.Street}); err == nil {
+		return nil
+	} else if !errors.Is(err, pgx.ErrNoRows) {
+		return err
+	}
+	if n, err := q.CountAddresses(ctx, customerID); err != nil || n >= 10 {
+		return err
+	}
+	_, err := q.InsertAddress(ctx, sqlc.InsertAddressParams{
+		CustomerID: customerID, StateID: in.StateID, LgaID: lga, LgaText: lgaText, Street: in.Street, Landmark: in.Landmark,
+	})
+	return err
 }

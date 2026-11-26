@@ -10,6 +10,8 @@ const paths = {
   track: "M5 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z M12 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z M19 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z M7 12h3M14 12h3",
   filter: "M4 6h16M7 12h10M10 18h4",
   close: "M6 6l12 12M18 6 6 18",
+  user: "M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z M4.5 20c1.2-3.5 4-5 7.5-5s6.3 1.5 7.5 5",
+  star: "M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z",
 } as const;
 
 export type IconName = keyof typeof paths;

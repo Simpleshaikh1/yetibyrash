@@ -88,8 +88,12 @@ var (
 	ErrNotFound   = errors.New("staff account not found")
 )
 
-// SessionLength is how long a sign-in lasts before staff must sign in again.
+// SessionLength is the longest a sign-in lasts, however much it's used.
 const SessionLength = 7 * 24 * time.Hour
+
+// IdleTimeout ends a sign-in that hasn't been used for this long, so an admin left
+// open on a shared or lost device signs itself out.
+const IdleTimeout = 8 * time.Hour
 
 type Service struct {
 	q *sqlc.Queries
@@ -130,7 +134,7 @@ func (s *Service) Login(ctx context.Context, email, password string) (Member, st
 		return Member{}, "", fmt.Errorf("create session: %w", err)
 	}
 	_ = s.q.TouchStaffLogin(ctx, row.ID)
-	_ = s.q.DeleteExpiredSessions(ctx)
+	_ = s.q.DeleteExpiredSessions(ctx, IdleTimeout.Seconds())
 	return Member{ID: row.ID, Email: row.Email, Name: row.Name, Role: Role(row.Role)}, token, nil
 }
 
@@ -139,12 +143,16 @@ func (s *Service) Authenticate(ctx context.Context, token string) (Member, error
 	if token == "" {
 		return Member{}, ErrNoSession
 	}
-	row, err := s.q.GetSessionStaff(ctx, hashToken(token))
+	hash := hashToken(token)
+	row, err := s.q.GetSessionStaff(ctx, sqlc.GetSessionStaffParams{TokenHash: hash, IdleSeconds: IdleTimeout.Seconds()})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Member{}, ErrNoSession
 	}
 	if err != nil {
 		return Member{}, fmt.Errorf("get session: %w", err)
+	}
+	if err := s.q.TouchSession(ctx, hash); err != nil {
+		return Member{}, fmt.Errorf("touch session: %w", err)
 	}
 	return Member{ID: row.ID, Email: row.Email, Name: row.Name, Role: Role(row.Role)}, nil
 }

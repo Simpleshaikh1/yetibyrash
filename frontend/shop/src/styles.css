@@ -1236,6 +1236,250 @@ p {
   color: var(--danger);
 }
 
+/* ---------- Accounts, saved items and reviews (M6) ---------- */
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.card-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-wrap > .card {
+  flex: 1;
+}
+
+.save-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 248, 245, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.save-btn.inline {
+  position: static;
+  flex: none;
+  background: var(--surface-card);
+}
+
+.save-btn.on {
+  color: var(--accent-rose);
+}
+
+.save-btn.on svg path {
+  fill: currentColor;
+}
+
+.title-row {
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.stars {
+  color: var(--accent-rose);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.stars.large {
+  font-size: 20px;
+}
+
+.stars-off {
+  color: var(--line-shop);
+}
+
+.card-rating {
+  color: var(--ink-secondary);
+}
+
+.rating-line {
+  color: var(--ink-secondary);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.reviews {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.review {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.review p {
+  margin: 0;
+}
+
+.review-photo {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.review-reply {
+  border-left: 3px solid var(--accent-rose);
+  padding-left: var(--space-3);
+  color: var(--ink-secondary);
+}
+
+.review-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.review-quote {
+  margin: 0;
+  background: var(--surface-card);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.review-quote blockquote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.code-input {
+  font-size: 24px;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.order-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.order-thumb {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-petal);
+}
+
+.order-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-pill {
+  flex: none;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-petal);
+  color: var(--ink);
+}
+
+.status-pill.delivered {
+  background: #eaf3ee;
+  color: #2f6b4f;
+}
+
+.status-pill.cancelled,
+.status-pill.refunded {
+  background: var(--surface-soft);
+  color: var(--ink-muted);
+}
+
+.address-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line-shop);
+  font-size: 14.5px;
+}
+
+.check-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: 14.5px;
+}
+
+.check-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent-rose);
+}
+
+.review-item {
+  gap: var(--space-3);
+}
+
+.review-thumb {
+  width: 64px;
+  flex: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.star-picker {
+  display: flex;
+  gap: 4px;
+}
+
+.star-picker button {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 0;
+  background: none;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--line-shop);
+  cursor: pointer;
+}
+
+.star-picker button.on {
+  color: var(--accent-rose);
+}
+
 /* ---------- Responsive: tablets and laptops ----------
    Phones get the layout above. From 600px the page widens and grids get more
    columns; from 900px (laptops) the main links move into the header and the

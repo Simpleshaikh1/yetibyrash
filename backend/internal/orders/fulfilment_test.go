@@ -79,7 +79,7 @@ func setup(t *testing.T) *env {
 		orders: orders.NewService(pool, delivery.NewService(pool), dev, "https://shop.test"),
 		runner: jobs.NewRunner(pool),
 	}
-	e.runner.Handle(jobs.KindOrderEmail, notify.NewOrders(pool, mail, "https://shop.test").HandleJob)
+	e.runner.Handle(jobs.KindOrderEmail, notify.NewOrders(pool, mail, nil, "https://shop.test").HandleJob)
 	if err := pool.QueryRow(ctx, `SELECT s.id, l.id FROM states s JOIN lgas l ON l.state_id = s.id WHERE s.name = 'Lagos' AND l.name = 'Eti-Osa'`).Scan(&e.lagos, &e.etiOsa); err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func (e *env) paidOrder(t *testing.T, email string) (int64, string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	started, err := e.orders.Checkout(ctx, cartID, orders.CheckoutInput{
+	started, err := e.orders.Checkout(ctx, cartID, 0, orders.CheckoutInput{
 		Name: "Amaka Obi", Phone: "08030000000", Email: email, StateID: e.lagos, LgaID: e.etiOsa,
 		Street: "12 Admiralty Way", Speed: "standard",
 	})

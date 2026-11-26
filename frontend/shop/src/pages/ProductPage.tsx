@@ -7,6 +7,7 @@ import { Badge } from "../components/Badge";
 import { Icon } from "../components/Icon";
 import { Photo } from "../components/Photo";
 import { ProductGrid } from "../components/ProductCard";
+import { SaveButton, Stars } from "../components/SaveButton";
 import { ErrorMessage, Loading } from "../components/Status";
 import { useApi } from "../useApi";
 
@@ -105,7 +106,15 @@ function Product({ p }: { p: ProductDetail }) {
               {p.parent ? `${p.parent.name} · ` : ""}
               {p.category.name}
             </span>
-            <h1 className="product-name">{p.name}</h1>
+            <div className="row-between title-row">
+              <h1 className="product-name">{p.name}</h1>
+              <SaveButton productId={p.id} name={p.name} className="save-btn inline" />
+            </div>
+            {p.rating.count > 0 && (
+              <a href="#reviews" className="rating-line">
+                <Stars value={p.rating.average} /> {p.rating.average.toFixed(1)} · {p.rating.count} {p.rating.count === 1 ? "review" : "reviews"}
+              </a>
+            )}
             {p.materialLine && <span className="muted">{p.materialLine}</span>}
             <div className="row-start baseline">
               <span className="price-large">{formatNaira(price)}</span>
@@ -196,6 +205,39 @@ function Product({ p }: { p: ProductDetail }) {
           </div>
         </div>
       </div>
+
+      {p.reviews.length > 0 && (
+        <section className="stack-sm" id="reviews">
+          <h2>
+            Reviews <span className="muted small">· {p.rating.average.toFixed(1)} from {p.rating.count}</span>
+          </h2>
+          <div className="reviews">
+            {p.reviews.map((r) => (
+              <article key={r.id} className="review">
+                <Stars value={r.rating} />
+                {r.text && <p>{r.text}</p>}
+                {r.photos.length > 0 && (
+                  <div className="row-start wrap">
+                    {r.photos.map((k) => (
+                      <img key={k} src={photoUrl(k, 400)} alt={`Photo from ${r.author}`} className="review-photo" loading="lazy" />
+                    ))}
+                  </div>
+                )}
+                <span className="small muted">
+                  {r.author}
+                  {r.area && ` · ${r.area}`}
+                  {r.option && ` · ${r.option}`}
+                </span>
+                {r.reply && (
+                  <p className="review-reply small">
+                    <b>Yetibyrash:</b> {r.reply}
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       {p.pairings.length > 0 && (
         <section className="stack-sm">

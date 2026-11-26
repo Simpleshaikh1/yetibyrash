@@ -15,6 +15,7 @@ import { ComingSoonPage, OverviewPage } from "./pages/OverviewPage";
 import { ProductEditorPage } from "./pages/ProductEditorPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { PromotionsPage } from "./pages/PromotionsPage";
+import { ReviewsPage } from "./pages/ReviewsPage";
 import { StaffPage } from "./pages/StaffPage";
 
 export function App() {
@@ -46,7 +47,7 @@ function Gate() {
         <Route path="messages" element={<Allow perm="catalogue"><MessagesPage /></Allow>} />
         <Route path="content" element={<Allow perm="content"><ContentPage /></Allow>} />
         <Route path="promotions" element={<Allow perm="promotions"><PromotionsPage /></Allow>} />
-        <Route path="reviews" element={<ComingSoonPage title="Reviews" milestone="M6" />} />
+        <Route path="reviews" element={<Allow perm="products"><ReviewsPage /></Allow>} />
         <Route path="delivery" element={<Allow perm="catalogue"><DeliveryPage /></Allow>} />
         <Route path="*" element={<ComingSoonPage title="Page not found" milestone="—" />} />
       </Route>

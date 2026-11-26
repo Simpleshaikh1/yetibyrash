@@ -342,6 +342,22 @@ func (q *Queries) EnqueueJob(ctx context.Context, arg EnqueueJobParams) error {
 	return err
 }
 
+const enqueueJobAt = `-- name: EnqueueJobAt :exec
+INSERT INTO jobs (kind, payload, run_at) VALUES ($1, $2, $3)
+`
+
+type EnqueueJobAtParams struct {
+	Kind    string             `json:"kind"`
+	Payload []byte             `json:"payload"`
+	RunAt   pgtype.Timestamptz `json:"run_at"`
+}
+
+// A job that waits, e.g. the review request 3 days after delivery.
+func (q *Queries) EnqueueJobAt(ctx context.Context, arg EnqueueJobAtParams) error {
+	_, err := q.db.Exec(ctx, enqueueJobAt, arg.Kind, arg.Payload, arg.RunAt)
+	return err
+}
+
 const getCourier = `-- name: GetCourier :one
 SELECT id, name, tracking_url, active FROM couriers WHERE id = $1
 `
@@ -412,16 +428,25 @@ func (q *Queries) GetOrderForTracking(ctx context.Context, number string) (GetOr
 }
 
 const getTemplate = `-- name: GetTemplate :one
-SELECT event, subject, body, active FROM message_templates WHERE event = $1
+SELECT event, subject, body, sms, active FROM message_templates WHERE event = $1
 `
 
-func (q *Queries) GetTemplate(ctx context.Context, event OrderStatus) (MessageTemplate, error) {
+type GetTemplateRow struct {
+	Event   string `json:"event"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
+	Sms     string `json:"sms"`
+	Active  bool   `json:"active"`
+}
+
+func (q *Queries) GetTemplate(ctx context.Context, event string) (GetTemplateRow, error) {
 	row := q.db.QueryRow(ctx, getTemplate, event)
-	var i MessageTemplate
+	var i GetTemplateRow
 	err := row.Scan(
 		&i.Event,
 		&i.Subject,
 		&i.Body,
+		&i.Sms,
 		&i.Active,
 	)
 	return i, err
@@ -554,24 +579,33 @@ func (q *Queries) ListOrderPayments(ctx context.Context, orderID pgtype.Int8) ([
 
 const listTemplates = `-- name: ListTemplates :many
 
-SELECT event, subject, body, active FROM message_templates
-ORDER BY array_position(ARRAY['paid','packed','shipped','out_for_delivery','delivered','cancelled']::order_status[], event)
+SELECT event, subject, body, sms, active FROM message_templates
+ORDER BY array_position(ARRAY['paid','packed','shipped','out_for_delivery','delivered','cancelled','review_request'], event)
 `
 
+type ListTemplatesRow struct {
+	Event   string `json:"event"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
+	Sms     string `json:"sms"`
+	Active  bool   `json:"active"`
+}
+
 // ---------- Customer messages ----------
-func (q *Queries) ListTemplates(ctx context.Context) ([]MessageTemplate, error) {
+func (q *Queries) ListTemplates(ctx context.Context) ([]ListTemplatesRow, error) {
 	rows, err := q.db.Query(ctx, listTemplates)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []MessageTemplate{}
+	items := []ListTemplatesRow{}
 	for rows.Next() {
-		var i MessageTemplate
+		var i ListTemplatesRow
 		if err := rows.Scan(
 			&i.Event,
 			&i.Subject,
 			&i.Body,
+			&i.Sms,
 			&i.Active,
 		); err != nil {
 			return nil, err
@@ -769,14 +803,15 @@ func (q *Queries) UpdateCourier(ctx context.Context, arg UpdateCourierParams) er
 }
 
 const updateTemplate = `-- name: UpdateTemplate :exec
-UPDATE message_templates SET subject = $2, body = $3, active = $4 WHERE event = $1
+UPDATE message_templates SET subject = $2, body = $3, sms = $4, active = $5 WHERE event = $1
 `
 
 type UpdateTemplateParams struct {
-	Event   OrderStatus `json:"event"`
-	Subject string      `json:"subject"`
-	Body    string      `json:"body"`
-	Active  bool        `json:"active"`
+	Event   string `json:"event"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
+	Sms     string `json:"sms"`
+	Active  bool   `json:"active"`
 }
 
 func (q *Queries) UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) error {
@@ -784,6 +819,7 @@ func (q *Queries) UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) 
 		arg.Event,
 		arg.Subject,
 		arg.Body,
+		arg.Sms,
 		arg.Active,
 	)
 	return err

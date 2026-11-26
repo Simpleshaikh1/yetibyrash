@@ -167,7 +167,8 @@ export type Overview = {
   last7Days: { day: string; totalKobo: number }[];
 };
 
-export type MessageTemplate = { event: OrderStatus; subject: string; body: string; active: boolean };
+/** One customer message: an order step ("paid", "shipped"…) or "review_request". */
+export type MessageTemplate = { event: string; subject: string; body: string; sms: string; active: boolean };
 
 export type DeliveryAdmin = {
   zones: Zone[];
@@ -272,7 +273,12 @@ export const api = {
   messages: (signal?: AbortSignal) =>
     request<{ templates: MessageTemplate[]; placeholders: { key: string; example: string }[] }>("GET", "/messages", undefined, signal),
   saveMessage: (t: MessageTemplate) => request<void>("PUT", `/messages/${t.event}`, t),
-  previewMessage: (subject: string, body: string) => request<{ subject: string; body: string }>("POST", "/messages/preview", { subject, body }),
+  previewMessage: (subject: string, body: string, sms: string) =>
+    request<{ subject: string; body: string; sms: string }>("POST", "/messages/preview", { subject, body, sms }),
+
+  reviews: (status: ReviewStatus, signal?: AbortSignal) => request<ReviewList>("GET", `/reviews?status=${status}`, undefined, signal),
+  setReviewStatus: (id: number, status: ReviewStatus) => request<void>("PUT", `/reviews/${id}/status`, { status }),
+  replyToReview: (id: number, reply: string) => request<void>("PUT", `/reviews/${id}/reply`, { reply }),
 
   staff: (signal?: AbortSignal) => request<{ staff: StaffAccount[] }>("GET", "/staff", undefined, signal).then((r) => r.staff),
   createStaff: (body: { email: string; name: string; role: Role; password: string }) => request<{ id: number }>("POST", "/staff", body),
@@ -394,6 +400,26 @@ export const promotionsApi = {
   saveCode: (c: DiscountCode) => save("/promotions/codes", c),
   saveGift: (g: GiftOffer) => save("/promotions/gifts", g),
 };
+
+// ---------- Reviews (M6) ----------
+
+export type ReviewStatus = "waiting" | "published" | "hidden";
+export type AdminReview = {
+  id: number;
+  rating: number;
+  text: string;
+  photos: string[];
+  status: ReviewStatus;
+  reply: string;
+  author: string;
+  area: string;
+  option: string;
+  orderNumber: string;
+  product: string;
+  productSlug: string;
+  createdAt: string;
+};
+export type ReviewList = { reviews: AdminReview[]; waiting: number; published: number; hidden: number; average: number };
 
 export const roleLabels: Record<Role, string> = {
   owner: "Owner",

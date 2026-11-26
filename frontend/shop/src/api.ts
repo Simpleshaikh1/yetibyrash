@@ -23,6 +23,7 @@ export type ProductCard = {
   maxPriceKobo: number;
   compareAtKobo: number | null;
   saleBadge: string; // a running sale's badge, "" for none
+  rating: Rating;
   colourCount: number;
   inStock: boolean;
   preorder: boolean;
@@ -71,9 +72,54 @@ export type ProductDetail = {
   images: { id: number; key: string; kind: string }[];
   pairings: ProductCard[];
   lowStockThreshold: number;
+  rating: Rating;
+  reviews: Review[];
 };
 
-export type HomeSection = { key: "hero" | "categories" | "new_in" | "best_sellers" | "gift_budget" | "trust"; title: string; lines: string[] };
+/** Published reviews in short; average is 0 when there are none. */
+export type Rating = { average: number; count: number };
+export type Review = {
+  id: number;
+  rating: number;
+  text: string;
+  photos: string[];
+  reply: string;
+  author: string;
+  area: string;
+  option: string;
+  publishedAt: string;
+};
+export type HomeReview = { id: number; text: string; author: string; area: string; product: string; productSlug: string };
+
+// ---------- Accounts (M6) ----------
+
+export type Customer = { id: number; name: string; phone: string; email: string; marketingOptIn: boolean };
+export type Me = { customer: Customer | null; saved: number[] };
+export type OrderSummary = { number: string; status: OrderView["status"]; totalKobo: number; items: number; image: string; createdAt: string };
+export type Address = {
+  id: number;
+  stateId: number;
+  stateName: string;
+  lgaId: number;
+  lgaText: string;
+  lgaName: string;
+  street: string;
+  landmark: string;
+};
+
+// ---------- Reviews (M6) ----------
+
+export type ReviewItem = {
+  orderItemId: number;
+  name: string;
+  slug: string;
+  option: string;
+  image: string;
+  review: { id: number; rating: number; status: string; photos: string[] } | null;
+};
+export type ReviewRequest = { orderNumber: string; firstName: string; authorName: string; items: ReviewItem[] };
+
+export type HomeSection = { key: "hero" | "categories" | "new_in" | "best_sellers" | "gift_budget" | "trust" | "reviews"; title: string; lines: string[] };
 export type HeroBanner = { eyebrow: string; headline: string; buttonText: string; buttonLink: string; image: string };
 /** The homepage: `sections` lists the visible blocks in the admin's order. */
 export type Home = {
@@ -84,6 +130,7 @@ export type Home = {
   newIn: ProductCard[];
   bestSellers: ProductCard[];
   budgets: PriceBand[];
+  reviews: HomeReview[];
 };
 
 /** Announcement bar and footer links, shown on every page. */
@@ -151,6 +198,8 @@ export type CheckoutInput = {
   street: string;
   landmark: string;
   speed: "standard" | "express";
+  /** Signed-in shoppers: keep this address on the account. */
+  saveAddress?: boolean;
 };
 
 export type OrderView = {
@@ -219,6 +268,7 @@ async function send<T>(method: string, path: string, body?: unknown, signal?: Ab
     const data = await res.json().catch(() => null);
     throw new ApiError(res.status, data?.error?.code ?? "unknown", data?.error?.message ?? `Request failed (${res.status}).`, data?.error?.field);
   }
+  if (res.status === 204) return undefined as T; // no content
   return (await res.json()) as T;
 }
 
@@ -238,6 +288,36 @@ export const api = {
   setQty: (variantId: number, qty: number) => send<Bag>("PUT", `/api/v1/cart/items/${variantId}`, { qty }),
   applyCode: (code: string) => send<Bag>("POST", "/api/v1/cart/code", { code }),
   removeCode: () => send<Bag>("DELETE", "/api/v1/cart/code"),
+
+  // Accounts
+  me: (signal?: AbortSignal) => getJSON<Me>("/api/v1/me", signal),
+  sendCode: (target: string) => send<{ value: string; isPhone: boolean }>("POST", "/api/v1/auth/code", { target }),
+  verifyCode: (target: string, code: string) => send<{ customer: Customer }>("POST", "/api/v1/auth/verify", { target, code }),
+  signOut: () => send<void>("POST", "/api/v1/auth/logout"),
+  updateMe: (name: string, marketingOptIn: boolean) => send<void>("PUT", "/api/v1/me", { name, marketingOptIn }),
+  deleteMe: () => send<void>("DELETE", "/api/v1/me"),
+  myOrders: (signal?: AbortSignal) => getJSON<{ orders: OrderSummary[] }>("/api/v1/me/orders", signal).then((r) => r.orders),
+  reviewLink: (number: string) => send<{ token: string }>("POST", `/api/v1/me/orders/${encodeURIComponent(number)}/review`),
+  addresses: (signal?: AbortSignal) => getJSON<{ addresses: Address[] }>("/api/v1/me/addresses", signal).then((r) => r.addresses),
+  deleteAddress: (id: number) => send<void>("DELETE", `/api/v1/me/addresses/${id}`),
+  saved: (signal?: AbortSignal) => getJSON<{ items: ProductCard[] }>("/api/v1/me/saved", signal).then((r) => r.items),
+  save: (productId: number) => send<void>("PUT", `/api/v1/me/saved/${productId}`),
+  unsave: (productId: number) => send<void>("DELETE", `/api/v1/me/saved/${productId}`),
+
+  // Reviews
+  reviewRequest: (token: string, signal?: AbortSignal) => getJSON<ReviewRequest>(`/api/v1/reviews/${encodeURIComponent(token)}`, signal),
+  submitReview: (token: string, body: { orderItemId: number; rating: number; text: string; name: string }) =>
+    send<{ id: number }>("POST", `/api/v1/reviews/${encodeURIComponent(token)}`, body),
+  reviewPhoto: async (token: string, reviewId: number, file: File) => {
+    const form = new FormData();
+    form.append("photo", file);
+    const res = await fetch(`/api/v1/reviews/${encodeURIComponent(token)}/${reviewId}/photos`, { method: "POST", body: form, credentials: "same-origin" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      throw new ApiError(res.status, data?.error?.code ?? "unknown", data?.error?.message ?? "Couldn't add the photo.");
+    }
+    return (await res.json()) as { photo: string };
+  },
 
   site: (signal?: AbortSignal) => getJSON<Site>("/api/v1/site", signal),
   page: (slug: string, signal?: AbortSignal) => getJSON<SitePage>(`/api/v1/pages/${encodeURIComponent(slug)}`, signal),

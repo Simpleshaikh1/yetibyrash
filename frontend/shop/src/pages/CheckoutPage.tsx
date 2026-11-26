@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { formatNaira } from "@yetibyrash/ui";
-import { api, ApiError, type CheckoutInput, type Quote } from "../api";
+import { useAccount } from "../account";
+import { api, ApiError, type Address, type CheckoutInput, type Quote } from "../api";
 import { useBag } from "../bag";
 import { ErrorMessage, Loading } from "../components/Status";
 import { useApi } from "../useApi";
@@ -28,6 +29,23 @@ export function CheckoutPage() {
   const [quoteError, setQuoteError] = useState<ApiError | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [busy, setBusy] = useState(false);
+  const { customer } = useAccount();
+  const [saveAddress, setSaveAddress] = useState(true);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+
+  // Signed in: fill in what we know, and offer the saved addresses.
+  useEffect(() => {
+    if (!customer) return;
+    setForm((f) => ({
+      ...f,
+      name: f.name || customer.name,
+      phone: f.phone || customer.phone,
+      email: f.email || customer.email,
+    }));
+    api.addresses().then(setAddresses).catch(() => setAddresses([]));
+  }, [customer]);
+  const pickAddress = (a: Address) =>
+    setForm((f) => ({ ...f, stateId: a.stateId, lgaId: a.lgaId, lgaText: a.lgaText, street: a.street, landmark: a.landmark }));
 
   const state = states.data?.find((s) => s.id === form.stateId);
   const needsLgaList = (state?.lgas.length ?? 0) > 0;
@@ -77,7 +95,12 @@ export function CheckoutPage() {
       } catch {
         // private browsing: not remembered
       }
-      const res = await api.checkout({ ...form, lgaId: needsLgaList ? form.lgaId : 0, lgaText: needsLgaList ? "" : form.lgaText });
+      const res = await api.checkout({
+        ...form,
+        lgaId: needsLgaList ? form.lgaId : 0,
+        lgaText: needsLgaList ? "" : form.lgaText,
+        saveAddress: !!customer && saveAddress,
+      });
       window.location.href = res.paymentUrl; // Paystack's page (or the test payment page in development)
     } catch (err) {
       setError(err instanceof ApiError ? err : new ApiError(0, "unknown", "Something went wrong. Please try again."));
@@ -104,7 +127,13 @@ export function CheckoutPage() {
     <form className="stack checkout" onSubmit={submit} noValidate>
       <div className="row-between">
         <h1 className="page-title">Checkout</h1>
-        <span className="small muted">No account needed</span>
+        {customer ? (
+          <span className="small muted">Signed in as {customer.name || customer.phone || customer.email}</span>
+        ) : (
+          <Link to="/account?next=/checkout" className="small">
+            Sign in for faster checkout
+          </Link>
+        )}
       </div>
 
       <section className="form-card">
@@ -122,6 +151,21 @@ export function CheckoutPage() {
 
       <section className="form-card">
         <h2 className="form-h">2. Delivery address</h2>
+        {addresses.length > 0 && (
+          <div className="stack-xs">
+            <span className="small muted">Use a saved address</span>
+            <div className="chips wrap">
+              {addresses.map((a) => {
+                const on = a.stateId === form.stateId && a.street === form.street && a.lgaId === form.lgaId;
+                return (
+                  <button key={a.id} type="button" className={on ? "chip on" : "chip"} onClick={() => pickAddress(a)}>
+                    {a.street}, {a.lgaName}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="two-col">
           <Field id="co-state" label="State" error={fieldError("stateId")}>
             <select id="co-state" value={form.stateId || ""} onChange={(e) => setForm((f) => ({ ...f, stateId: Number(e.target.value), lgaId: 0 }))}>
@@ -156,6 +200,12 @@ export function CheckoutPage() {
         <Field id="co-landmark" label="Nearest landmark (optional)" error={fieldError("landmark")}>
           <input id="co-landmark" placeholder="e.g. opposite the filling station" value={form.landmark} onChange={(e) => set("landmark", e.target.value)} />
         </Field>
+        {customer && (
+          <label className="check-row" htmlFor="co-save">
+            <input id="co-save" type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} />
+            Save this address to my account
+          </label>
+        )}
       </section>
 
       <section className="form-card">
