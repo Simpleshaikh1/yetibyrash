@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"yetibyrash/backend/internal/db/sqlc"
+	"yetibyrash/backend/internal/monitor"
 )
 
 // MaxAttempts is how often a job is tried before it's left for staff to look at.
@@ -109,6 +110,10 @@ func (r *Runner) RunOnce(ctx context.Context) (int, error) {
 			}
 			retry := backoff(int(j.Attempts))
 			slog.Warn("job failed", "id", j.ID, "kind", j.Kind, "attempt", j.Attempts+1, "retry_in", retry, "error", err)
+			// Tell the owner when a message keeps failing (3rd try) and when it's given up on.
+			if attempt := int(j.Attempts) + 1; attempt == 3 || attempt >= MaxAttempts {
+				monitor.Error("job "+j.Kind, err, map[string]string{"attempt": fmt.Sprint(attempt)})
+			}
 			if err := q.MarkJobFailed(ctx, sqlc.MarkJobFailedParams{ID: j.ID, LastError: truncate(err.Error(), 500), RetryInSeconds: int32(retry.Seconds())}); err != nil {
 				return err
 			}

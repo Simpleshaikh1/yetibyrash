@@ -1,0 +1,89 @@
+# Render blueprint: the shop, its database and the nightly backup.
+# In Render: New + > Blueprint > pick this repository. Render asks for every value marked
+# `sync: false` (secrets are never stored in this file). See docs/go-live.md.
+# Plans and prices change: check render.com/pricing. The FREE database plan is deleted
+# after 30 days, so the live shop needs a paid database plan.
+
+services:
+  - type: web
+    name: yetibyrash
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: frankfurt # closest Render region to Nigeria
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeploy: true # every push to main goes live; turn off to deploy by hand
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yetibyrash-db
+          property: connectionString
+      - key: SHOP_URL # https://yetibyrash.com (or the onrender.com address until the domain is ready)
+        sync: false
+      - key: ADMIN_ORIGINS # the same address: the admin is at /admin on it
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: SMTP_ADDR # e.g. smtp.resend.com:587
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAIL_FROM # Yetibyrash <orders@yetibyrash.com>
+        sync: false
+      - key: MEDIA_STORAGE
+        value: r2
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET # e.g. yetibyrash-photos
+        sync: false
+      - key: MEDIA_PUBLIC_URL # the bucket's public address, e.g. https://media.yetibyrash.com
+        sync: false
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        value: Yetibyrash
+      - key: TERMII_CHANNEL
+        value: generic # change to dnd once Termii enables it
+      - key: SENTRY_DSN
+        sync: false
+
+  # Every night at 02:00 UTC (03:00 in Lagos): a database copy to R2, kept 30 days.
+  - type: cron
+    name: yetibyrash-backup
+    runtime: docker
+    dockerfilePath: ./deploy/backup/Dockerfile
+    region: frankfurt
+    plan: starter
+    schedule: "0 2 * * *"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yetibyrash-db
+          property: connectionString
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: BACKUP_BUCKET # a separate, private bucket, e.g. yetibyrash-backups
+        sync: false
+
+databases:
+  - name: yetibyrash-db
+    databaseName: yetibyrash
+    user: yetibyrash
+    region: frankfurt
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    ipAllowList: [] # reachable only from Render's private network, not the internet

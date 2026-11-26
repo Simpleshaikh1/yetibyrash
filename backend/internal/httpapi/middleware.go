@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"yetibyrash/backend/internal/monitor"
 )
 
 // statusRecorder remembers the status code a handler wrote, for logging.
@@ -39,6 +41,7 @@ func recoverPanics(next http.Handler) http.Handler {
 		defer func() {
 			if v := recover(); v != nil {
 				slog.Error("panic in handler", "panic", v, "path", r.URL.Path, "stack", string(debug.Stack()))
+				monitor.Panic(v, r.URL.Path)
 				writeError(w, http.StatusInternalServerError, "internal", "Something went wrong on our side. Please try again.")
 			}
 		}()

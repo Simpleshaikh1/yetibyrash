@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"yetibyrash/backend/internal/catalog"
+	"yetibyrash/backend/internal/monitor"
 )
 
 // CatalogService is what the shop's catalogue endpoints need. *catalog.Service satisfies it.
@@ -116,6 +117,7 @@ func badTier(w http.ResponseWriter) {
 
 func internalError(w http.ResponseWriter, what string, err error) {
 	slog.Error(what, "error", err)
+	monitor.Error(what, err, nil)
 	writeError(w, http.StatusInternalServerError, "internal", "Something went wrong on our side. Please try again.")
 }
 

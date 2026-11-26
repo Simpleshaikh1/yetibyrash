@@ -120,6 +120,29 @@ The catalogue tests create a throwaway database in the local Postgres, so start 
 
 The API reads environment variables, with development defaults for all of them. To override locally, copy `backend/.env.example` to `backend/.env`. Port 8080 is avoided because Apache already uses it on this machine.
 
+## Going live
+
+The live shop runs on Render as one container (see `Dockerfile` and `render.yaml`): the Go
+server serves the shop at `/`, the admin at `/admin/` and the API at `/api/`. Photos live in a
+Cloudflare R2 bucket, and a nightly job backs the database up to R2.
+
+**Follow [docs/go-live.md](docs/go-live.md) step by step.** In production
+(`APP_ENV=production`) the server refuses to start while a setting is missing or unsafe (a test
+inbox, an `http://` address, the development database), and its log says which one.
+
+Production settings, on top of the ones above:
+
+| Setting | What it's for |
+| --- | --- |
+| `MEDIA_STORAGE=r2`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `MEDIA_PUBLIC_URL` | photos in Cloudflare R2 |
+| `TRUSTED_PROXY_HOPS=1` | read visitors' real addresses behind Render's proxy (rate limits) |
+| `SENTRY_DSN` | email alerts for errors, through sentry.io |
+| `WEB_DIR` | where the built shop and admin are (the Docker image sets it) |
+
+Copy the photos on this computer into R2 with `cd backend; go run ./cmd/mediasync`.
+
+To try the production container locally: `docker build -t yetibyrash .`.
+
 ## Database queries (sqlc)
 
 SQL lives in `backend/queries/`. Generate the Go code with Docker:

@@ -1,14 +1,16 @@
-// Command yetibyrash runs the Yetibyrash API.
-// Later milestones add the background worker and the built shop and admin apps to this same binary.
+// Command yetibyrash runs the whole shop: the API, the background worker (emails, texts,
+// review requests) and, in production, the built shop and admin apps.
 package main
 
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -22,12 +24,14 @@ import (
 	"yetibyrash/backend/internal/httpapi"
 	"yetibyrash/backend/internal/jobs"
 	"yetibyrash/backend/internal/media"
+	"yetibyrash/backend/internal/monitor"
 	"yetibyrash/backend/internal/notify"
 	"yetibyrash/backend/internal/orders"
 	"yetibyrash/backend/internal/paystack"
 	"yetibyrash/backend/internal/promotions"
 	"yetibyrash/backend/internal/reviews"
 	"yetibyrash/backend/internal/staff"
+	"yetibyrash/backend/internal/web"
 )
 
 // version is set at build time: go build -ldflags "-X main.version=1.2.3"
@@ -49,6 +53,20 @@ func run() error {
 	}
 	slog.SetDefault(slog.New(handler))
 
+	// Production must have real keys and safe addresses; refuse to start otherwise.
+	problems, warnings := cfg.Check()
+	for _, w := range warnings {
+		slog.Warn("setting", "note", w)
+	}
+	if len(problems) > 0 {
+		for _, p := range problems {
+			slog.Error("setting", "problem", p)
+		}
+		return fmt.Errorf("%d production setting(s) need fixing (see above)", len(problems))
+	}
+	monitor.Init(cfg.SentryDSN, cfg.Env, version)
+	defer monitor.Flush()
+
 	// Stop cleanly on Ctrl+C or when the host sends SIGTERM.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -63,9 +81,32 @@ func run() error {
 		return err
 	}
 
-	photos, err := media.NewLocalStorage(cfg.MediaDir)
-	if err != nil {
-		return err
+	// Photos: an R2 bucket in production (Render's disk is wiped on deploy), a folder otherwise.
+	var photos media.Storage
+	mediaOrigin := ""
+	if cfg.MediaStorage == "r2" {
+		r2, err := media.NewR2Storage(media.R2Config{
+			AccountID: cfg.R2AccountID, AccessKeyID: cfg.R2AccessKeyID, SecretAccessKey: cfg.R2SecretAccessKey,
+			Bucket: cfg.R2Bucket, PublicURL: cfg.MediaPublicURL,
+		})
+		if err != nil {
+			return err
+		}
+		if err := r2.Check(ctx); err != nil {
+			return err
+		}
+		photos, mediaOrigin = r2, r2.PublicURL()
+	} else {
+		local, err := media.NewLocalStorage(cfg.MediaDir)
+		if err != nil {
+			return err
+		}
+		photos = local
+	}
+
+	var site http.Handler
+	if cfg.WebDir != "" {
+		site = web.Handler(filepath.Join(cfg.WebDir, "shop"), filepath.Join(cfg.WebDir, "admin"))
 	}
 
 	// Payments: real Paystack when a secret key is set; in development without keys,
@@ -129,6 +170,9 @@ func run() error {
 			Version:        version,
 			SecureCookies:  cfg.IsProduction(),
 			AllowedOrigins: cfg.AdminOrigins,
+			Web:            site,
+			Security:       httpapi.SecurityOptions{HTTPSOnly: cfg.IsProduction(), MediaOrigin: mediaOrigin},
+			ProxyHops:      cfg.ProxyHops,
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       60 * time.Second,

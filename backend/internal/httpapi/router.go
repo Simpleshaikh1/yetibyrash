@@ -48,11 +48,18 @@ type Deps struct {
 
 	SecureCookies  bool     // send cookies over HTTPS only (production)
 	AllowedOrigins []string // admin app addresses allowed to make changes
+
+	// Web serves the built shop and admin (production); nil in development.
+	Web http.Handler
+	// Security shapes the security headers; ProxyHops is how many proxies are in front (Render: 1).
+	Security  SecurityOptions
+	ProxyHops int
 }
 
 // NewRouter registers every route and wraps them in the shared middleware.
 func NewRouter(d Deps) http.Handler {
 	mux := http.NewServeMux()
+	trustedProxyHops = d.ProxyHops
 
 	mux.HandleFunc("GET /api/health", healthHandler(d))
 
@@ -109,7 +116,11 @@ func NewRouter(d Deps) http.Handler {
 		writeError(w, http.StatusNotFound, "not_found", "There is no API endpoint at this address.")
 	})
 
-	return recoverPanics(logRequests(mux))
+	if d.Web != nil {
+		mux.Handle("/", d.Web) // everything that isn't /api or /media: the shop and the admin
+	}
+
+	return recoverPanics(logRequests(securityHeaders(d.Security, mux)))
 }
 
 func registerShopOrders(mux *http.ServeMux, d Deps, accounts *accountHandlers) {

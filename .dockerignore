@@ -1,0 +1,13 @@
+# Keep the build small and secrets out of the image.
+.git
+.idea
+**/node_modules
+**/dist
+backend/var
+backend/bin
+backend/tmp
+**/.env
+**/.env.*
+design
+docs
+*.md
